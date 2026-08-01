@@ -33,7 +33,8 @@ export default function App() {
 
     const savedAdmin = localStorage.getItem('cbse_admin_session');
     if (savedAdmin === 'true') {
-      setCurrentUser({ role: 'admin', adminEmail: 'admin@cbsemaths.com' });
+      const savedEmail = localStorage.getItem('cbse_admin_email') || 'Administrator';
+      setCurrentUser({ role: 'admin', adminEmail: savedEmail });
     }
   }, []);
 
@@ -44,10 +45,13 @@ export default function App() {
     setActiveTest(null);
   };
 
-  const handleAdminLogin = () => {
+  const handleAdminLogin = (email?: string) => {
     localStorage.setItem('cbse_admin_session', 'true');
+    if (email) {
+      localStorage.setItem('cbse_admin_email', email);
+    }
     localStorage.removeItem('cbse_student_session');
-    setCurrentUser({ role: 'admin', adminEmail: 'admin@cbsemaths.com' });
+    setCurrentUser({ role: 'admin', adminEmail: email || localStorage.getItem('cbse_admin_email') || 'Administrator' });
     setActiveTest(null);
   };
 

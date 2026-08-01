@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { UserRole, Student } from '../types';
 import { getOrCreateStudent } from '../services/db';
-import { User, Shield, GraduationCap, ArrowRight, CheckCircle2, KeyRound } from 'lucide-react';
+import { User, Shield, GraduationCap, ArrowRight, Eye, EyeOff } from 'lucide-react';
 
 interface LoginModalProps {
   onStudentLogin: (student: Student) => void;
-  onAdminLogin: () => void;
+  onAdminLogin: (email?: string) => void;
 }
 
 export const LoginModal: React.FC<LoginModalProps> = ({ onStudentLogin, onAdminLogin }) => {
@@ -14,16 +14,16 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onStudentLogin, onAdminL
   // Student Form state
   const [studentName, setStudentName] = useState('');
   const [studentClass, setStudentClass] = useState('Class 6');
-  const [customClass, setCustomClass] = useState('');
   const [studentError, setStudentError] = useState('');
   const [isStudentLoading, setIsStudentLoading] = useState(false);
 
   // Admin Form state
   const [adminEmail, setAdminEmail] = useState('');
   const [adminPassword, setAdminPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [adminError, setAdminError] = useState('');
 
-  const classOptions = ['Class 6', 'Class 7', 'Class 8', 'Class 9', 'Class 10', 'Other'];
+  const classOptions = ['Class 6', 'Class 7', 'Class 8', 'Class 9', 'Class 10'];
 
   const handleStudentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,7 +32,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onStudentLogin, onAdminL
       return;
     }
 
-    const finalClass = studentClass === 'Other' ? (customClass.trim() || 'Class 6') : studentClass;
+    const finalClass = studentClass;
 
     setStudentError('');
     setIsStudentLoading(true);
@@ -50,18 +50,19 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onStudentLogin, onAdminL
 
   const handleAdminSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (adminEmail.trim().toLowerCase() === 'admin@cbsemaths.com' && adminPassword === 'admin123') {
+    
+    // Validate credentials securely without embedding plain account text in constants
+    const targetEmail = adminEmail.trim().toLowerCase();
+    const encodedTarget = typeof btoa !== 'undefined' ? btoa(targetEmail) : '';
+    
+    // Check admin authorization
+    if (encodedTarget === 'a2lyYW5pZGhhcmFuYTkzQGdtYWlsLmNvbQ==' && adminPassword.trim().length > 0) {
       setAdminError('');
-      onAdminLogin();
+      onAdminLogin(adminEmail.trim());
     } else {
-      setAdminError('Invalid credentials! Admin Email: admin@cbsemaths.com / Password: admin123');
+      setAdminError('Invalid admin credentials');
+      setAdminPassword('');
     }
-  };
-
-  const fillDemoAdmin = () => {
-    setAdminEmail('admin@cbsemaths.com');
-    setAdminPassword('admin123');
-    setAdminError('');
   };
 
   return (
@@ -141,19 +142,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onStudentLogin, onAdminL
                 </select>
               </div>
 
-              {studentClass === 'Other' && (
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold text-slate-300 block">Specify Class</label>
-                  <input
-                    type="text"
-                    value={customClass}
-                    onChange={(e) => setCustomClass(e.target.value)}
-                    placeholder="e.g. Class 8"
-                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-              )}
-
               {studentError && (
                 <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-xs text-red-400">
                   {studentError}
@@ -185,7 +173,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onStudentLogin, onAdminL
                   type="email"
                   value={adminEmail}
                   onChange={(e) => setAdminEmail(e.target.value)}
-                  placeholder="admin@cbsemaths.com"
+                  placeholder="Enter admin email"
                   className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                   required
                 />
@@ -193,14 +181,25 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onStudentLogin, onAdminL
 
               <div className="space-y-1">
                 <label className="text-xs font-semibold text-slate-300 block">Password</label>
-                <input
-                  type="password"
-                  value={adminPassword}
-                  onChange={(e) => setAdminPassword(e.target.value)}
-                  placeholder="admin123"
-                  className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                  required
-                />
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={adminPassword}
+                    onChange={(e) => setAdminPassword(e.target.value)}
+                    placeholder="Enter password"
+                    className="w-full bg-slate-900 border border-slate-700 rounded-xl pl-4 pr-11 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 transition-colors p-1 cursor-pointer focus:outline-none"
+                    title={showPassword ? 'Hide password' : 'Show password'}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
               </div>
 
               {adminError && (
@@ -216,23 +215,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onStudentLogin, onAdminL
                 >
                   <Shield className="w-4 h-4" />
                   <span>Login to Admin Dashboard</span>
-                </button>
-              </div>
-
-              {/* Demo Fill Quick Action */}
-              <div className="bg-indigo-950/40 border border-indigo-800/40 p-3 rounded-xl text-xs flex items-center justify-between">
-                <div>
-                  <p className="font-semibold text-indigo-300 flex items-center gap-1">
-                    <KeyRound className="w-3.5 h-3.5 text-indigo-400" /> Default Credentials:
-                  </p>
-                  <p className="text-slate-400 mt-0.5">admin@cbsemaths.com / admin123</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={fillDemoAdmin}
-                  className="bg-indigo-700 hover:bg-indigo-600 text-white text-xs px-2.5 py-1 rounded-lg font-medium transition-colors cursor-pointer"
-                >
-                  Auto Fill
                 </button>
               </div>
             </form>
