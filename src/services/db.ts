@@ -1080,9 +1080,13 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
 
 /**
  * Helper to populate official Class 6 Whole Numbers – Sample Test 2
- * Pattern: 4 Sections (A, B, C, D) × 5 questions each = 20 questions
+ * Pattern: 4 Sections (A, B, C, D)
+ * - Section A: MCQs (15 questions: 5 Multiplication, 5 Division, 5 Number Lines)
+ * - Section B: True/False (15 questions: 5 Multiplication, 5 Division, 5 Number Lines)
+ * - Section C: Word Problems (6 questions: 2 Multiplication, 2 Division, 2 Number Lines)
+ * - Section D: Reading Comprehension (6 questions: 2 Multiplication, 2 Division, 2 Number Lines)
  * plus Teacher's Question Bank (26 questions: 10 MCQs, 10 T/F, 6 Word/Passage)
- * Total = 46 questions (all unique from Sample Test 1)
+ * Total = 68 questions (all unique from Sample Test 1)
  */
 export async function createWholeNumbersTestPaper2(): Promise<Test> {
   const testObj = await createTest({
@@ -1093,7 +1097,8 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
   });
 
   const rawQuestions: Omit<Question, 'id'>[] = [
-    // --- SECTION A: MCQs (5 Questions) ---
+    // --- SECTION A: MCQs (15 Questions) ---
+    // Topic 1: Multiplication (5)
     {
       testId: testObj.id,
       question: '[SECTION A - MCQ 1] Topic 1: Multiplication\nQ1. Evaluate 9 × (10 + 4) using the distributive property.',
@@ -1116,7 +1121,39 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION A - MCQ 3] Topic 2: Division\nQ3. In 96 ÷ 12 = 8, what is the role of 12?',
+      question: '[SECTION A - MCQ 3] Topic 1: Multiplication\nQ3. Find the product of 25 × 37 × 4 by suitable rearrangement.',
+      optionA: '370',
+      optionB: '3700',
+      optionC: '37000',
+      optionD: '925',
+      correctAnswer: 'optionB',
+      hint: '(25 × 4) × 37 = 100 × 37 = 3700.',
+    },
+    {
+      testId: testObj.id,
+      question: '[SECTION A - MCQ 4] Topic 1: Multiplication\nQ4. 12 × (100 − 2) is equal to:',
+      optionA: '1200 − 2',
+      optionB: '1200 − 24',
+      optionC: '1200 + 24',
+      optionD: '100 − 24',
+      correctAnswer: 'optionB',
+      hint: 'Distributive property over subtraction: 12 × 100 − 12 × 2 = 1200 − 24 = 1176.',
+    },
+    {
+      testId: testObj.id,
+      question: '[SECTION A - MCQ 5] Topic 1: Multiplication\nQ5. If a × b = 0, where a and b are whole numbers, then:',
+      optionA: 'a must be 0',
+      optionB: 'b must be 0',
+      optionC: 'At least one of a or b must be 0',
+      optionD: 'Neither a nor b can be 0',
+      correctAnswer: 'optionC',
+      hint: 'If product of two whole numbers is zero, at least one of them must be zero.',
+    },
+
+    // Topic 2: Division (5)
+    {
+      testId: testObj.id,
+      question: '[SECTION A - MCQ 6] Topic 2: Division\nQ6. In 96 ÷ 12 = 8, what is the role of 12?',
       optionA: 'Dividend',
       optionB: 'Divisor',
       optionC: 'Quotient',
@@ -1126,7 +1163,7 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION A - MCQ 4] Topic 2: Division\nQ4. Find the remainder when 58 is divided by 9.',
+      question: '[SECTION A - MCQ 7] Topic 2: Division\nQ7. Find the remainder when 58 is divided by 9.',
       optionA: '2',
       optionB: '3',
       optionC: '4',
@@ -1136,7 +1173,39 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION A - MCQ 5] Topic 3: Representing Division on Number Lines\nQ5. To represent 21 ÷ 7 on a number line starting from 0, how many equal jumps of 7 units are needed?',
+      question: '[SECTION A - MCQ 8] Topic 2: Division\nQ8. What is 0 ÷ 15?',
+      optionA: '0',
+      optionB: '15',
+      optionC: '1',
+      optionD: 'Not defined',
+      correctAnswer: 'optionA',
+      hint: 'Zero divided by any non-zero whole number is zero.',
+    },
+    {
+      testId: testObj.id,
+      question: '[SECTION A - MCQ 9] Topic 2: Division\nQ9. In a division sum, Divisor = 12, Quotient = 7, and Remainder = 5. Find the Dividend.',
+      optionA: '89',
+      optionB: '84',
+      optionC: '91',
+      optionD: '95',
+      correctAnswer: 'optionA',
+      hint: 'Dividend = Divisor × Quotient + Remainder = 12 × 7 + 5 = 84 + 5 = 89.',
+    },
+    {
+      testId: testObj.id,
+      question: '[SECTION A - MCQ 10] Topic 2: Division\nQ10. Which of the following division operations is NOT defined?',
+      optionA: '15 ÷ 3',
+      optionB: '0 ÷ 7',
+      optionC: '12 ÷ 0',
+      optionD: '24 ÷ 6',
+      correctAnswer: 'optionC',
+      hint: 'Division of any whole number by zero is not defined.',
+    },
+
+    // Topic 3: Representing Division on Number Lines (5)
+    {
+      testId: testObj.id,
+      question: '[SECTION A - MCQ 11] Topic 3: Representing Division on Number Lines\nQ11. To represent 21 ÷ 7 on a number line starting from 0, how many equal jumps of 7 units are needed?',
       optionA: '2 jumps',
       optionB: '3 jumps',
       optionC: '7 jumps',
@@ -1144,8 +1213,49 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
       correctAnswer: 'optionB',
       hint: '21 ÷ 7 = 3 equal jumps of size 7.',
     },
+    {
+      testId: testObj.id,
+      question: '[SECTION A - MCQ 12] Topic 3: Representing Division on Number Lines\nQ12. Moving backwards from 15 to 0 in steps of 3 models which division?',
+      optionA: '15 ÷ 5 = 3',
+      optionB: '15 ÷ 3 = 5',
+      optionC: '15 − 3 = 12',
+      optionD: '3 ÷ 15 = 0',
+      correctAnswer: 'optionB',
+      hint: 'Starting at 15 and making 5 steps of 3 units backwards to 0 models 15 ÷ 3 = 5.',
+    },
+    {
+      testId: testObj.id,
+      question: '[SECTION A - MCQ 13] Topic 3: Representing Division on Number Lines\nQ13. Starting from 0, six equal jumps of 4 units reach which point on the number line?',
+      optionA: '20',
+      optionB: '24',
+      optionC: '28',
+      optionD: '16',
+      correctAnswer: 'optionB',
+      hint: '6 × 4 = 24.',
+    },
+    {
+      testId: testObj.id,
+      question: '[SECTION A - MCQ 14] Topic 3: Representing Division on Number Lines\nQ14. Showing 35 ÷ 5 on a number line requires equal jumps ending at:',
+      optionA: '5',
+      optionB: '7',
+      optionC: '35',
+      optionD: '40',
+      correctAnswer: 'optionC',
+      hint: 'The total length covered on the number line ends at the dividend (35).',
+    },
+    {
+      testId: testObj.id,
+      question: '[SECTION A - MCQ 15] Topic 3: Representing Division on Number Lines\nQ15. On a number line, 18 ÷ 6 needs:',
+      optionA: '2 jumps of 6',
+      optionB: '3 jumps of 6',
+      optionC: '6 jumps of 6',
+      optionD: '18 jumps of 6',
+      correctAnswer: 'optionB',
+      hint: '18 ÷ 6 = 3 jumps of size 6.',
+    },
 
-    // --- SECTION B: True / False (5 Questions) ---
+    // --- SECTION B: True / False (15 Questions) ---
+    // Topic 1: Multiplication (5)
     {
       testId: testObj.id,
       question: '[SECTION B - True/False 1] Topic 1: Multiplication\nQ1. Multiplying any whole number by 0 always results in 0.',
@@ -1158,17 +1268,49 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION B - True/False 2] Topic 1: Multiplication\nQ2. 12 × (5 - 2) = 12 × 5 - 2.',
+      question: '[SECTION B - True/False 2] Topic 1: Multiplication\nQ2. 12 × (5 − 2) = 12 × 5 − 2.',
       optionA: 'True',
       optionB: 'False',
       optionC: 'Equal to 36',
       optionD: 'None of the above',
       correctAnswer: 'optionB',
-      hint: 'False. 12 × (5 - 2) = 12 × 3 = 36, whereas 12 × 5 - 2 = 60 - 2 = 58.',
+      hint: 'False. 12 × (5 − 2) = 12 × 3 = 36, whereas 12 × 5 − 2 = 60 − 2 = 58.',
     },
     {
       testId: testObj.id,
-      question: '[SECTION B - True/False 3] Topic 2: Division\nQ3. 0 divided by any non-zero whole number is equal to 0.',
+      question: '[SECTION B - True/False 3] Topic 1: Multiplication\nQ3. Whole number multiplication is commutative.',
+      optionA: 'True',
+      optionB: 'False',
+      optionC: 'Only for positive numbers',
+      optionD: 'None of the above',
+      correctAnswer: 'optionA',
+      hint: 'True. a × b = b × a for all whole numbers.',
+    },
+    {
+      testId: testObj.id,
+      question: '[SECTION B - True/False 4] Topic 1: Multiplication\nQ4. 1 is the multiplicative identity for whole numbers.',
+      optionA: 'True',
+      optionB: 'False',
+      optionC: '0 is the identity',
+      optionD: 'None of the above',
+      correctAnswer: 'optionA',
+      hint: 'True. Multiplying any number by 1 yields that number.',
+    },
+    {
+      testId: testObj.id,
+      question: '[SECTION B - True/False 5] Topic 1: Multiplication\nQ5. 15 × (10 + 4) = 15 × 10 + 15 × 4.',
+      optionA: 'True',
+      optionB: 'False',
+      optionC: 'Equal to 150',
+      optionD: 'None of the above',
+      correctAnswer: 'optionA',
+      hint: 'True. Distributive property of multiplication over addition.',
+    },
+
+    // Topic 2: Division (5)
+    {
+      testId: testObj.id,
+      question: '[SECTION B - True/False 6] Topic 2: Division\nQ6. 0 divided by any non-zero whole number is equal to 0.',
       optionA: 'True',
       optionB: 'False',
       optionC: 'Undefined',
@@ -1178,7 +1320,7 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION B - True/False 4] Topic 2: Division\nQ4. In division, the remainder can be equal to or greater than the divisor.',
+      question: '[SECTION B - True/False 7] Topic 2: Division\nQ7. In division, the remainder can be equal to or greater than the divisor.',
       optionA: 'True',
       optionB: 'False',
       optionC: 'Always greater',
@@ -1188,7 +1330,39 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION B - True/False 5] Topic 3: Representing Division on Number Lines\nQ5. On a number line, 16 ÷ 4 can be shown by 4 backward jumps of 4 steps from 16 to 0.',
+      question: '[SECTION B - True/False 8] Topic 2: Division\nQ8. Division of whole numbers is commutative.',
+      optionA: 'True',
+      optionB: 'False',
+      optionC: 'Sometimes true',
+      optionD: 'None of the above',
+      correctAnswer: 'optionB',
+      hint: 'False. E.g., 12 ÷ 4 ≠ 4 ÷ 12.',
+    },
+    {
+      testId: testObj.id,
+      question: '[SECTION B - True/False 9] Topic 2: Division\nQ9. In 77 ÷ 8 = 9 remainder 5, 77 is the dividend.',
+      optionA: 'True',
+      optionB: 'False',
+      optionC: '77 is divisor',
+      optionD: 'None of the above',
+      correctAnswer: 'optionA',
+      hint: 'True. 77 is the total being divided.',
+    },
+    {
+      testId: testObj.id,
+      question: '[SECTION B - True/False 10] Topic 2: Division\nQ10. 50 ÷ 5 has a quotient of 10 and remainder 0.',
+      optionA: 'True',
+      optionB: 'False',
+      optionC: 'Remainder is 5',
+      optionD: 'None of the above',
+      correctAnswer: 'optionA',
+      hint: 'True. 50 = 5 × 10 + 0.',
+    },
+
+    // Topic 3: Representing Division on Number Lines (5)
+    {
+      testId: testObj.id,
+      question: '[SECTION B - True/False 11] Topic 3: Representing Division on Number Lines\nQ11. On a number line, 16 ÷ 4 can be shown by 4 backward jumps of 4 steps from 16 to 0.',
       optionA: 'True',
       optionB: 'False',
       optionC: 'Needs 16 jumps',
@@ -1196,8 +1370,49 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
       correctAnswer: 'optionA',
       hint: 'True. Repeated subtraction on a number line models division.',
     },
+    {
+      testId: testObj.id,
+      question: '[SECTION B - True/False 12] Topic 3: Representing Division on Number Lines\nQ12. Number-line division uses jumps of unequal length.',
+      optionA: 'True',
+      optionB: 'False',
+      optionC: 'Random lengths allowed',
+      optionD: 'None of the above',
+      correctAnswer: 'optionB',
+      hint: 'False. Jumps on a number line for division must always be of equal size.',
+    },
+    {
+      testId: testObj.id,
+      question: '[SECTION B - True/False 13] Topic 3: Representing Division on Number Lines\nQ13. 28 ÷ 7 reaches 28 after 4 jumps of 7 units starting from 0.',
+      optionA: 'True',
+      optionB: 'False',
+      optionC: '7 jumps of 4 units',
+      optionD: 'None of the above',
+      correctAnswer: 'optionA',
+      hint: 'True. 4 × 7 = 28.',
+    },
+    {
+      testId: testObj.id,
+      question: '[SECTION B - True/False 14] Topic 3: Representing Division on Number Lines\nQ14. Moving towards the left on a number line corresponds to repeated addition.',
+      optionA: 'True',
+      optionB: 'False',
+      optionC: 'Corresponds to multiplication',
+      optionD: 'None of the above',
+      correctAnswer: 'optionB',
+      hint: 'False. Moving left corresponds to subtraction; moving right corresponds to addition.',
+    },
+    {
+      testId: testObj.id,
+      question: '[SECTION B - True/False 15] Topic 3: Representing Division on Number Lines\nQ15. 18 ÷ 2 can be represented on a number line by 9 equal jumps of 2.',
+      optionA: 'True',
+      optionB: 'False',
+      optionC: '2 jumps of 9',
+      optionD: 'None of the above',
+      correctAnswer: 'optionA',
+      hint: 'True. 9 × 2 = 18.',
+    },
 
-    // --- SECTION C: Word Problems (5 Questions) ---
+    // --- SECTION C: Word Problems (6 Questions) ---
+    // Topic 1: Multiplication (2)
     {
       testId: testObj.id,
       question: '[SECTION C - Word Problem 1] Topic 1: Multiplication\nQ1. A factory produces 25 bicycles every day. How many bicycles does it produce in 14 days?',
@@ -1218,6 +1433,8 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
       correctAnswer: 'optionC',
       hint: '15 × 18 = 270 chairs.',
     },
+
+    // Topic 2: Division (2)
     {
       testId: testObj.id,
       question: '[SECTION C - Word Problem 3] Topic 2: Division\nQ3. 108 apples are distributed equally into 9 baskets. How many apples are placed in each basket?',
@@ -1238,6 +1455,8 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
       correctAnswer: 'optionA',
       hint: '78 = (7 × 11) + 1. Quotient = 11, Remainder = 1.',
     },
+
+    // Topic 3: Representing Division on Number Lines (2)
     {
       testId: testObj.id,
       question: '[SECTION C - Word Problem 5] Topic 3: Representing Division on Number Lines\nQ5. A grasshopper jumps 5 spaces at a time on a number line starting at 0. How many jumps does it take to reach 35?',
@@ -1248,8 +1467,19 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
       correctAnswer: 'optionC',
       hint: '35 ÷ 5 = 7 jumps.',
     },
+    {
+      testId: testObj.id,
+      question: '[SECTION C - Word Problem 6] Topic 3: Representing Division on Number Lines\nQ6. A toy car moves 4 units at a time from 0 to 32 on a number line. How many jumps does it make?',
+      optionA: '6 jumps',
+      optionB: '7 jumps',
+      optionC: '8 jumps',
+      optionD: '9 jumps',
+      correctAnswer: 'optionC',
+      hint: '32 ÷ 4 = 8 jumps.',
+    },
 
-    // --- SECTION D: Reading Comprehension / Passages (5 Questions) ---
+    // --- SECTION D: Reading Comprehension / Passages (6 Questions) ---
+    // Topic 1: Multiplication Passage (2)
     {
       testId: testObj.id,
       question: '[SECTION D - Reading Comprehension 1] Topic 1: Multiplication Passage\nPassage: A school bus carries 42 students per trip. It completes 6 trips every morning.\nQ1. How many total students are transported in a morning?',
@@ -1270,6 +1500,8 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
       correctAnswer: 'optionA',
       hint: '252 - 12 = 240 students.',
     },
+
+    // Topic 2: Division Passage (2)
     {
       testId: testObj.id,
       question: '[SECTION D - Reading Comprehension 3] Topic 2: Division Passage\nPassage: A bakery bakes 120 muffins and packs them into boxes containing 8 muffins each.\nQ3. How many full boxes of muffins are packed?',
@@ -1290,6 +1522,8 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
       correctAnswer: 'optionB',
       hint: '8 is the divisor.',
     },
+
+    // Topic 3: Number Line Passage (2)
     {
       testId: testObj.id,
       question: '[SECTION D - Reading Comprehension 5] Topic 3: Number Line Passage\nPassage: A kangaroo hops 6 units per leap on a track from 0 to 42.\nQ5. How many leaps did it take and what math operation is modeled?',
@@ -1299,6 +1533,16 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
       optionD: '7 leaps, modeled by 42 + 6',
       correctAnswer: 'optionB',
       hint: '42 ÷ 6 = 7 leaps.',
+    },
+    {
+      testId: testObj.id,
+      question: '[SECTION D - Reading Comprehension 6] Topic 3: Number Line Passage\nPassage: A kangaroo hops 6 units per leap from 0 to reach 42 on a number line.\nQ6. If the kangaroo starts at 42 and hops backwards 6 units at a time to reach 0, which property of division on a number line is demonstrated?',
+      optionA: 'Division as repeated addition',
+      optionB: 'Division as repeated subtraction',
+      optionC: 'Commutative law of division',
+      optionD: 'Distributive law over zero',
+      correctAnswer: 'optionB',
+      hint: 'Backward jumps on a number line demonstrate division as repeated subtraction.',
     },
 
     // --- TEACHER\'S QUESTION BANK (26 Questions) ---
@@ -1912,7 +2156,7 @@ export async function seedSampleDataIfEmpty(): Promise<void> {
           hasSampleTest1 = true;
         }
       } else if (title.includes('Sample Test 2')) {
-        if (questions.length < 40 || hasUnorderedQuestions) {
+        if (questions.length < 65 || hasUnorderedQuestions) {
           console.log(`Deleting outdated Sample Test 2 paper (${testId})...`);
           await deleteTest(testId);
         } else {
