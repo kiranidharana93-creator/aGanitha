@@ -1,0 +1,6 @@
+{
+  "name": "CBSE Maths Test Portal",
+  "description": "CBSE Maths Test Portal for students and admins to conduct tests, manage questions, enforce attempt limits, and track results.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

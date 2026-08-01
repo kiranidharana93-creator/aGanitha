@@ -1,0 +1,55 @@
+{
+  "entities": {
+    "students": {
+      "title": "Students",
+      "description": "Registered students taking tests",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "class": { "type": "string" }
+      },
+      "required": ["name", "class"]
+    },
+    "tests": {
+      "title": "Tests",
+      "description": "CBSE Maths tests created by admin",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "class": { "type": "string" },
+        "duration": { "type": "number" },
+        "published": { "type": "boolean" }
+      },
+      "required": ["title", "class", "duration", "published"]
+    },
+    "questions": {
+      "title": "Questions",
+      "description": "MCQ questions for tests",
+      "type": "object",
+      "properties": {
+        "testId": { "type": "string" },
+        "question": { "type": "string" },
+        "optionA": { "type": "string" },
+        "optionB": { "type": "string" },
+        "optionC": { "type": "string" },
+        "optionD": { "type": "string" },
+        "correctAnswer": { "type": "string" }
+      },
+      "required": ["testId", "question", "optionA", "optionB", "optionC", "optionD", "correctAnswer"]
+    },
+    "attempts": {
+      "title": "Attempts",
+      "description": "Student test attempts and scores",
+      "type": "object",
+      "properties": {
+        "studentId": { "type": "string" },
+        "testId": { "type": "string" },
+        "attemptNumber": { "type": "number" },
+        "score": { "type": "number" },
+        "totalQuestions": { "type": "number" },
+        "submittedAt": { "type": "string" }
+      },
+      "required": ["studentId", "testId", "attemptNumber", "score", "submittedAt"]
+    }
+  }
+}
