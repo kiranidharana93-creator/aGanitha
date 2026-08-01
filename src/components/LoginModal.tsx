@@ -176,16 +176,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onStudentLogin, onAdminL
                   )}
                 </button>
               </div>
-
-              <div className="bg-slate-900/60 p-3 rounded-xl border border-slate-700/50 text-xs text-slate-400 space-y-1">
-                <p className="flex items-center gap-1.5 font-medium text-slate-300">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                  Attempt Restriction Notice:
-                </p>
-                <p className="text-slate-400 leading-relaxed">
-                  Each test allows a maximum of <strong>2 attempts</strong>. Make sure to prepare before starting.
-                </p>
-              </div>
             </form>
           ) : (
             <form onSubmit={handleAdminSubmit} className="space-y-4">

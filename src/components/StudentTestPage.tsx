@@ -491,7 +491,7 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
                       <span>Hint</span>
                     </div>
                     <p className="italic text-amber-200/90 leading-relaxed pl-6">
-                      {currentQ.hint || 'Remember to analyze the math rule step-by-step and double-check calculations.'}
+                      {currentQ.hint || 'Think about the mathematical concept used in this question.'}
                     </p>
                     <p className="text-[11px] text-slate-400 pl-6 pt-1 font-medium">
                       You can select another option while time remains for this question.

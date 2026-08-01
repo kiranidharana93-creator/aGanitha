@@ -116,12 +116,7 @@ export default function App() {
       {/* Footer */}
       <footer className="bg-slate-900 border-t border-slate-800/80 py-4 px-6 text-center text-xs text-slate-500">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
-          <p>© CBSE Maths Online Assessment Portal. Built for CBSE Board Mathematics Examination.</p>
-          <div className="flex items-center space-x-3 text-slate-400 font-medium">
-            <span>Attempt Enforcement: Active (Max 2)</span>
-            <span>•</span>
-            <span>Firebase Firestore Backend</span>
-          </div>
+          <p>© CBSE Maths Online Assessment Portal • Unlimited Practice Attempts Enabled • Firebase Firestore Backend</p>
         </div>
       </footer>
     </div>

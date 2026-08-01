@@ -58,6 +58,12 @@ export const AdminDashboard: React.FC = () => {
 
   const [viewingAttempt, setViewingAttempt] = useState<Attempt | null>(null);
 
+  const [deletingItem, setDeletingItem] = useState<{
+    type: 'test' | 'question' | 'reset';
+    id?: string;
+    title?: string;
+  } | null>(null);
+
   const loadData = async () => {
     setIsLoading(true);
     try {
@@ -92,12 +98,17 @@ export const AdminDashboard: React.FC = () => {
 
   // Test Handlers
   const handleSaveTest = async (testData: { title: string; class: string; duration: number; published: boolean }) => {
+    let createdTestId = '';
     if (editingTest) {
       await updateTest(editingTest.id, testData);
     } else {
-      await createTest(testData);
+      const newTest = await createTest(testData);
+      createdTestId = newTest.id;
     }
     await loadData();
+    if (createdTestId) {
+      setSelectedTestId(createdTestId);
+    }
     setEditingTest(null);
   };
 
@@ -106,48 +117,91 @@ export const AdminDashboard: React.FC = () => {
     await loadData();
   };
 
-  const handleDeleteTest = async (testId: string) => {
-    if (confirm('Are you sure you want to delete this test and all its questions?')) {
-      await deleteTest(testId);
-      if (selectedTestId === testId) {
-        setSelectedTestId('');
-      }
-      await loadData();
-    }
+  const handleDeleteTest = (testId: string) => {
+    const targetTest = tests.find((t) => t.id === testId);
+    setDeletingItem({
+      type: 'test',
+      id: testId,
+      title: targetTest?.title || 'Selected Test',
+    });
   };
 
-  const handlePublishClass6To10 = async () => {
-    if (confirm('This will replace current test papers with standard CBSE Class 6, 7, 8, 9, and 10 test papers. Do you want to proceed?')) {
-      setIsLoading(true);
-      await publishClass6To10DefaultTests(true);
-      await loadData();
-      setIsLoading(false);
-    }
+  const handlePublishClass6To10 = () => {
+    setDeletingItem({
+      type: 'reset',
+      title: 'CBSE Standard Test Papers (Class 6-10)',
+    });
   };
 
   // Question Handlers
   const handleSaveQuestion = async (qData: Omit<Question, 'id'>) => {
-    if (editingQuestion) {
-      await updateQuestion(editingQuestion.id, qData);
-    } else {
-      await createQuestion(qData);
-    }
-    if (selectedTestId) {
-      const qList = await getQuestionsByTestId(selectedTestId);
+    try {
+      const targetTestId = qData.testId;
+      if (editingQuestion) {
+        await updateQuestion(editingQuestion.id, qData);
+      } else {
+        await createQuestion(qData);
+      }
+      setSelectedTestId(targetTestId);
+
+      const qList = await getQuestionsByTestId(targetTestId);
       setQuestions(qList);
+
+      await loadData();
+      setEditingQuestion(null);
+    } catch (err) {
+      console.error('Error saving question:', err);
+      alert('Failed to save question. Please try again.');
     }
-    await loadData();
-    setEditingQuestion(null);
   };
 
-  const handleDeleteQuestion = async (qId: string) => {
-    if (confirm('Are you sure you want to delete this question?')) {
-      await deleteQuestion(qId);
-      if (selectedTestId) {
-        const qList = await getQuestionsByTestId(selectedTestId);
-        setQuestions(qList);
+  const handleDeleteQuestion = (qId: string) => {
+    const targetQ = questions.find((q) => q.id === qId);
+    setDeletingItem({
+      type: 'question',
+      id: qId,
+      title: targetQ?.question || 'Selected Question',
+    });
+  };
+
+  const confirmDeleteAction = async () => {
+    if (!deletingItem) return;
+    const { type, id } = deletingItem;
+    setDeletingItem(null);
+
+    if (type === 'test' && id) {
+      try {
+        setTests((prev) => prev.filter((t) => t.id !== id));
+        if (selectedTestId === id) {
+          setSelectedTestId('');
+        }
+        await deleteTest(id);
+        await loadData();
+      } catch (err) {
+        console.error('Error deleting test:', err);
+        await loadData();
       }
+    } else if (type === 'question' && id) {
+      try {
+        setQuestions((prev) => prev.filter((q) => q.id !== id));
+        await deleteQuestion(id);
+        if (selectedTestId) {
+          const qList = await getQuestionsByTestId(selectedTestId);
+          setQuestions(qList);
+        }
+        await loadData();
+      } catch (err) {
+        console.error('Error deleting question:', err);
+        if (selectedTestId) {
+          const qList = await getQuestionsByTestId(selectedTestId);
+          setQuestions(qList);
+        }
+      }
+    } else if (type === 'reset') {
+      setIsLoading(true);
+      await publishClass6To10DefaultTests(true);
       await loadData();
+      setIsLoading(false);
     }
   };
 
@@ -663,6 +717,47 @@ export const AdminDashboard: React.FC = () => {
       {/* Result Details Modal */}
       {viewingAttempt && (
         <ResultDetailsModal attempt={viewingAttempt} onClose={() => setViewingAttempt(null)} />
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deletingItem && (
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center space-x-3 text-red-400">
+              <div className="p-3 bg-red-500/10 rounded-xl">
+                <Trash2 className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-white">
+                  {deletingItem.type === 'reset' ? 'Confirm Reset' : 'Confirm Deletion'}
+                </h3>
+                <p className="text-xs text-slate-400">This action cannot be undone</p>
+              </div>
+            </div>
+
+            <p className="text-sm text-slate-300 leading-relaxed">
+              {deletingItem.type === 'reset'
+                ? 'Are you sure you want to reset all test papers to standard CBSE Class 6-10 questions?'
+                : `Are you sure you want to delete "${deletingItem.title || 'this item'}"?`}
+            </p>
+
+            <div className="flex items-center justify-end space-x-3 pt-2">
+              <button
+                onClick={() => setDeletingItem(null)}
+                className="px-4 py-2.5 rounded-xl border border-slate-700 text-slate-300 text-xs font-bold hover:bg-slate-800 cursor-pointer transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDeleteAction}
+                className="px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold shadow-lg flex items-center space-x-2 cursor-pointer transition-colors"
+              >
+                <Trash2 className="w-4 h-4" />
+                <span>{deletingItem.type === 'reset' ? 'Yes, Reset' : 'Yes, Delete'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

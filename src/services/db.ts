@@ -182,6 +182,7 @@ export async function getQuestionsByTestId(testId: string): Promise<Question[]> 
         optionC: data.optionC || '',
         optionD: data.optionD || '',
         correctAnswer: normalizeAnswerKey(data.correctAnswer) as any,
+        hint: data.hint || '',
       };
     });
   } catch (error) {
@@ -355,6 +356,57 @@ export async function publishClass6To10DefaultTests(clearExisting = false): Prom
 
     console.log('Publishing CBSE Class 6 to 10 Test Papers...');
 
+    // CLASS 6: ODD NUMBERS TEST PAPER
+    const testOdd = await createTest({
+      title: 'CBSE Class 6: Odd Numbers',
+      class: 'Class 6',
+      duration: 15,
+      published: true,
+    });
+    const testOddQuestions: Omit<Question, 'id'>[] = [
+      {
+        testId: testOdd.id,
+        question: 'Which of the following is an odd number?',
+        optionA: '24',
+        optionB: '36',
+        optionC: '51',
+        optionD: '60',
+        correctAnswer: 'optionC',
+        hint: 'Odd numbers are not divisible by 2 and usually end in 1, 3, 5, 7, or 9.',
+      },
+      {
+        testId: testOdd.id,
+        question: 'What is the next odd number after 97?',
+        optionA: '98',
+        optionB: '99',
+        optionC: '100',
+        optionD: '101',
+        correctAnswer: 'optionB',
+        hint: 'Odd numbers increase by 2 each time: 95, 97, 99, 101.',
+      },
+      {
+        testId: testOdd.id,
+        question: 'Which pair contains only odd numbers?',
+        optionA: '13 and 17',
+        optionB: '12 and 15',
+        optionC: '18 and 21',
+        optionD: '25 and 30',
+        correctAnswer: 'optionA',
+        hint: 'Check whether both numbers are not divisible by 2.',
+      },
+      {
+        testId: testOdd.id,
+        question: 'The sum of two odd numbers is usually:',
+        optionA: 'Odd',
+        optionB: 'Even',
+        optionC: 'Prime',
+        optionD: 'Negative',
+        correctAnswer: 'optionB',
+        hint: 'Try adding two odd numbers such as 5 + 7 or 9 + 11 and observe the result.',
+      },
+    ];
+    for (const q of testOddQuestions) await createQuestion(q);
+
     // CLASS 6 TEST PAPER
     const test6 = await createTest({
       title: 'CBSE Class 6: Whole Numbers, Decimals & Geometry',
@@ -381,7 +433,7 @@ export async function publishClass6To10DefaultTests(clearExisting = false): Prom
         optionC: '9,990',
         optionD: '9,000',
         correctAnswer: 'optionA',
-        hint: 'Predecessor means subtracting 1 from the given number: 10,000 - 1.',
+        hint: 'The predecessor of a number is the number that comes immediately before it. Try subtracting 1 from 10,000.',
       },
       {
         testId: test6.id,
@@ -457,56 +509,7 @@ export async function publishClass6To10DefaultTests(clearExisting = false): Prom
     ];
     for (const q of test7Questions) await createQuestion(q);
 
-    // CLASS 8 TEST PAPER
-    const test8 = await createTest({
-      title: 'CBSE Class 8: Rational Numbers & Linear Equations',
-      class: 'Class 8',
-      duration: 15,
-      published: true,
-    });
-    const test8Questions: Omit<Question, 'id'>[] = [
-      {
-        testId: test8.id,
-        question: 'What is the additive inverse of -5/9?',
-        optionA: '5/9',
-        optionB: '-9/5',
-        optionC: '9/5',
-        optionD: '1',
-        correctAnswer: 'optionA',
-        hint: 'The additive inverse of a number a is -a, such that a + (-a) = 0.',
-      },
-      {
-        testId: test8.id,
-        question: 'Solve for x: 5x - 4 = 2x + 11',
-        optionA: 'x = 5',
-        optionB: 'x = 3',
-        optionC: 'x = 7',
-        optionD: 'x = 4',
-        correctAnswer: 'optionA',
-        hint: 'Bring variables to one side: 5x - 2x = 11 + 4 => 3x = 15 => x = 5.',
-      },
-      {
-        testId: test8.id,
-        question: 'What is the value of 2³ × 2⁴?',
-        optionA: '128',
-        optionB: '64',
-        optionC: '256',
-        optionD: '32',
-        correctAnswer: 'optionA',
-        hint: 'When multiplying powers with the same base, add the exponents: 2^(3+4) = 2^7 = 128.',
-      },
-      {
-        testId: test8.id,
-        question: 'The sum of all interior angles of a pentagon (5 sides) is:',
-        optionA: '540°',
-        optionB: '360°',
-        optionC: '720°',
-        optionD: '180°',
-        correctAnswer: 'optionA',
-        hint: 'Sum of interior angles of an n-sided polygon = (n - 2) × 180°. For n=5: (5 - 2) × 180° = 540°.',
-      },
-    ];
-    for (const q of test8Questions) await createQuestion(q);
+    // Remove Class 8 Test Paper creation from default set as requested
 
     // CLASS 9 TEST PAPER
     const test9 = await createTest({
@@ -622,20 +625,16 @@ export async function publishClass6To10DefaultTests(clearExisting = false): Prom
  */
 export async function seedSampleDataIfEmpty(): Promise<void> {
   try {
+    const SEED_KEY = 'cbse_portal_seeded_v10';
+    if (localStorage.getItem(SEED_KEY)) {
+      return; // Database seeded, do not overwrite user deletions or modifications
+    }
+
     const snap = await getDocs(collection(db, TESTS_COL));
     if (snap.empty) {
       await publishClass6To10DefaultTests(false);
-      return;
     }
-
-    const tests = snap.docs.map((docSnap) => docSnap.data());
-    const hasClass6 = tests.some((t) => t.class === 'Class 6');
-    const hasLegacy = tests.some((t) => t.class === 'Class 11' || t.class === 'Class 12');
-
-    if (!hasClass6 || hasLegacy) {
-      console.log('Migrating tests to official CBSE Class 6 to 10 papers...');
-      await publishClass6To10DefaultTests(true);
-    }
+    localStorage.setItem(SEED_KEY, 'true');
   } catch (error) {
     console.error('Error seeding sample data:', error);
   }
