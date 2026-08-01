@@ -24,11 +24,11 @@ export const QuestionModal: React.FC<QuestionModalProps> = ({
   const [optionC, setOptionC] = useState(questionToEdit?.optionC || '');
   const [optionD, setOptionD] = useState(questionToEdit?.optionD || '');
   const [correctAnswer, setCorrectAnswer] = useState<string>(questionToEdit?.correctAnswer || 'optionA');
+  const [hint, setHint] = useState(questionToEdit?.hint || '');
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
     if (!testId) {
       setError('Please select a test');
       return;
@@ -53,6 +53,7 @@ export const QuestionModal: React.FC<QuestionModalProps> = ({
         optionC: optionC.trim(),
         optionD: optionD.trim(),
         correctAnswer: correctAnswer as any,
+        hint: hint.trim() || undefined,
       });
       onClose();
     } catch (err) {
@@ -187,6 +188,21 @@ export const QuestionModal: React.FC<QuestionModalProps> = ({
               <option value="optionC">Option C: {optionC || '(Empty)'}</option>
               <option value="optionD">Option D: {optionD || '(Empty)'}</option>
             </select>
+          </div>
+
+          {/* Educational Hint Field */}
+          <div className="space-y-1">
+            <label className="text-xs font-semibold text-slate-300 flex items-center justify-between">
+              <span>Educational Hint (Shown on wrong selection)</span>
+              <span className="text-[10px] text-amber-400 font-medium">Optional</span>
+            </label>
+            <textarea
+              rows={2}
+              value={hint}
+              onChange={(e) => setHint(e.target.value)}
+              placeholder="e.g. Formula for discriminant is D = b² - 4ac. Identify a, b, and c first."
+              className="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-xs text-amber-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
+            />
           </div>
 
           {error && <div className="p-3 bg-red-500/10 border border-red-500/30 text-xs text-red-400 rounded-xl">{error}</div>}

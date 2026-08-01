@@ -196,7 +196,7 @@ export async function getQuestionsByTestId(testId: string): Promise<Question[]> 
 export async function createQuestion(qData: Omit<Question, 'id'>): Promise<Question> {
   const payload = {
     ...qData,
-    correctAnswer: normalizeAnswerKey(qData.correctAnswer),
+    correctAnswer: normalizeAnswerKey(qData.correctAnswer) as Question['correctAnswer'],
   };
   const docRef = await addDoc(collection(db, QUESTIONS_COL), payload);
   return {
@@ -371,6 +371,7 @@ export async function publishClass6To10DefaultTests(clearExisting = false): Prom
         optionC: '-1',
         optionD: '10',
         correctAnswer: 'optionA',
+        hint: 'Whole numbers start from 0 and include all non-negative integers (0, 1, 2, 3...).',
       },
       {
         testId: test6.id,
@@ -380,6 +381,7 @@ export async function publishClass6To10DefaultTests(clearExisting = false): Prom
         optionC: '9,990',
         optionD: '9,000',
         correctAnswer: 'optionA',
+        hint: 'Predecessor means subtracting 1 from the given number: 10,000 - 1.',
       },
       {
         testId: test6.id,
@@ -389,6 +391,7 @@ export async function publishClass6To10DefaultTests(clearExisting = false): Prom
         optionC: 'Right angle',
         optionD: 'Straight angle',
         correctAnswer: 'optionA',
+        hint: 'Acute angles are smaller than 90°, right angles are exactly 90°, and obtuse angles are between 90° and 180°.',
       },
       {
         testId: test6.id,
@@ -398,6 +401,7 @@ export async function publishClass6To10DefaultTests(clearExisting = false): Prom
         optionC: '49 cm',
         optionD: '21 cm',
         correctAnswer: 'optionA',
+        hint: 'Perimeter of a square = 4 × side length.',
       },
     ];
     for (const q of test6Questions) await createQuestion(q);
@@ -418,6 +422,7 @@ export async function publishClass6To10DefaultTests(clearExisting = false): Prom
         optionC: '-23',
         optionD: '23',
         correctAnswer: 'optionA',
+        hint: 'When adding integers with opposite signs, subtract the absolute values (15 - 8 = 7) and keep the sign of the larger absolute value (-).',
       },
       {
         testId: test7.id,
@@ -427,6 +432,7 @@ export async function publishClass6To10DefaultTests(clearExisting = false): Prom
         optionC: 'x = 6',
         optionD: 'x = 3',
         correctAnswer: 'optionA',
+        hint: 'First subtract 7 from both sides: 3x = 15. Then divide by 3.',
       },
       {
         testId: test7.id,
@@ -436,6 +442,7 @@ export async function publishClass6To10DefaultTests(clearExisting = false): Prom
         optionC: '65°',
         optionD: '45°',
         correctAnswer: 'optionA',
+        hint: 'Two angles are complementary if their sum is 90°. Subtract 35° from 90°.',
       },
       {
         testId: test7.id,
@@ -445,6 +452,7 @@ export async function publishClass6To10DefaultTests(clearExisting = false): Prom
         optionC: '16 sq cm',
         optionD: '20 sq cm',
         correctAnswer: 'optionA',
+        hint: 'Area of a triangle = (1/2) × base × height.',
       },
     ];
     for (const q of test7Questions) await createQuestion(q);
@@ -465,6 +473,7 @@ export async function publishClass6To10DefaultTests(clearExisting = false): Prom
         optionC: '9/5',
         optionD: '1',
         correctAnswer: 'optionA',
+        hint: 'The additive inverse of a number a is -a, such that a + (-a) = 0.',
       },
       {
         testId: test8.id,
@@ -474,6 +483,7 @@ export async function publishClass6To10DefaultTests(clearExisting = false): Prom
         optionC: 'x = 7',
         optionD: 'x = 4',
         correctAnswer: 'optionA',
+        hint: 'Bring variables to one side: 5x - 2x = 11 + 4 => 3x = 15 => x = 5.',
       },
       {
         testId: test8.id,
@@ -483,6 +493,7 @@ export async function publishClass6To10DefaultTests(clearExisting = false): Prom
         optionC: '256',
         optionD: '32',
         correctAnswer: 'optionA',
+        hint: 'When multiplying powers with the same base, add the exponents: 2^(3+4) = 2^7 = 128.',
       },
       {
         testId: test8.id,
@@ -492,6 +503,7 @@ export async function publishClass6To10DefaultTests(clearExisting = false): Prom
         optionC: '720°',
         optionD: '180°',
         correctAnswer: 'optionA',
+        hint: 'Sum of interior angles of an n-sided polygon = (n - 2) × 180°. For n=5: (5 - 2) × 180° = 540°.',
       },
     ];
     for (const q of test8Questions) await createQuestion(q);
@@ -512,6 +524,7 @@ export async function publishClass6To10DefaultTests(clearExisting = false): Prom
         optionC: '0.25',
         optionD: '22/7',
         correctAnswer: 'optionA',
+        hint: 'Irrational numbers cannot be expressed as a ratio of two integers. √2 is non-terminating and non-recurring.',
       },
       {
         testId: test9.id,
@@ -521,6 +534,7 @@ export async function publishClass6To10DefaultTests(clearExisting = false): Prom
         optionC: 'Not defined',
         optionD: '2',
         correctAnswer: 'optionA',
+        hint: 'A non-zero constant polynomial like c = c·x⁰ has degree 0.',
       },
       {
         testId: test9.id,
@@ -530,6 +544,7 @@ export async function publishClass6To10DefaultTests(clearExisting = false): Prom
         optionC: '-2',
         optionD: '4',
         correctAnswer: 'optionA',
+        hint: 'By Factor Theorem, evaluate P(-2) = (-2)³ + 3(-2)² + 2(-2) + k = -8 + 12 - 4 + k = 0 => k = 0.',
       },
       {
         testId: test9.id,
@@ -539,6 +554,7 @@ export async function publishClass6To10DefaultTests(clearExisting = false): Prom
         optionC: '5 units',
         optionD: '7 units',
         correctAnswer: 'optionA',
+        hint: 'The perpendicular distance of a point (x, y) from the y-axis is equal to its x-coordinate |x|.',
       },
     ];
     for (const q of test9Questions) await createQuestion(q);
@@ -559,6 +575,7 @@ export async function publishClass6To10DefaultTests(clearExisting = false): Prom
         optionC: '25',
         optionD: '-11',
         correctAnswer: 'optionA',
+        hint: 'Formula for discriminant is D = b² - 4ac. Here a=3, b=-5, c=2 => D = (-5)² - 4(3)(2) = 25 - 24 = 1.',
       },
       {
         testId: test10.id,
@@ -568,6 +585,7 @@ export async function publishClass6To10DefaultTests(clearExisting = false): Prom
         optionC: '3/4',
         optionD: '1/2',
         correctAnswer: 'optionA',
+        hint: 'Use trigonometric identity cos θ = √(1 - sin² θ) = √(1 - (3/5)²) = √(1 - 9/25) = √(16/25) = 4/5.',
       },
       {
         testId: test10.id,
@@ -577,6 +595,7 @@ export async function publishClass6To10DefaultTests(clearExisting = false): Prom
         optionC: '1/2',
         optionD: '2',
         correctAnswer: 'optionA',
+        hint: 'Fundamental trigonometric identity: sin² θ + cos² θ = 1 for any angle θ.',
       },
       {
         testId: test10.id,
@@ -586,6 +605,7 @@ export async function publishClass6To10DefaultTests(clearExisting = false): Prom
         optionC: '-5',
         optionD: '-6',
         correctAnswer: 'optionA',
+        hint: 'For quadratic polynomial ax² + bx + c, sum of zeroes (α + β) = -b/a = -(-5)/1 = 5.',
       },
     ];
     for (const q of test10Questions) await createQuestion(q);

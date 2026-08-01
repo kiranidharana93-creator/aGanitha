@@ -120,15 +120,12 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
             {tests.map((test) => {
               const attempts = studentAttemptsMap[test.id] || [];
               const attemptsCount = attempts.length;
-              const hasUsedMaxAttempts = attemptsCount >= 2;
               const nextAttemptNumber = attemptsCount + 1;
 
               return (
                 <div
                   key={test.id}
-                  className={`bg-slate-900 border ${
-                    hasUsedMaxAttempts ? 'border-amber-500/30 bg-slate-900/80' : 'border-slate-800 hover:border-slate-700'
-                  } rounded-2xl p-6 shadow-lg flex flex-col justify-between transition-all space-y-5`}
+                  className="bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-2xl p-6 shadow-lg flex flex-col justify-between transition-all space-y-5"
                 >
                   <div className="space-y-3">
                     <div className="flex items-start justify-between gap-2">
@@ -136,14 +133,14 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
                         {test.class}
                       </span>
 
-                      {hasUsedMaxAttempts ? (
-                        <span className="bg-amber-500/10 text-amber-400 border border-amber-500/30 text-xs px-2.5 py-1 rounded-full font-bold flex items-center gap-1">
-                          <AlertTriangle className="w-3.5 h-3.5" />
-                          2 / 2 Used
+                      {attemptsCount > 0 ? (
+                        <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-xs px-2.5 py-1 rounded-full font-bold flex items-center gap-1">
+                          <CheckCircle className="w-3.5 h-3.5" />
+                          Taken {attemptsCount} {attemptsCount === 1 ? 'Time' : 'Times'}
                         </span>
                       ) : (
-                        <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-xs px-2.5 py-1 rounded-full font-bold">
-                          Attempt {nextAttemptNumber} of 2
+                        <span className="bg-blue-500/10 text-blue-400 border border-blue-500/30 text-xs px-2.5 py-1 rounded-full font-bold">
+                          New Test
                         </span>
                       )}
                     </div>
@@ -154,8 +151,8 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
                       <div className="bg-slate-800/60 p-2.5 rounded-xl border border-slate-800 flex items-center gap-2">
                         <Clock className="w-4 h-4 text-blue-400" />
                         <div>
-                          <p className="text-[10px] text-slate-500 font-semibold uppercase">Duration</p>
-                          <p className="font-bold text-slate-200">{test.duration} Minutes</p>
+                          <p className="text-[10px] text-slate-500 font-semibold uppercase">Per Qn Time</p>
+                          <p className="font-bold text-slate-200">60 Seconds</p>
                         </div>
                       </div>
 
@@ -169,41 +166,21 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
                     </div>
                   </div>
 
-                  {/* Attempt Restriction Warning Banner */}
-                  {hasUsedMaxAttempts ? (
-                    <div className="space-y-3">
-                      <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-amber-300 text-xs flex items-start gap-2">
-                        <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                        <div>
-                          <p className="font-bold">Attempt Limit Reached</p>
-                          <p className="mt-0.5 text-amber-200/80 font-medium">You have already used your 2 attempts</p>
-                        </div>
-                      </div>
-
-                      <button
-                        disabled
-                        className="w-full bg-slate-800 text-slate-500 font-semibold py-3 rounded-xl border border-slate-700/50 cursor-not-allowed text-xs flex items-center justify-center gap-2"
-                      >
-                        You have already used your 2 attempts
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      <button
-                        onClick={() => onStartTest(test, nextAttemptNumber)}
-                        disabled={(test.questionCount || 0) === 0}
-                        className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold py-3 rounded-xl shadow-lg transition-all text-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        <Play className="w-4 h-4 fill-white" />
-                        <span>Start Test (Attempt {nextAttemptNumber})</span>
-                      </button>
-                      {(test.questionCount || 0) === 0 && (
-                        <p className="text-[11px] text-amber-400 text-center font-medium">
-                          Teacher is adding questions to this test.
-                        </p>
-                      )}
-                    </div>
-                  )}
+                  <div className="space-y-2">
+                    <button
+                      onClick={() => onStartTest(test, nextAttemptNumber)}
+                      disabled={(test.questionCount || 0) === 0}
+                      className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold py-3 rounded-xl shadow-lg transition-all text-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Play className="w-4 h-4 fill-white" />
+                      <span>{attemptsCount > 0 ? `Retake Test (Attempt ${nextAttemptNumber})` : 'Start Test'}</span>
+                    </button>
+                    {(test.questionCount || 0) === 0 && (
+                      <p className="text-[11px] text-amber-400 text-center font-medium">
+                        Teacher is adding questions to this test.
+                      </p>
+                    )}
+                  </div>
                 </div>
               );
             })}

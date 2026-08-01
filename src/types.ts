@@ -24,6 +24,7 @@ export interface Question {
   optionC: string;
   optionD: string;
   correctAnswer: 'A' | 'B' | 'C' | 'D' | 'optionA' | 'optionB' | 'optionC' | 'optionD';
+  hint?: string;
 }
 
 export interface Attempt {

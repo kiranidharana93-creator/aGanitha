@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Student, Test, Question, Attempt } from '../types';
-import { getQuestionsByTestId, saveAttempt, getAttemptsForStudentAndTest, normalizeAnswerKey } from '../services/db';
-import { Clock, CheckCircle2, XCircle, AlertTriangle, ChevronLeft, ChevronRight, Send, ArrowLeft, RefreshCw, Award } from 'lucide-react';
+import { getQuestionsByTestId, saveAttempt, normalizeAnswerKey } from '../services/db';
+import { Clock, CheckCircle2, XCircle, AlertTriangle, ChevronLeft, ChevronRight, Send, ArrowLeft, RefreshCw, Award, Lightbulb } from 'lucide-react';
 
 interface StudentTestPageProps {
   student: Student;
@@ -20,38 +20,25 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(true);
-  const [isBlocked, setIsBlocked] = useState(false);
-  const [blockMessage, setBlockMessage] = useState('');
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [completedAttempt, setCompletedAttempt] = useState<Attempt | null>(null);
 
-  // Timer state
-  const [timeLeft, setTimeLeft] = useState<number>(test.duration * 60);
+  // Per-Question Timer state (60 seconds per question)
+  const [questionTimeLeft, setQuestionTimeLeft] = useState<number>(60);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Load questions and verify attempt limits
+  // Load questions
   useEffect(() => {
     let isMounted = true;
 
     async function initTest() {
       setIsLoading(true);
       try {
-        // Double check attempt restriction logic
-        const existingAttempts = await getAttemptsForStudentAndTest(student.id, test.id);
-        if (existingAttempts.length >= 2) {
-          if (isMounted) {
-            setIsBlocked(true);
-            setBlockMessage('You have already used your 2 attempts');
-            setIsLoading(false);
-          }
-          return;
-        }
-
         const qList = await getQuestionsByTestId(test.id);
         if (isMounted) {
           setQuestions(qList);
-          setTimeLeft(test.duration * 60);
+          setQuestionTimeLeft(60);
           setIsLoading(false);
         }
       } catch (err) {
@@ -66,17 +53,26 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
       isMounted = false;
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [test.id, student.id]);
+  }, [test.id]);
 
-  // Timer Countdown Effect
+  // Reset 60s Timer whenever question index changes
   useEffect(() => {
-    if (isLoading || isBlocked || completedAttempt || questions.length === 0) return;
+    if (questions.length > 0) {
+      setQuestionTimeLeft(60);
+    }
+  }, [currentIndex, questions.length]);
+
+  // Per-Question Timer Countdown Effect
+  useEffect(() => {
+    if (isLoading || completedAttempt || questions.length === 0) return;
+
+    if (timerRef.current) clearInterval(timerRef.current);
 
     timerRef.current = setInterval(() => {
-      setTimeLeft((prev) => {
+      setQuestionTimeLeft((prev) => {
         if (prev <= 1) {
           if (timerRef.current) clearInterval(timerRef.current);
-          handleAutoSubmit();
+          handleQuestionTimeout();
           return 0;
         }
         return prev - 1;
@@ -86,7 +82,20 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [isLoading, isBlocked, completedAttempt, questions.length]);
+  }, [currentIndex, isLoading, completedAttempt, questions.length]);
+
+  const handleQuestionTimeout = () => {
+    // If timer reaches 0: lock question answer and advance or submit
+    setCurrentIndex((prevIdx) => {
+      if (prevIdx < questions.length - 1) {
+        return prevIdx + 1;
+      } else {
+        // Last question timed out -> auto submit
+        processSubmission();
+        return prevIdx;
+      }
+    });
+  };
 
   const handleOptionSelect = (questionId: string, optionKey: string) => {
     setSelectedAnswers((prev) => ({
@@ -137,16 +146,6 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
     }
   };
 
-  const handleAutoSubmit = () => {
-    processSubmission();
-  };
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
-
   const answeredCount = Object.keys(selectedAnswers).length;
 
   if (isLoading) {
@@ -155,30 +154,6 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
         <RefreshCw className="w-10 h-10 text-blue-500 animate-spin mb-4" />
         <h2 className="text-lg font-bold text-slate-200">Loading Test Questions...</h2>
         <p className="text-xs text-slate-400 mt-1">Preparing examination environment for {test.title}</p>
-      </div>
-    );
-  }
-
-  // Attempt Limit Blocked Screen
-  if (isBlocked) {
-    return (
-      <div className="max-w-md mx-auto my-16 bg-slate-900 border border-amber-500/40 rounded-2xl p-8 text-center shadow-2xl space-y-4">
-        <div className="w-16 h-16 bg-amber-500/10 border border-amber-500/30 text-amber-400 rounded-2xl flex items-center justify-center mx-auto">
-          <AlertTriangle className="w-8 h-8" />
-        </div>
-        <h2 className="text-xl font-bold text-white">Attempt Limit Reached</h2>
-        <p className="text-sm font-semibold text-amber-300 bg-amber-500/10 p-3 rounded-xl border border-amber-500/20">
-          {blockMessage || 'You have already used your 2 attempts'}
-        </p>
-        <p className="text-xs text-slate-400">
-          According to CBSE examination guidelines, students are limited to a maximum of 2 attempts per assessment.
-        </p>
-        <button
-          onClick={onFinishTest}
-          className="w-full bg-slate-800 hover:bg-slate-700 text-white font-semibold py-3 rounded-xl border border-slate-700 text-xs transition-colors cursor-pointer"
-        >
-          Return to Dashboard
-        </button>
       </div>
     );
   }
@@ -313,6 +288,16 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
                       );
                     })}
                   </div>
+
+                  {q.hint && (
+                    <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-xs text-amber-300 flex items-start gap-2">
+                      <Lightbulb className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                      <div>
+                        <strong className="font-bold">Educational Hint:</strong>
+                        <p className="mt-0.5 italic text-amber-200">{q.hint}</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               );
             })}
@@ -323,6 +308,17 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
   }
 
   const currentQ = questions[currentIndex];
+  const selectedOpt = currentQ ? selectedAnswers[currentQ.id] : undefined;
+  const isSelectedCorrect =
+    selectedOpt && currentQ ? normalizeAnswerKey(selectedOpt) === normalizeAnswerKey(currentQ.correctAnswer) : false;
+
+  // Visual styling for the per-question timer
+  let timerStyle = 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400';
+  if (questionTimeLeft <= 10) {
+    timerStyle = 'bg-red-500/20 border-red-500/50 text-red-400 animate-pulse';
+  } else if (questionTimeLeft <= 30) {
+    timerStyle = 'bg-amber-500/10 border-amber-500/30 text-amber-400';
+  }
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-6 space-y-6">
@@ -330,24 +326,13 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl sticky top-20 z-30 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div>
           <span className="bg-blue-600/20 text-blue-300 border border-blue-500/30 text-[11px] font-bold px-2.5 py-0.5 rounded-full">
-            CBSE Examination Mode • Attempt {attemptNumber} of 2
+            CBSE Examination Mode • Attempt #{attemptNumber}
           </span>
           <h2 className="text-base sm:text-lg font-bold text-white mt-1">{test.title}</h2>
         </div>
 
-        {/* Timer Display */}
+        {/* Global Action & Finish Button */}
         <div className="flex items-center space-x-4 shrink-0">
-          <div
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl font-mono text-base font-bold border transition-colors ${
-              timeLeft <= 120
-                ? 'bg-red-500/20 border-red-500/50 text-red-400 animate-pulse'
-                : 'bg-slate-800 border-slate-700 text-slate-200'
-            }`}
-          >
-            <Clock className={`w-4 h-4 ${timeLeft <= 120 ? 'text-red-400' : 'text-blue-400'}`} />
-            <span>{formatTime(timeLeft)}</span>
-          </div>
-
           <button
             onClick={() => setShowSubmitModal(true)}
             className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow-md transition-colors cursor-pointer"
@@ -425,11 +410,19 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
           {/* Active Question Display */}
           <div className="lg:col-span-3 bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col justify-between space-y-6">
             <div className="space-y-6">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              {/* Question Header with Per-Question Timer */}
+              <div className="flex items-center justify-between border-b border-slate-800 pb-3 gap-2">
                 <span className="text-xs font-extrabold text-blue-400 uppercase tracking-wider">
                   Question {currentIndex + 1} of {questions.length}
                 </span>
-                <span className="text-xs text-slate-400 font-medium">1 Mark</span>
+
+                {/* Per-Question Timer (60s countdown) */}
+                <div className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl border transition-colors ${timerStyle}`}>
+                  <Clock className="w-4 h-4 shrink-0" />
+                  <span className="text-xs font-mono font-bold">
+                    Time left: <strong className="text-sm">{questionTimeLeft}s</strong>
+                  </span>
+                </div>
               </div>
 
               {/* Question Text */}
@@ -451,7 +444,9 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
                       onClick={() => handleOptionSelect(currentQ.id, opt.key)}
                       className={`w-full text-left p-4 rounded-xl border transition-all flex items-center justify-between cursor-pointer ${
                         isSelected
-                          ? 'bg-blue-600/15 border-blue-500 text-white shadow-md ring-1 ring-blue-500'
+                          ? isSelectedCorrect
+                            ? 'bg-emerald-600/15 border-emerald-500 text-white shadow-md ring-1 ring-emerald-500'
+                            : 'bg-amber-600/15 border-amber-500 text-white shadow-md ring-1 ring-amber-500'
                           : 'bg-slate-800/50 border-slate-700/80 text-slate-300 hover:bg-slate-800 hover:border-slate-600'
                       }`}
                     >
@@ -459,7 +454,9 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
                         <div
                           className={`w-6 h-6 rounded-full border text-xs font-bold flex items-center justify-center transition-colors ${
                             isSelected
-                              ? 'bg-blue-600 border-blue-500 text-white'
+                              ? isSelectedCorrect
+                                ? 'bg-emerald-600 border-emerald-500 text-white'
+                                : 'bg-amber-600 border-amber-500 text-white'
                               : 'border-slate-600 text-slate-400 bg-slate-900'
                           }`}
                         >
@@ -468,11 +465,40 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
                         <span className="text-sm font-medium">{opt.text}</span>
                       </div>
 
-                      {isSelected && <CheckCircle2 className="w-5 h-5 text-blue-400 shrink-0" />}
+                      {isSelected && (
+                        isSelectedCorrect ? (
+                          <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+                        ) : (
+                          <XCircle className="w-5 h-5 text-amber-400 shrink-0" />
+                        )
+                      )}
                     </button>
                   );
                 })}
               </div>
+
+              {/* Educational Feedback / Hint Box */}
+              {selectedOpt && (
+                isSelectedCorrect ? (
+                  <div className="p-3.5 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-400 text-xs flex items-center gap-2.5 font-bold shadow-sm">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+                    <span>Correct! Well done.</span>
+                  </div>
+                ) : (
+                  <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl text-amber-300 text-xs space-y-1.5 shadow-sm">
+                    <div className="flex items-center gap-2 font-bold text-amber-400 text-sm">
+                      <Lightbulb className="w-4 h-4 text-amber-400 shrink-0" />
+                      <span>Hint</span>
+                    </div>
+                    <p className="italic text-amber-200/90 leading-relaxed pl-6">
+                      {currentQ.hint || 'Remember to analyze the math rule step-by-step and double-check calculations.'}
+                    </p>
+                    <p className="text-[11px] text-slate-400 pl-6 pt-1 font-medium">
+                      You can select another option while time remains for this question.
+                    </p>
+                  </div>
+                )
+              )}
             </div>
 
             {/* Navigation Controls */}
@@ -515,7 +541,7 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
             <h3 className="text-lg font-bold text-white">Submit Test Confirmation</h3>
             <p className="text-xs text-slate-300 leading-relaxed">
               You have answered <strong>{answeredCount}</strong> out of <strong>{questions.length}</strong> questions.
-              Are you sure you want to finalize and submit Attempt {attemptNumber}?
+              Are you sure you want to finalize and submit Attempt #{attemptNumber}?
             </p>
 
             {answeredCount < questions.length && (
@@ -547,3 +573,4 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
     </div>
   );
 };
+

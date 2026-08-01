@@ -69,7 +69,7 @@ export const ResultDetailsModal: React.FC<ResultDetailsModalProps> = ({ attempt,
                   <div key={qId} className="bg-slate-950 p-3 rounded-lg border border-slate-800 flex items-center justify-between text-xs">
                     <span className="text-slate-300 font-medium">Question {idx + 1}</span>
                     <span className="bg-blue-600/20 text-blue-300 border border-blue-500/30 px-2.5 py-0.5 rounded-md font-bold uppercase">
-                      {ans.replace('option', 'Option ')}
+                      {String(ans || '').replace('option', 'Option ')}
                     </span>
                   </div>
                 ))}
