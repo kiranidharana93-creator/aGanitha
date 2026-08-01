@@ -32,6 +32,36 @@ export function normalizeAnswerKey(ans: string): string {
 }
 
 /**
+ * Strips section titles ([SECTION A - MCQ 1]), topic labels (Topic 1: Multiplication),
+ * question category headings (MCQs, True/False, Word Problems), and leading Q1. / 1. numbers
+ * from question strings so questions are clean and properly ordered.
+ */
+export function cleanQuestionText(text: string): string {
+  if (!text) return '';
+  let cleaned = text;
+
+  // 1. Remove bracketed section/topic/type tags like [SECTION A - MCQ 1], [SECTION B], [Teacher's Question Bank - MCQs 1], etc.
+  cleaned = cleaned.replace(/\[[^\]]*\]/g, '');
+
+  // 2. Remove "Topic X: ..." lines or inline phrases
+  cleaned = cleaned.replace(/Topic\s*\d+\s*:[^\n]*\n?/gi, '');
+
+  // 3. Remove Section / Category headings
+  cleaned = cleaned.replace(/(Section\s*[A-Z]\s*:?\s*)?(MCQs?|True\s*\/\s*False|Word\s*Problems?|Reading\s*Comprehension|Teacher'?s?\s*Question\s*Bank)/gi, '');
+
+  // 4. Remove leading Q1., Q2., Q12., Q1:, Q1 prefixes at start or after newlines
+  cleaned = cleaned.replace(/(^|\n)\s*Q\d+[\.\:]?\s*/gi, '$1');
+
+  // 5. Remove leading question numbers like "1. ", "2. ", "10. " at start of string or after newline ONLY if followed by dot/colon AND space
+  cleaned = cleaned.replace(/(^|\n)\s*\d{1,3}[\.\:]\s+/g, '$1');
+
+  // 6. Remove any leftover leading dashes, dots, colons, or whitespace
+  cleaned = cleaned.replace(/^[\s\-\–\—\:\.]+/g, '');
+
+  return cleaned.trim();
+}
+
+/**
  * Find existing student by name & class, or create new one in Firestore
  */
 export async function getOrCreateStudent(name: string, studentClass: string): Promise<Student> {
@@ -176,7 +206,7 @@ export async function getQuestionsByTestId(testId: string): Promise<Question[]> 
       return {
         id: d.id,
         testId: data.testId,
-        question: data.question || '',
+        question: cleanQuestionText(data.question || ''),
         optionA: data.optionA || '',
         optionB: data.optionB || '',
         optionC: data.optionC || '',
@@ -199,6 +229,7 @@ export async function getQuestionsByTestId(testId: string): Promise<Question[]> 
 export async function createQuestion(qData: Omit<Question, 'id'>): Promise<Question> {
   const payload = {
     ...qData,
+    question: cleanQuestionText(qData.question),
     correctAnswer: normalizeAnswerKey(qData.correctAnswer) as Question['correctAnswer'],
     orderIndex: typeof qData.orderIndex === 'number' ? qData.orderIndex : 9999,
   };
@@ -215,6 +246,9 @@ export async function createQuestion(qData: Omit<Question, 'id'>): Promise<Quest
 export async function updateQuestion(id: string, updates: Partial<Question>): Promise<void> {
   const docRef = doc(db, QUESTIONS_COL, id);
   const payload = { ...updates };
+  if (payload.question) {
+    payload.question = cleanQuestionText(payload.question);
+  }
   if (payload.correctAnswer) {
     payload.correctAnswer = normalizeAnswerKey(payload.correctAnswer) as any;
   }
@@ -352,11 +386,10 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
   });
 
   const rawQuestions: Omit<Question, 'id'>[] = [
-    // --- SECTION A: MCQs ---
-    // Topic 1: Multiplication
+    // --- Section A: MCQs ---
     {
       testId: testObj.id,
-      question: '[SECTION A - MCQ 1] Topic 1: Multiplication\nQ1. Which property is shown by: 3 × (4 × 5) = (3 × 4) × 5',
+      question: 'Q1. Which property is shown by: 3 × (4 × 5) = (3 × 4) × 5',
       optionA: 'Commutative',
       optionB: 'Associative',
       optionC: 'Distributive',
@@ -366,7 +399,7 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION A - MCQ 2] Topic 1: Multiplication\nQ2. 7 × (8 + 2) = ?',
+      question: 'Q2. 7 × (8 + 2) = ?',
       optionA: '56',
       optionB: '70',
       optionC: '72',
@@ -376,7 +409,7 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION A - MCQ 3] Topic 1: Multiplication\nQ3. 6 × (9 − 4) = ?',
+      question: 'Q3. 6 × (9 − 4) = ?',
       optionA: '30',
       optionB: '54',
       optionC: '24',
@@ -386,7 +419,7 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION A - MCQ 4] Topic 1: Multiplication\nQ4. Which is equal to 4 × (7 + 5)?',
+      question: 'Q4. Which is equal to 4 × (7 + 5)?',
       optionA: '4 × 7 + 5',
       optionB: '4 × 7 + 4 × 5',
       optionC: '7 + 5 × 4',
@@ -396,7 +429,7 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION A - MCQ 5] Topic 1: Multiplication\nQ5. 1 × 458 shows the:',
+      question: 'Q5. 1 × 458 shows the:',
       optionA: 'Zero property',
       optionB: 'Associative property',
       optionC: 'Multiplicative identity',
@@ -405,10 +438,9 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
       hint: '1 is the multiplicative identity because multiplying any number by 1 yields the same number.',
     },
 
-    // Topic 2: Division
     {
       testId: testObj.id,
-      question: '[SECTION A - MCQ 6] Topic 2: Division\nQ6. In 81 ÷ 9 = 9, the quotient is:',
+      question: 'Q6. In 81 ÷ 9 = 9, the quotient is:',
       optionA: '81',
       optionB: '9',
       optionC: '0',
@@ -418,7 +450,7 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION A - MCQ 7] Topic 2: Division\nQ7. In 75 ÷ 8 = 9 remainder 3, the dividend is:',
+      question: 'Q7. In 75 ÷ 8 = 9 remainder 3, the dividend is:',
       optionA: '8',
       optionB: '9',
       optionC: '3',
@@ -428,7 +460,7 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION A - MCQ 8] Topic 2: Division\nQ8. The remainder when 46 is divided by 7 is:',
+      question: 'Q8. The remainder when 46 is divided by 7 is:',
       optionA: '3',
       optionB: '4',
       optionC: '5',
@@ -438,7 +470,7 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION A - MCQ 9] Topic 2: Division\nQ9. Which statement is correct?',
+      question: 'Q9. Which statement is correct?',
       optionA: 'Quotient = Dividend + Divisor',
       optionB: 'Dividend = Divisor × Quotient + Remainder',
       optionC: 'Remainder can be greater than divisor',
@@ -448,7 +480,7 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION A - MCQ 10] Topic 2: Division\nQ10. Which division has remainder 0?',
+      question: 'Q10. Which division has remainder 0?',
       optionA: '54 ÷ 6',
       optionB: '43 ÷ 5',
       optionC: '67 ÷ 8',
@@ -457,10 +489,9 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
       hint: '54 ÷ 6 = 9 cleanly with remainder 0.',
     },
 
-    // Topic 3: Representing Division on Number Lines
     {
       testId: testObj.id,
-      question: '[SECTION A - MCQ 11] Topic 3: Representing Division on Number Lines\nQ11. To represent 20 ÷ 5 on a number line, we make jumps of:',
+      question: 'Q11. To represent 20 ÷ 5 on a number line, we make jumps of:',
       optionA: '20',
       optionB: '10',
       optionC: '5',
@@ -470,7 +501,7 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION A - MCQ 12] Topic 3: Representing Division on Number Lines\nQ12. 24 ÷ 6 can be shown by:',
+      question: 'Q12. 24 ÷ 6 can be shown by:',
       optionA: '4 jumps of 6',
       optionB: '6 jumps of 4',
       optionC: 'Both A and B',
@@ -480,7 +511,7 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION A - MCQ 13] Topic 3: Representing Division on Number Lines\nQ13. Starting from 0, three jumps of 7 reach:',
+      question: 'Q13. Starting from 0, three jumps of 7 reach:',
       optionA: '14',
       optionB: '21',
       optionC: '24',
@@ -490,7 +521,7 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION A - MCQ 14] Topic 3: Representing Division on Number Lines\nQ14. Which operation is used repeatedly on a number line to show division?',
+      question: 'Q14. Which operation is used repeatedly on a number line to show division?',
       optionA: 'Addition',
       optionB: 'Multiplication',
       optionC: 'Repeated subtraction',
@@ -500,7 +531,7 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION A - MCQ 15] Topic 3: Representing Division on Number Lines\nQ15. 18 ÷ 3 needs:',
+      question: 'Q15. 18 ÷ 3 needs:',
       optionA: '3 jumps',
       optionB: '4 jumps',
       optionC: '5 jumps',
@@ -509,11 +540,10 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
       hint: '18 ÷ 3 = 6 jumps.',
     },
 
-    // --- SECTION B: True / False ---
-    // Topic 1: Multiplication
+    // --- Section B: True / False ---
     {
       testId: testObj.id,
-      question: '[SECTION B - True/False 1] Topic 1: Multiplication\nQ1. Multiplication is associative for whole numbers.',
+      question: 'Q1. Multiplication is associative for whole numbers.',
       optionA: 'True',
       optionB: 'False',
       optionC: 'Only for negative numbers',
@@ -523,7 +553,7 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION B - True/False 2] Topic 1: Multiplication\nQ2. 5 × (3 + 4) = 5 × 3 + 5 × 4.',
+      question: 'Q2. 5 × (3 + 4) = 5 × 3 + 5 × 4.',
       optionA: 'True',
       optionB: 'False',
       optionC: 'Sometimes True',
@@ -533,7 +563,7 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION B - True/False 3] Topic 1: Multiplication\nQ3. 8 × (10 − 2) = 8 × 10 − 2.',
+      question: 'Q3. 8 × (10 − 2) = 8 × 10 − 2.',
       optionA: 'True',
       optionB: 'False',
       optionC: 'Equal to 64',
@@ -543,7 +573,7 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION B - True/False 4] Topic 1: Multiplication\nQ4. 1 is called the multiplicative identity.',
+      question: 'Q4. 1 is called the multiplicative identity.',
       optionA: 'True',
       optionB: 'False',
       optionC: '0 is the identity',
@@ -553,7 +583,7 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION B - True/False 5] Topic 1: Multiplication\nQ5. Multiplication of two whole numbers always gives a whole number.',
+      question: 'Q5. Multiplication of two whole numbers always gives a whole number.',
       optionA: 'True',
       optionB: 'False',
       optionC: 'Only for even numbers',
@@ -562,10 +592,9 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
       hint: 'True. Whole numbers are closed under multiplication.',
     },
 
-    // Topic 2: Division
     {
       testId: testObj.id,
-      question: '[SECTION B - True/False 6] Topic 2: Division\nQ6. The divisor can be zero.',
+      question: 'Q6. The divisor can be zero.',
       optionA: 'True',
       optionB: 'False',
       optionC: 'Sometimes True',
@@ -575,7 +604,7 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION B - True/False 7] Topic 2: Division\nQ7. In 64 ÷ 8 = 8, 64 is the dividend.',
+      question: 'Q7. In 64 ÷ 8 = 8, 64 is the dividend.',
       optionA: 'True',
       optionB: 'False',
       optionC: '64 is quotient',
@@ -585,7 +614,7 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION B - True/False 8] Topic 2: Division\nQ8. The remainder is always smaller than the divisor.',
+      question: 'Q8. The remainder is always smaller than the divisor.',
       optionA: 'True',
       optionB: 'False',
       optionC: 'Remainder equals divisor',
@@ -595,7 +624,7 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION B - True/False 9] Topic 2: Division\nQ9. 35 ÷ 5 has remainder 5.',
+      question: 'Q9. 35 ÷ 5 has remainder 5.',
       optionA: 'True',
       optionB: 'False',
       optionC: 'Remainder is 1',
@@ -605,7 +634,7 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION B - True/False 10] Topic 2: Division\nQ10. Quotient × Divisor + Remainder gives the dividend.',
+      question: 'Q10. Quotient × Divisor + Remainder gives the dividend.',
       optionA: 'True',
       optionB: 'False',
       optionC: 'Gives divisor',
@@ -614,10 +643,9 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
       hint: 'True. Dividend = (Divisor × Quotient) + Remainder.',
     },
 
-    // Topic 3: Number Line Division
     {
       testId: testObj.id,
-      question: '[SECTION B - True/False 11] Topic 3: Number Line Division\nQ11. Division can be represented by equal jumps on a number line.',
+      question: 'Q11. Division can be represented by equal jumps on a number line.',
       optionA: 'True',
       optionB: 'False',
       optionC: 'Only addition can',
@@ -627,7 +655,7 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION B - True/False 12] Topic 3: Number Line Division\nQ12. 16 ÷ 4 can be shown by four jumps of 4.',
+      question: 'Q12. 16 ÷ 4 can be shown by four jumps of 4.',
       optionA: 'True',
       optionB: 'False',
       optionC: 'Needs 16 jumps',
@@ -637,7 +665,7 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION B - True/False 13] Topic 3: Number Line Division\nQ13. Number-line division uses random jumps.',
+      question: 'Q13. Number-line division uses random jumps.',
       optionA: 'True',
       optionB: 'False',
       optionC: 'Jumps of variable sizes',
@@ -647,7 +675,7 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION B - True/False 14] Topic 3: Number Line Division\nQ14. Repeated subtraction helps us understand division.',
+      question: 'Q14. Repeated subtraction helps us understand division.',
       optionA: 'True',
       optionB: 'False',
       optionC: 'Repeated addition only',
@@ -657,7 +685,7 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION B - True/False 15] Topic 3: Number Line Division\nQ15. 25 ÷ 5 reaches 25 after five jumps of 5.',
+      question: 'Q15. 25 ÷ 5 reaches 25 after five jumps of 5.',
       optionA: 'True',
       optionB: 'False',
       optionC: 'Four jumps of 5',
@@ -666,11 +694,10 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
       hint: 'True. 5 × 5 = 25.',
     },
 
-    // --- SECTION C: Word Problems ---
-    // Topic 1: Multiplication
+    // --- Section C: Word Problems ---
     {
       testId: testObj.id,
-      question: '[SECTION C - Word Problem 1] Topic 1: Multiplication\nQ1. A school has 7 rows of desks. Each row has 9 desks. How many desks are there in total?',
+      question: 'Q1. A school has 7 rows of desks. Each row has 9 desks. How many desks are there in total?',
       optionA: '56 desks',
       optionB: '63 desks',
       optionC: '70 desks',
@@ -680,7 +707,7 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION C - Word Problem 2] Topic 1: Multiplication\nQ2. A shopkeeper arranges 8 packets with 6 biscuits in each packet. How many biscuits are there altogether?',
+      question: 'Q2. A shopkeeper arranges 8 packets with 6 biscuits in each packet. How many biscuits are there altogether?',
       optionA: '42 biscuits',
       optionB: '48 biscuits',
       optionC: '54 biscuits',
@@ -689,10 +716,9 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
       hint: '8 × 6 = 48 biscuits.',
     },
 
-    // Topic 2: Division
     {
       testId: testObj.id,
-      question: '[SECTION C - Word Problem 3] Topic 2: Division\nQ3. 72 pencils are shared equally among 8 students. How many pencils does each student get?',
+      question: 'Q3. 72 pencils are shared equally among 8 students. How many pencils does each student get?',
       optionA: '8 pencils',
       optionB: '9 pencils',
       optionC: '10 pencils',
@@ -702,7 +728,7 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION C - Word Problem 4] Topic 2: Division\nQ4. 58 candies are distributed equally among 6 children. Find the quotient and remainder.',
+      question: 'Q4. 58 candies are distributed equally among 6 children. Find the quotient and remainder.',
       optionA: 'Quotient = 9, Remainder = 4',
       optionB: 'Quotient = 8, Remainder = 10',
       optionC: 'Quotient = 9, Remainder = 0',
@@ -711,10 +737,9 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
       hint: '58 ÷ 6 = 9 with remainder 4.',
     },
 
-    // Topic 3: Number Line Division
     {
       testId: testObj.id,
-      question: '[SECTION C - Word Problem 5] Topic 3: Number Line Division\nQ5. A kangaroo jumps 5 spaces at a time from 0 and reaches 25. How many jumps did it make?',
+      question: 'Q5. A kangaroo jumps 5 spaces at a time from 0 and reaches 25. How many jumps did it make?',
       optionA: '4 jumps',
       optionB: '5 jumps',
       optionC: '6 jumps',
@@ -724,7 +749,7 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION C - Word Problem 6] Topic 3: Number Line Division\nQ6. A toy robot moves 4 units each time and reaches 28 from 0. How many jumps were made?',
+      question: 'Q6. A toy robot moves 4 units each time and reaches 28 from 0. How many jumps were made?',
       optionA: '6 jumps',
       optionB: '7 jumps',
       optionC: '8 jumps',
@@ -733,11 +758,10 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
       hint: '28 ÷ 4 = 7 jumps.',
     },
 
-    // --- SECTION D: Reading Comprehension ---
-    // Topic 1: Multiplication
+    // --- Section D: Reading Comprehension ---
     {
       testId: testObj.id,
-      question: '[SECTION D - Reading Comprehension 1] Topic 1: Multiplication Passage\nPassage: A fruit seller has 8 baskets. Each basket contains 7 oranges.\nQ1. How many oranges are there in all?',
+      question: 'Passage: A fruit seller has 8 baskets. Each basket contains 7 oranges.\n\nQ1. How many oranges are there in all?',
       optionA: '49 oranges',
       optionB: '56 oranges',
       optionC: '63 oranges',
@@ -747,7 +771,7 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION D - Reading Comprehension 2] Topic 1: Multiplication Passage\nPassage: A fruit seller has 8 baskets with 7 oranges each.\nQ2. If 6 oranges are sold, how many oranges remain?',
+      question: 'Passage: A fruit seller has 8 baskets with 7 oranges each.\n\nQ2. If 6 oranges are sold, how many oranges remain?',
       optionA: '50 oranges',
       optionB: '52 oranges',
       optionC: '56 oranges',
@@ -756,10 +780,9 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
       hint: '56 − 6 = 50 oranges.',
     },
 
-    // Topic 2: Division
     {
       testId: testObj.id,
-      question: '[SECTION D - Reading Comprehension 3] Topic 2: Division Passage\nPassage: A teacher has 54 notebooks. She distributes them equally among 6 groups.\nQ3. How many notebooks does each group get?',
+      question: 'Passage: A teacher has 54 notebooks. She distributes them equally among 6 groups.\n\nQ3. How many notebooks does each group get?',
       optionA: '8 notebooks',
       optionB: '9 notebooks',
       optionC: '10 notebooks',
@@ -769,7 +792,7 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION D - Reading Comprehension 4] Topic 2: Division Passage\nPassage: A teacher has 54 notebooks distributed equally among 6 groups.\nQ4. What is the divisor in this division?',
+      question: 'Passage: A teacher has 54 notebooks distributed equally among 6 groups.\n\nQ4. What is the divisor in this division?',
       optionA: '54',
       optionB: '6',
       optionC: '9',
@@ -778,10 +801,9 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
       hint: 'The divisor is 6 (the number of groups).',
     },
 
-    // Topic 3: Representing Division on Number Lines
     {
       testId: testObj.id,
-      question: '[SECTION D - Reading Comprehension 5] Topic 3: Number Line Passage\nPassage: A child hops 3 spaces each time and reaches 18 starting from 0.\nQ5. How many hops did the child make?',
+      question: 'Passage: A child hops 3 spaces each time and reaches 18 starting from 0.\n\nQ5. How many hops did the child make?',
       optionA: '5 hops',
       optionB: '6 hops',
       optionC: '7 hops',
@@ -791,7 +813,7 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION D - Reading Comprehension 6] Topic 3: Number Line Passage\nPassage: A child hops 3 spaces each time to reach 18 starting from 0.\nQ6. Which mathematical operation is represented on the number line?',
+      question: 'Passage: A child hops 3 spaces each time to reach 18 starting from 0.\n\nQ6. Which mathematical operation is represented on the number line?',
       optionA: 'Addition',
       optionB: 'Division by repeated subtraction',
       optionC: 'Fraction multiplication',
@@ -800,11 +822,10 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
       hint: 'Division on a number line is represented as repeated subtraction.',
     },
 
-    // --- TEACHER\'S QUESTION BANK ---
-    // MCQs (10)
+    // --- Teacher\'s Question Bank ---
     {
       testId: testObj.id,
-      question: '[Teacher\'s Question Bank - MCQs 1] 1. 9 × (5 + 3) = ?',
+      question: '1. 9 × (5 + 3) = ?',
       optionA: '72',
       optionB: '45',
       optionC: '27',
@@ -814,7 +835,7 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[Teacher\'s Question Bank - MCQs 2] 2. Which property is shown by: (2 × 7) × 4 = 2 × (7 × 4)?',
+      question: '2. Which property is shown by: (2 × 7) × 4 = 2 × (7 × 4)?',
       optionA: 'Identity',
       optionB: 'Associative',
       optionC: 'Commutative',
@@ -824,7 +845,7 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[Teacher\'s Question Bank - MCQs 3] 3. 96 ÷ 8 = ?',
+      question: '3. 96 ÷ 8 = ?',
       optionA: '10',
       optionB: '11',
       optionC: '12',
@@ -834,7 +855,7 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[Teacher\'s Question Bank - MCQs 4] 4. The remainder in 52 ÷ 5 is:',
+      question: '4. The remainder in 52 ÷ 5 is:',
       optionA: '0',
       optionB: '1',
       optionC: '2',
@@ -844,7 +865,7 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[Teacher\'s Question Bank - MCQs 5] 5. 30 ÷ 5 on a number line requires:',
+      question: '5. 30 ÷ 5 on a number line requires:',
       optionA: '5 jumps',
       optionB: '6 jumps',
       optionC: '7 jumps',
@@ -854,7 +875,7 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[Teacher\'s Question Bank - MCQs 6] 6. 4 × (12 − 3) = ?',
+      question: '6. 4 × (12 − 3) = ?',
       optionA: '36',
       optionB: '48',
       optionC: '24',
@@ -864,7 +885,7 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[Teacher\'s Question Bank - MCQs 7] 7. The quotient in 84 ÷ 7 is:',
+      question: '7. The quotient in 84 ÷ 7 is:',
       optionA: '10',
       optionB: '11',
       optionC: '12',
@@ -874,7 +895,7 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[Teacher\'s Question Bank - MCQs 8] 8. Four jumps of 5 reach:',
+      question: '8. Four jumps of 5 reach:',
       optionA: '15',
       optionB: '20',
       optionC: '25',
@@ -884,7 +905,7 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[Teacher\'s Question Bank - MCQs 9] 9. Which is divisible by 9?',
+      question: '9. Which is divisible by 9?',
       optionA: '63',
       optionB: '65',
       optionC: '67',
@@ -894,7 +915,7 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[Teacher\'s Question Bank - MCQs 10] 10. 5 jumps of 4 represent:',
+      question: '10. 5 jumps of 4 represent:',
       optionA: '20 ÷ 5',
       optionB: '20 ÷ 4',
       optionC: '4 ÷ 5',
@@ -903,10 +924,9 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
       hint: '20 ÷ 4 = 5 jumps of 4.',
     },
 
-    // True / False (10)
     {
       testId: testObj.id,
-      question: '[Teacher\'s Question Bank - True/False 1] 1. Multiplication distributes over addition.',
+      question: '1. Multiplication distributes over addition.',
       optionA: 'True',
       optionB: 'False',
       optionC: 'Only positive numbers',
@@ -916,7 +936,7 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[Teacher\'s Question Bank - True/False 2] 2. 0 is the multiplicative identity.',
+      question: '2. 0 is the multiplicative identity.',
       optionA: 'True',
       optionB: 'False',
       optionC: '1 is identity',
@@ -926,7 +946,7 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[Teacher\'s Question Bank - True/False 3] 3. Division by 1 gives the same number.',
+      question: '3. Division by 1 gives the same number.',
       optionA: 'True',
       optionB: 'False',
       optionC: 'Changes the number',
@@ -936,7 +956,7 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[Teacher\'s Question Bank - True/False 4] 4. The remainder can be equal to the divisor.',
+      question: '4. The remainder can be equal to the divisor.',
       optionA: 'True',
       optionB: 'False',
       optionC: 'Always equal',
@@ -946,7 +966,7 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[Teacher\'s Question Bank - True/False 5] 5. 24 ÷ 6 can be shown by four jumps of 6.',
+      question: '5. 24 ÷ 6 can be shown by four jumps of 6.',
       optionA: 'True',
       optionB: 'False',
       optionC: 'Six jumps of 4',
@@ -956,7 +976,7 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[Teacher\'s Question Bank - True/False 6] 6. 6 × (2 + 3) = 6 × 2 + 6 × 3.',
+      question: '6. 6 × (2 + 3) = 6 × 2 + 6 × 3.',
       optionA: 'True',
       optionB: 'False',
       optionC: 'Equals 30',
@@ -966,7 +986,7 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[Teacher\'s Question Bank - True/False 7] 7. In 45 ÷ 9 = 5, 9 is the quotient.',
+      question: '7. In 45 ÷ 9 = 5, 9 is the quotient.',
       optionA: 'True',
       optionB: 'False',
       optionC: '9 is dividend',
@@ -976,7 +996,7 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[Teacher\'s Question Bank - True/False 8] 8. Number-line division is based on repeated subtraction.',
+      question: '8. Number-line division is based on repeated subtraction.',
       optionA: 'True',
       optionB: 'False',
       optionC: 'Addition only',
@@ -986,7 +1006,7 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[Teacher\'s Question Bank - True/False 9] 9. 1 × 875 = 875.',
+      question: '9. 1 × 875 = 875.',
       optionA: 'True',
       optionB: 'False',
       optionC: 'Equals 1',
@@ -996,7 +1016,7 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[Teacher\'s Question Bank - True/False 10] 10. 31 ÷ 6 has remainder 6.',
+      question: '10. 31 ÷ 6 has remainder 6.',
       optionA: 'True',
       optionB: 'False',
       optionC: 'Remainder is 1',
@@ -1005,10 +1025,9 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
       hint: 'False. 31 = (6 × 5) + 1, so remainder is 1.',
     },
 
-    // Word Problems & Reading Comprehension (6)
     {
       testId: testObj.id,
-      question: '[Teacher\'s Question Bank - Word Problem 1] 1. A library has 9 shelves with 8 books each. How many books are there altogether?',
+      question: '1. A library has 9 shelves with 8 books each. How many books are there altogether?',
       optionA: '64 books',
       optionB: '72 books',
       optionC: '80 books',
@@ -1018,7 +1037,7 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[Teacher\'s Question Bank - Word Problem 2] 2. 84 chocolates are packed equally into 7 boxes. How many chocolates are in each box?',
+      question: '2. 84 chocolates are packed equally into 7 boxes. How many chocolates are in each box?',
       optionA: '10 chocolates',
       optionB: '11 chocolates',
       optionC: '12 chocolates',
@@ -1028,7 +1047,7 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[Teacher\'s Question Bank - Word Problem 3] 3. A rabbit jumps 6 spaces each time and reaches 36. How many jumps did it make?',
+      question: '3. A rabbit jumps 6 spaces each time and reaches 36. How many jumps did it make?',
       optionA: '5 jumps',
       optionB: '6 jumps',
       optionC: '7 jumps',
@@ -1038,7 +1057,7 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[Teacher\'s Question Bank - Passage 4] Passage: Rohan has 63 marbles. He shares them equally among 9 friends.\nQ4. How many marbles does each friend get?',
+      question: 'Passage: Rohan has 63 marbles. He shares them equally among 9 friends.\n\nQ4. How many marbles does each friend get?',
       optionA: '6 marbles',
       optionB: '7 marbles',
       optionC: '8 marbles',
@@ -1048,7 +1067,7 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[Teacher\'s Question Bank - Passage 5] Passage: A toy train moves 4 stations at a time and reaches 32 from 0.\nQ5. How many jumps were made?',
+      question: 'Passage: A toy train moves 4 stations at a time and reaches 32 from 0.\n\nQ5. How many jumps were made?',
       optionA: '6 jumps',
       optionB: '7 jumps',
       optionC: '8 jumps',
@@ -1058,7 +1077,7 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[Teacher\'s Question Bank - Passage 6] Passage: A school has 6 sections with 15 students each participating in a maths activity.\nQ6. How many students participated altogether?',
+      question: 'Passage: A school has 6 sections with 15 students each participating in a maths activity.\n\nQ6. How many students participated altogether?',
       optionA: '80 students',
       optionB: '85 students',
       optionC: '90 students',
@@ -1097,11 +1116,10 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
   });
 
   const rawQuestions: Omit<Question, 'id'>[] = [
-    // --- SECTION A: MCQs (15 Questions) ---
-    // Topic 1: Multiplication (5)
+    // --- Section A: MCQs ---
     {
       testId: testObj.id,
-      question: '[SECTION A - MCQ 1] Topic 1: Multiplication\nQ1. Evaluate 9 × (10 + 4) using the distributive property.',
+      question: 'Q1. Evaluate 9 × (10 + 4) using the distributive property.',
       optionA: '126',
       optionB: '94',
       optionC: '130',
@@ -1111,7 +1129,7 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION A - MCQ 2] Topic 1: Multiplication\nQ2. Which property states that 15 × 8 = 8 × 15?',
+      question: 'Q2. Which property states that 15 × 8 = 8 × 15?',
       optionA: 'Commutative Property',
       optionB: 'Associative Property',
       optionC: 'Distributive Property',
@@ -1121,7 +1139,7 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION A - MCQ 3] Topic 1: Multiplication\nQ3. Find the product of 25 × 37 × 4 by suitable rearrangement.',
+      question: 'Q3. Find the product of 25 × 37 × 4 by suitable rearrangement.',
       optionA: '370',
       optionB: '3700',
       optionC: '37000',
@@ -1131,7 +1149,7 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION A - MCQ 4] Topic 1: Multiplication\nQ4. 12 × (100 − 2) is equal to:',
+      question: 'Q4. 12 × (100 − 2) is equal to:',
       optionA: '1200 − 2',
       optionB: '1200 − 24',
       optionC: '1200 + 24',
@@ -1141,7 +1159,7 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION A - MCQ 5] Topic 1: Multiplication\nQ5. If a × b = 0, where a and b are whole numbers, then:',
+      question: 'Q5. If a × b = 0, where a and b are whole numbers, then:',
       optionA: 'a must be 0',
       optionB: 'b must be 0',
       optionC: 'At least one of a or b must be 0',
@@ -1150,10 +1168,9 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
       hint: 'If product of two whole numbers is zero, at least one of them must be zero.',
     },
 
-    // Topic 2: Division (5)
     {
       testId: testObj.id,
-      question: '[SECTION A - MCQ 6] Topic 2: Division\nQ6. In 96 ÷ 12 = 8, what is the role of 12?',
+      question: 'Q6. In 96 ÷ 12 = 8, what is the role of 12?',
       optionA: 'Dividend',
       optionB: 'Divisor',
       optionC: 'Quotient',
@@ -1163,7 +1180,7 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION A - MCQ 7] Topic 2: Division\nQ7. Find the remainder when 58 is divided by 9.',
+      question: 'Q7. Find the remainder when 58 is divided by 9.',
       optionA: '2',
       optionB: '3',
       optionC: '4',
@@ -1173,7 +1190,7 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION A - MCQ 8] Topic 2: Division\nQ8. What is 0 ÷ 15?',
+      question: 'Q8. What is 0 ÷ 15?',
       optionA: '0',
       optionB: '15',
       optionC: '1',
@@ -1183,7 +1200,7 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION A - MCQ 9] Topic 2: Division\nQ9. In a division sum, Divisor = 12, Quotient = 7, and Remainder = 5. Find the Dividend.',
+      question: 'Q9. In a division sum, Divisor = 12, Quotient = 7, and Remainder = 5. Find the Dividend.',
       optionA: '89',
       optionB: '84',
       optionC: '91',
@@ -1193,7 +1210,7 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION A - MCQ 10] Topic 2: Division\nQ10. Which of the following division operations is NOT defined?',
+      question: 'Q10. Which of the following division operations is NOT defined?',
       optionA: '15 ÷ 3',
       optionB: '0 ÷ 7',
       optionC: '12 ÷ 0',
@@ -1202,10 +1219,9 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
       hint: 'Division of any whole number by zero is not defined.',
     },
 
-    // Topic 3: Representing Division on Number Lines (5)
     {
       testId: testObj.id,
-      question: '[SECTION A - MCQ 11] Topic 3: Representing Division on Number Lines\nQ11. To represent 21 ÷ 7 on a number line starting from 0, how many equal jumps of 7 units are needed?',
+      question: 'Q11. To represent 21 ÷ 7 on a number line starting from 0, how many equal jumps of 7 units are needed?',
       optionA: '2 jumps',
       optionB: '3 jumps',
       optionC: '7 jumps',
@@ -1215,7 +1231,7 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION A - MCQ 12] Topic 3: Representing Division on Number Lines\nQ12. Moving backwards from 15 to 0 in steps of 3 models which division?',
+      question: 'Q12. Moving backwards from 15 to 0 in steps of 3 models which division?',
       optionA: '15 ÷ 5 = 3',
       optionB: '15 ÷ 3 = 5',
       optionC: '15 − 3 = 12',
@@ -1225,7 +1241,7 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION A - MCQ 13] Topic 3: Representing Division on Number Lines\nQ13. Starting from 0, six equal jumps of 4 units reach which point on the number line?',
+      question: 'Q13. Starting from 0, six equal jumps of 4 units reach which point on the number line?',
       optionA: '20',
       optionB: '24',
       optionC: '28',
@@ -1235,7 +1251,7 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION A - MCQ 14] Topic 3: Representing Division on Number Lines\nQ14. Showing 35 ÷ 5 on a number line requires equal jumps ending at:',
+      question: 'Q14. Showing 35 ÷ 5 on a number line requires equal jumps ending at:',
       optionA: '5',
       optionB: '7',
       optionC: '35',
@@ -1245,7 +1261,7 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION A - MCQ 15] Topic 3: Representing Division on Number Lines\nQ15. On a number line, 18 ÷ 6 needs:',
+      question: 'Q15. On a number line, 18 ÷ 6 needs:',
       optionA: '2 jumps of 6',
       optionB: '3 jumps of 6',
       optionC: '6 jumps of 6',
@@ -1254,11 +1270,10 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
       hint: '18 ÷ 6 = 3 jumps of size 6.',
     },
 
-    // --- SECTION B: True / False (15 Questions) ---
-    // Topic 1: Multiplication (5)
+    // --- Section B: True / False ---
     {
       testId: testObj.id,
-      question: '[SECTION B - True/False 1] Topic 1: Multiplication\nQ1. Multiplying any whole number by 0 always results in 0.',
+      question: 'Q1. Multiplying any whole number by 0 always results in 0.',
       optionA: 'True',
       optionB: 'False',
       optionC: 'Only for odd numbers',
@@ -1268,7 +1283,7 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION B - True/False 2] Topic 1: Multiplication\nQ2. 12 × (5 − 2) = 12 × 5 − 2.',
+      question: 'Q2. 12 × (5 − 2) = 12 × 5 − 2.',
       optionA: 'True',
       optionB: 'False',
       optionC: 'Equal to 36',
@@ -1278,7 +1293,7 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION B - True/False 3] Topic 1: Multiplication\nQ3. Whole number multiplication is commutative.',
+      question: 'Q3. Whole number multiplication is commutative.',
       optionA: 'True',
       optionB: 'False',
       optionC: 'Only for positive numbers',
@@ -1288,7 +1303,7 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION B - True/False 4] Topic 1: Multiplication\nQ4. 1 is the multiplicative identity for whole numbers.',
+      question: 'Q4. 1 is the multiplicative identity for whole numbers.',
       optionA: 'True',
       optionB: 'False',
       optionC: '0 is the identity',
@@ -1298,7 +1313,7 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION B - True/False 5] Topic 1: Multiplication\nQ5. 15 × (10 + 4) = 15 × 10 + 15 × 4.',
+      question: 'Q5. 15 × (10 + 4) = 15 × 10 + 15 × 4.',
       optionA: 'True',
       optionB: 'False',
       optionC: 'Equal to 150',
@@ -1307,10 +1322,9 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
       hint: 'True. Distributive property of multiplication over addition.',
     },
 
-    // Topic 2: Division (5)
     {
       testId: testObj.id,
-      question: '[SECTION B - True/False 6] Topic 2: Division\nQ6. 0 divided by any non-zero whole number is equal to 0.',
+      question: 'Q6. 0 divided by any non-zero whole number is equal to 0.',
       optionA: 'True',
       optionB: 'False',
       optionC: 'Undefined',
@@ -1320,7 +1334,7 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION B - True/False 7] Topic 2: Division\nQ7. In division, the remainder can be equal to or greater than the divisor.',
+      question: 'Q7. In division, the remainder can be equal to or greater than the divisor.',
       optionA: 'True',
       optionB: 'False',
       optionC: 'Always greater',
@@ -1330,7 +1344,7 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION B - True/False 8] Topic 2: Division\nQ8. Division of whole numbers is commutative.',
+      question: 'Q8. Division of whole numbers is commutative.',
       optionA: 'True',
       optionB: 'False',
       optionC: 'Sometimes true',
@@ -1340,7 +1354,7 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION B - True/False 9] Topic 2: Division\nQ9. In 77 ÷ 8 = 9 remainder 5, 77 is the dividend.',
+      question: 'Q9. In 77 ÷ 8 = 9 remainder 5, 77 is the dividend.',
       optionA: 'True',
       optionB: 'False',
       optionC: '77 is divisor',
@@ -1350,7 +1364,7 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION B - True/False 10] Topic 2: Division\nQ10. 50 ÷ 5 has a quotient of 10 and remainder 0.',
+      question: 'Q10. 50 ÷ 5 has a quotient of 10 and remainder 0.',
       optionA: 'True',
       optionB: 'False',
       optionC: 'Remainder is 5',
@@ -1359,10 +1373,9 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
       hint: 'True. 50 = 5 × 10 + 0.',
     },
 
-    // Topic 3: Representing Division on Number Lines (5)
     {
       testId: testObj.id,
-      question: '[SECTION B - True/False 11] Topic 3: Representing Division on Number Lines\nQ11. On a number line, 16 ÷ 4 can be shown by 4 backward jumps of 4 steps from 16 to 0.',
+      question: 'Q11. On a number line, 16 ÷ 4 can be shown by 4 backward jumps of 4 steps from 16 to 0.',
       optionA: 'True',
       optionB: 'False',
       optionC: 'Needs 16 jumps',
@@ -1372,7 +1385,7 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION B - True/False 12] Topic 3: Representing Division on Number Lines\nQ12. Number-line division uses jumps of unequal length.',
+      question: 'Q12. Number-line division uses jumps of unequal length.',
       optionA: 'True',
       optionB: 'False',
       optionC: 'Random lengths allowed',
@@ -1382,7 +1395,7 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION B - True/False 13] Topic 3: Representing Division on Number Lines\nQ13. 28 ÷ 7 reaches 28 after 4 jumps of 7 units starting from 0.',
+      question: 'Q13. 28 ÷ 7 reaches 28 after 4 jumps of 7 units starting from 0.',
       optionA: 'True',
       optionB: 'False',
       optionC: '7 jumps of 4 units',
@@ -1392,7 +1405,7 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION B - True/False 14] Topic 3: Representing Division on Number Lines\nQ14. Moving towards the left on a number line corresponds to repeated addition.',
+      question: 'Q14. Moving towards the left on a number line corresponds to repeated addition.',
       optionA: 'True',
       optionB: 'False',
       optionC: 'Corresponds to multiplication',
@@ -1402,7 +1415,7 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION B - True/False 15] Topic 3: Representing Division on Number Lines\nQ15. 18 ÷ 2 can be represented on a number line by 9 equal jumps of 2.',
+      question: 'Q15. 18 ÷ 2 can be represented on a number line by 9 equal jumps of 2.',
       optionA: 'True',
       optionB: 'False',
       optionC: '2 jumps of 9',
@@ -1411,11 +1424,10 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
       hint: 'True. 9 × 2 = 18.',
     },
 
-    // --- SECTION C: Word Problems (6 Questions) ---
-    // Topic 1: Multiplication (2)
+    // --- Section C: Word Problems ---
     {
       testId: testObj.id,
-      question: '[SECTION C - Word Problem 1] Topic 1: Multiplication\nQ1. A factory produces 25 bicycles every day. How many bicycles does it produce in 14 days?',
+      question: 'Q1. A factory produces 25 bicycles every day. How many bicycles does it produce in 14 days?',
       optionA: '320 bicycles',
       optionB: '350 bicycles',
       optionC: '375 bicycles',
@@ -1425,7 +1437,7 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION C - Word Problem 2] Topic 1: Multiplication\nQ2. An auditorium has 15 rows of chairs with 18 chairs in each row. How many chairs are there in total?',
+      question: 'Q2. An auditorium has 15 rows of chairs with 18 chairs in each row. How many chairs are there in total?',
       optionA: '250 chairs',
       optionB: '260 chairs',
       optionC: '270 chairs',
@@ -1434,10 +1446,9 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
       hint: '15 × 18 = 270 chairs.',
     },
 
-    // Topic 2: Division (2)
     {
       testId: testObj.id,
-      question: '[SECTION C - Word Problem 3] Topic 2: Division\nQ3. 108 apples are distributed equally into 9 baskets. How many apples are placed in each basket?',
+      question: 'Q3. 108 apples are distributed equally into 9 baskets. How many apples are placed in each basket?',
       optionA: '11 apples',
       optionB: '12 apples',
       optionC: '13 apples',
@@ -1447,7 +1458,7 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION C - Word Problem 4] Topic 2: Division\nQ4. 78 notebooks are shared among 7 students equally. Find the quotient and remainder.',
+      question: 'Q4. 78 notebooks are shared among 7 students equally. Find the quotient and remainder.',
       optionA: 'Quotient = 11, Remainder = 1',
       optionB: 'Quotient = 10, Remainder = 8',
       optionC: 'Quotient = 11, Remainder = 2',
@@ -1456,10 +1467,9 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
       hint: '78 = (7 × 11) + 1. Quotient = 11, Remainder = 1.',
     },
 
-    // Topic 3: Representing Division on Number Lines (2)
     {
       testId: testObj.id,
-      question: '[SECTION C - Word Problem 5] Topic 3: Representing Division on Number Lines\nQ5. A grasshopper jumps 5 spaces at a time on a number line starting at 0. How many jumps does it take to reach 35?',
+      question: 'Q5. A grasshopper jumps 5 spaces at a time on a number line starting at 0. How many jumps does it take to reach 35?',
       optionA: '5 jumps',
       optionB: '6 jumps',
       optionC: '7 jumps',
@@ -1469,7 +1479,7 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION C - Word Problem 6] Topic 3: Representing Division on Number Lines\nQ6. A toy car moves 4 units at a time from 0 to 32 on a number line. How many jumps does it make?',
+      question: 'Q6. A toy car moves 4 units at a time from 0 to 32 on a number line. How many jumps does it make?',
       optionA: '6 jumps',
       optionB: '7 jumps',
       optionC: '8 jumps',
@@ -1478,11 +1488,10 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
       hint: '32 ÷ 4 = 8 jumps.',
     },
 
-    // --- SECTION D: Reading Comprehension / Passages (6 Questions) ---
-    // Topic 1: Multiplication Passage (2)
+    // --- Section D: Reading Comprehension / Passages ---
     {
       testId: testObj.id,
-      question: '[SECTION D - Reading Comprehension 1] Topic 1: Multiplication Passage\nPassage: A school bus carries 42 students per trip. It completes 6 trips every morning.\nQ1. How many total students are transported in a morning?',
+      question: 'Passage: A school bus carries 42 students per trip. It completes 6 trips every morning.\n\nQ1. How many total students are transported in a morning?',
       optionA: '240 students',
       optionB: '252 students',
       optionC: '262 students',
@@ -1492,7 +1501,7 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION D - Reading Comprehension 2] Topic 1: Multiplication Passage\nPassage: A school bus carries 42 students per trip for 6 trips (252 students).\nQ2. If 12 students were absent across all trips, how many students were actually transported?',
+      question: 'Passage: A school bus carries 42 students per trip for 6 trips (252 students).\n\nQ2. If 12 students were absent across all trips, how many students were actually transported?',
       optionA: '240 students',
       optionB: '242 students',
       optionC: '250 students',
@@ -1501,10 +1510,9 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
       hint: '252 - 12 = 240 students.',
     },
 
-    // Topic 2: Division Passage (2)
     {
       testId: testObj.id,
-      question: '[SECTION D - Reading Comprehension 3] Topic 2: Division Passage\nPassage: A bakery bakes 120 muffins and packs them into boxes containing 8 muffins each.\nQ3. How many full boxes of muffins are packed?',
+      question: 'Passage: A bakery bakes 120 muffins and packs them into boxes containing 8 muffins each.\n\nQ3. How many full boxes of muffins are packed?',
       optionA: '12 boxes',
       optionB: '14 boxes',
       optionC: '15 boxes',
@@ -1514,7 +1522,7 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION D - Reading Comprehension 4] Topic 2: Division Passage\nPassage: In the bakery\'s calculation of 120 muffins divided by 8 to get 15 boxes:\nQ4. What term describes the number 8 in this equation?',
+      question: 'Passage: In the bakery\'s calculation of 120 muffins divided by 8 to get 15 boxes:\n\nQ4. What term describes the number 8 in this equation?',
       optionA: 'Dividend',
       optionB: 'Divisor',
       optionC: 'Quotient',
@@ -1523,10 +1531,9 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
       hint: '8 is the divisor.',
     },
 
-    // Topic 3: Number Line Passage (2)
     {
       testId: testObj.id,
-      question: '[SECTION D - Reading Comprehension 5] Topic 3: Number Line Passage\nPassage: A kangaroo hops 6 units per leap on a track from 0 to 42.\nQ5. How many leaps did it take and what math operation is modeled?',
+      question: 'Passage: A kangaroo hops 6 units per leap on a track from 0 to 42.\n\nQ5. How many leaps did it take and what math operation is modeled?',
       optionA: '6 leaps, modeled by 42 ÷ 7',
       optionB: '7 leaps, modeled by 42 ÷ 6',
       optionC: '8 leaps, modeled by 42 - 6',
@@ -1536,7 +1543,7 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[SECTION D - Reading Comprehension 6] Topic 3: Number Line Passage\nPassage: A kangaroo hops 6 units per leap from 0 to reach 42 on a number line.\nQ6. If the kangaroo starts at 42 and hops backwards 6 units at a time to reach 0, which property of division on a number line is demonstrated?',
+      question: 'Passage: A kangaroo hops 6 units per leap from 0 to reach 42 on a number line.\n\nQ6. If the kangaroo starts at 42 and hops backwards 6 units at a time to reach 0, which property of division on a number line is demonstrated?',
       optionA: 'Division as repeated addition',
       optionB: 'Division as repeated subtraction',
       optionC: 'Commutative law of division',
@@ -1545,11 +1552,10 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
       hint: 'Backward jumps on a number line demonstrate division as repeated subtraction.',
     },
 
-    // --- TEACHER\'S QUESTION BANK (26 Questions) ---
-    // MCQs (10)
+    // --- Teacher\'s Question Bank ---
     {
       testId: testObj.id,
-      question: '[Teacher\'s Question Bank - MCQs 1] 1. 12 × (5 + 3) = ?',
+      question: '1. 12 × (5 + 3) = ?',
       optionA: '90',
       optionB: '96',
       optionC: '100',
@@ -1559,7 +1565,7 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[Teacher\'s Question Bank - MCQs 2] 2. Which property is shown by: 14 × 6 = 6 × 14?',
+      question: '2. Which property is shown by: 14 × 6 = 6 × 14?',
       optionA: 'Associative',
       optionB: 'Commutative',
       optionC: 'Distributive',
@@ -1569,7 +1575,7 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[Teacher\'s Question Bank - MCQs 3] 3. 99 ÷ 11 = ?',
+      question: '3. 99 ÷ 11 = ?',
       optionA: '8',
       optionB: '9',
       optionC: '10',
@@ -1579,7 +1585,7 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[Teacher\'s Question Bank - MCQs 4] 4. In 67 ÷ 7, the remainder is:',
+      question: '4. In 67 ÷ 7, the remainder is:',
       optionA: '3',
       optionB: '4',
       optionC: '5',
@@ -1589,7 +1595,7 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[Teacher\'s Question Bank - MCQs 5] 5. 30 ÷ 5 on a number line requires how many equal jumps of 5?',
+      question: '5. 30 ÷ 5 on a number line requires how many equal jumps of 5?',
       optionA: '5 jumps',
       optionB: '6 jumps',
       optionC: '7 jumps',
@@ -1599,7 +1605,7 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[Teacher\'s Question Bank - MCQs 6] 6. 8 × (10 − 3) = ?',
+      question: '6. 8 × (10 − 3) = ?',
       optionA: '56',
       optionB: '64',
       optionC: '72',
@@ -1609,7 +1615,7 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[Teacher\'s Question Bank - MCQs 7] 7. The quotient in 144 ÷ 12 is:',
+      question: '7. The quotient in 144 ÷ 12 is:',
       optionA: '10',
       optionB: '12',
       optionC: '14',
@@ -1619,7 +1625,7 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[Teacher\'s Question Bank - MCQs 8] 8. Six jumps of 5 starting from 0 reach:',
+      question: '8. Six jumps of 5 starting from 0 reach:',
       optionA: '25',
       optionB: '30',
       optionC: '35',
@@ -1629,7 +1635,7 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[Teacher\'s Question Bank - MCQs 9] 9. Which number when divided by 8 gives a quotient of 9 and remainder of 2?',
+      question: '9. Which number when divided by 8 gives a quotient of 9 and remainder of 2?',
       optionA: '72',
       optionB: '74',
       optionC: '76',
@@ -1639,7 +1645,7 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[Teacher\'s Question Bank - MCQs 10] 10. 4 jumps of 7 on a number line represent:',
+      question: '10. 4 jumps of 7 on a number line represent:',
       optionA: '28 ÷ 7',
       optionB: '28 ÷ 4',
       optionC: '7 ÷ 4',
@@ -1648,10 +1654,9 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
       hint: '28 ÷ 7 = 4 jumps of 7.',
     },
 
-    // True / False (10)
     {
       testId: testObj.id,
-      question: '[Teacher\'s Question Bank - True/False 1] 1. Whole numbers are closed under multiplication.',
+      question: '1. Whole numbers are closed under multiplication.',
       optionA: 'True',
       optionB: 'False',
       optionC: 'Only for even numbers',
@@ -1661,7 +1666,7 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[Teacher\'s Question Bank - True/False 2] 2. Division of whole numbers is commutative.',
+      question: '2. Division of whole numbers is commutative.',
       optionA: 'True',
       optionB: 'False',
       optionC: 'Sometimes true',
@@ -1671,7 +1676,7 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[Teacher\'s Question Bank - True/False 3] 3. Any non-zero whole number divided by itself equals 1.',
+      question: '3. Any non-zero whole number divided by itself equals 1.',
       optionA: 'True',
       optionB: 'False',
       optionC: 'Equals 0',
@@ -1681,7 +1686,7 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[Teacher\'s Question Bank - True/False 4] 4. In division, the remainder is always strictly less than the divisor.',
+      question: '4. In division, the remainder is always strictly less than the divisor.',
       optionA: 'True',
       optionB: 'False',
       optionC: 'Equal to divisor',
@@ -1691,7 +1696,7 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[Teacher\'s Question Bank - True/False 5] 5. 24 ÷ 4 on a number line can be shown by 6 equal jumps of 4.',
+      question: '5. 24 ÷ 4 on a number line can be shown by 6 equal jumps of 4.',
       optionA: 'True',
       optionB: 'False',
       optionC: 'Needs 4 jumps of 6',
@@ -1701,7 +1706,7 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[Teacher\'s Question Bank - True/False 6] 6. 7 × (3 + 5) = 7 × 3 + 5.',
+      question: '6. 7 × (3 + 5) = 7 × 3 + 5.',
       optionA: 'True',
       optionB: 'False',
       optionC: 'Equal to 56',
@@ -1711,7 +1716,7 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[Teacher\'s Question Bank - True/False 7] 7. In 81 ÷ 9 = 9, 81 is the dividend.',
+      question: '7. In 81 ÷ 9 = 9, 81 is the dividend.',
       optionA: 'True',
       optionB: 'False',
       optionC: '81 is divisor',
@@ -1721,7 +1726,7 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[Teacher\'s Question Bank - True/False 8] 8. Moving left on a number line represents repeated addition.',
+      question: '8. Moving left on a number line represents repeated addition.',
       optionA: 'True',
       optionB: 'False',
       optionC: 'Represents multiplication',
@@ -1731,7 +1736,7 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[Teacher\'s Question Bank - True/False 9] 9. 0 × 1234 = 1234.',
+      question: '9. 0 × 1234 = 1234.',
       optionA: 'True',
       optionB: 'False',
       optionC: 'Equals 1',
@@ -1741,7 +1746,7 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[Teacher\'s Question Bank - True/False 10] 10. 45 ÷ 6 has a quotient of 7 and remainder of 3.',
+      question: '10. 45 ÷ 6 has a quotient of 7 and remainder of 3.',
       optionA: 'True',
       optionB: 'False',
       optionC: 'Quotient is 6',
@@ -1750,10 +1755,9 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
       hint: 'True. 45 = (6 × 7) + 3.',
     },
 
-    // Word Problems & Reading Comprehension (6)
     {
       testId: testObj.id,
-      question: '[Teacher\'s Question Bank - Word Problem 1] 1. A store has 12 boxes with 15 pens each. How many pens are there in total?',
+      question: '1. A store has 12 boxes with 15 pens each. How many pens are there in total?',
       optionA: '150 pens',
       optionB: '165 pens',
       optionC: '180 pens',
@@ -1763,7 +1767,7 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[Teacher\'s Question Bank - Word Problem 2] 2. 105 candies are packed equally into bags of 7. How many bags are needed?',
+      question: '2. 105 candies are packed equally into bags of 7. How many bags are needed?',
       optionA: '13 bags',
       optionB: '14 bags',
       optionC: '15 bags',
@@ -1773,7 +1777,7 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[Teacher\'s Question Bank - Word Problem 3] 3. A frog jumps 3 units each time from 0 to 27 on a number line. How many jumps did it take?',
+      question: '3. A frog jumps 3 units each time from 0 to 27 on a number line. How many jumps did it take?',
       optionA: '8 jumps',
       optionB: '9 jumps',
       optionC: '10 jumps',
@@ -1783,7 +1787,7 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[Teacher\'s Question Bank - Passage 4] Passage: Priya has 56 stamps and pastes 8 stamps per page in her album.\nQ4. How many pages does she fill completely?',
+      question: 'Passage: Priya has 56 stamps and pastes 8 stamps per page in her album.\n\nQ4. How many pages does she fill completely?',
       optionA: '6 pages',
       optionB: '7 pages',
       optionC: '8 pages',
@@ -1793,7 +1797,7 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[Teacher\'s Question Bank - Passage 5] Passage: A cyclist travels 5 km per hour for 8 hours along a straight highway.\nQ5. What total distance is covered on the highway scale?',
+      question: 'Passage: A cyclist travels 5 km per hour for 8 hours along a straight highway.\n\nQ5. What total distance is covered on the highway scale?',
       optionA: '35 km',
       optionB: '40 km',
       optionC: '45 km',
@@ -1803,7 +1807,7 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
     },
     {
       testId: testObj.id,
-      question: '[Teacher\'s Question Bank - Passage 6] Passage: A farmer harvests 14 crates of oranges with 20 oranges in each crate.\nQ6. How many oranges did the farmer harvest in total?',
+      question: 'Passage: A farmer harvests 14 crates of oranges with 20 oranges in each crate.\n\nQ6. How many oranges did the farmer harvest in total?',
       optionA: '260 oranges',
       optionB: '270 oranges',
       optionC: '280 oranges',
@@ -2148,15 +2152,35 @@ export async function seedSampleDataIfEmpty(): Promise<void> {
       const questions = await getQuestionsByTestId(testId);
       const hasUnorderedQuestions = questions.some((q) => q.orderIndex === undefined || q.orderIndex === 9999);
 
+      // Check if raw questions in Firestore still contain legacy section/topic prefixes
+      const rawQSnap = await getDocs(query(collection(db, QUESTIONS_COL), where('testId', '==', testId)));
+      const hasDirtyQuestions = rawQSnap.docs.some((d) => {
+        const text = d.data().question || '';
+        return (
+          text.includes('[SECTION') ||
+          text.includes('Topic') ||
+          text.includes('MCQ') ||
+          text.includes('True/False') ||
+          text.includes('Word Problem') ||
+          text.includes('Reading Comprehension') ||
+          text.includes("Teacher's") ||
+          text.startsWith('Q1.') ||
+          text.startsWith('Q2.') ||
+          text.startsWith('× ') ||
+          text.startsWith('÷ ') ||
+          text.startsWith('+ ')
+        );
+      });
+
       if (title.includes('Sample Test 1')) {
-        if (questions.length < 55 || hasUnorderedQuestions) {
+        if (questions.length < 55 || hasUnorderedQuestions || hasDirtyQuestions) {
           console.log(`Deleting outdated Sample Test 1 paper (${testId})...`);
           await deleteTest(testId);
         } else {
           hasSampleTest1 = true;
         }
       } else if (title.includes('Sample Test 2')) {
-        if (questions.length < 65 || hasUnorderedQuestions) {
+        if (questions.length < 65 || hasUnorderedQuestions || hasDirtyQuestions) {
           console.log(`Deleting outdated Sample Test 2 paper (${testId})...`);
           await deleteTest(testId);
         } else {
