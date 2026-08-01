@@ -36,8 +36,9 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
       setIsLoading(true);
       try {
         const qList = await getQuestionsByTestId(test.id);
+        const sortedList = [...qList].sort((a, b) => (a.orderIndex ?? 9999) - (b.orderIndex ?? 9999));
         if (isMounted) {
-          setQuestions(qList);
+          setQuestions(sortedList);
           setQuestionTimeLeft(60);
           setIsLoading(false);
         }
