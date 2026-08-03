@@ -375,6 +375,30 @@ export async function saveAttempt(
 }
 
 /**
+ * Delete a single attempt by ID
+ */
+export async function deleteAttempt(id: string): Promise<void> {
+  await deleteDoc(doc(db, ATTEMPTS_COL, id));
+}
+
+/**
+ * Delete multiple attempts by IDs
+ */
+export async function deleteMultipleAttempts(ids: string[]): Promise<void> {
+  const deletePromises = ids.map((id) => deleteDoc(doc(db, ATTEMPTS_COL, id)));
+  await Promise.all(deletePromises);
+}
+
+/**
+ * Delete all student attempts
+ */
+export async function deleteAllAttempts(): Promise<void> {
+  const snap = await getDocs(collection(db, ATTEMPTS_COL));
+  const deletePromises = snap.docs.map((d) => deleteDoc(doc(db, ATTEMPTS_COL, d.id)));
+  await Promise.all(deletePromises);
+}
+
+/**
  * Helper to populate official Class 6 Whole Numbers – Sample Test 1 (38 comprehensive questions)
  */
 export async function createWholeNumbersTestPaper1(): Promise<Test> {

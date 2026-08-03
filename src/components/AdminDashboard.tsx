@@ -10,6 +10,9 @@ import {
   updateQuestion,
   deleteQuestion,
   getAllAttempts,
+  deleteAttempt,
+  deleteMultipleAttempts,
+  deleteAllAttempts,
   publishClass6To10DefaultTests,
   cleanupAndDeduplicateTests,
 } from '../services/db';
@@ -58,11 +61,13 @@ export const AdminDashboard: React.FC = () => {
   const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
 
   const [viewingAttempt, setViewingAttempt] = useState<Attempt | null>(null);
+  const [selectedAttemptIds, setSelectedAttemptIds] = useState<string[]>([]);
 
   const [deletingItem, setDeletingItem] = useState<{
-    type: 'test' | 'question' | 'reset';
+    type: 'test' | 'question' | 'reset' | 'attempt' | 'multiple_attempts' | 'all_attempts';
     id?: string;
     title?: string;
+    count?: number;
   } | null>(null);
 
   const loadData = async () => {
@@ -183,6 +188,33 @@ export const AdminDashboard: React.FC = () => {
     });
   };
 
+  // Attempt Deletion Handlers
+  const handleDeleteAttempt = (attempt: Attempt) => {
+    setDeletingItem({
+      type: 'attempt',
+      id: attempt.id,
+      title: `${attempt.studentName || 'Student'} - ${attempt.testTitle || 'Test'}`,
+    });
+  };
+
+  const handleDeleteSelectedAttempts = () => {
+    if (selectedAttemptIds.length === 0) return;
+    setDeletingItem({
+      type: 'multiple_attempts',
+      count: selectedAttemptIds.length,
+      title: `${selectedAttemptIds.length} selected student result(s)`,
+    });
+  };
+
+  const handleDeleteAllAttempts = () => {
+    if (allAttempts.length === 0) return;
+    setDeletingItem({
+      type: 'all_attempts',
+      count: allAttempts.length,
+      title: `All ${allAttempts.length} student result(s)`,
+    });
+  };
+
   const confirmDeleteAction = async () => {
     if (!deletingItem) return;
     const { type, id } = deletingItem;
@@ -221,7 +253,153 @@ export const AdminDashboard: React.FC = () => {
       await publishClass6To10DefaultTests(true);
       await loadData();
       setIsLoading(false);
+    } else if (type === 'attempt' && id) {
+      try {
+        setAllAttempts((prev) => prev.filter((a) => a.id !== id));
+        setSelectedAttemptIds((prev) => prev.filter((item) => item !== id));
+        await deleteAttempt(id);
+        await loadData();
+      } catch (err) {
+        console.error('Error deleting student result:', err);
+        await loadData();
+      }
+    } else if (type === 'multiple_attempts') {
+      try {
+        const idsToDelete = [...selectedAttemptIds];
+        setAllAttempts((prev) => prev.filter((a) => !idsToDelete.includes(a.id)));
+        setSelectedAttemptIds([]);
+        await deleteMultipleAttempts(idsToDelete);
+        await loadData();
+      } catch (err) {
+        console.error('Error deleting selected student results:', err);
+        await loadData();
+      }
+    } else if (type === 'all_attempts') {
+      try {
+        setAllAttempts([]);
+        setSelectedAttemptIds([]);
+        await deleteAllAttempts();
+        await loadData();
+      } catch (err) {
+        console.error('Error deleting all student results:', err);
+        await loadData();
+      }
     }
+  };
+
+  // PDF Export Logic for a Result Record
+  const handleDownloadPDF = (att: Attempt) => {
+    const percentage = Math.round((att.score / (att.totalQuestions || 1)) * 100);
+    const isPassed = percentage >= 40;
+    const dateStr = att.submittedAt ? new Date(att.submittedAt).toLocaleString('en-IN') : 'N/A';
+
+    let answersHtml = '';
+    if (att.answers && Object.keys(att.answers).length > 0) {
+      answersHtml = Object.entries(att.answers)
+        .map(
+          ([_, ans], idx) => `
+            <tr>
+              <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; font-weight: bold; color: #334155;">Q${idx + 1}</td>
+              <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; text-transform: uppercase; font-weight: 600; color: #2563eb;">${String(ans).replace('option', 'Option ')}</td>
+            </tr>
+          `
+        )
+        .join('');
+    }
+
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      alert('Please allow popups to download or print the PDF report.');
+      return;
+    }
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Student Test Result - ${att.studentName || 'Student'}</title>
+          <style>
+            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px; color: #1e293b; background: #fff; line-height: 1.5; }
+            .header { border-bottom: 3px solid #2563eb; padding-bottom: 16px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; }
+            .title { font-size: 24px; font-weight: 800; color: #0f172a; }
+            .badge { background-color: ${isPassed ? '#dcfce7' : '#fee2e2'}; color: ${isPassed ? '#166534' : '#991b1b'}; padding: 6px 16px; border-radius: 9999px; font-weight: 800; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
+            .card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 24px; }
+            .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; text-align: center; margin-top: 16px; }
+            .stat { background: white; border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px; }
+            .stat-label { font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: bold; }
+            .stat-value { font-size: 18px; font-weight: 800; margin-top: 4px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 13px; }
+            th { text-align: left; background: #f1f5f9; padding: 10px; border-bottom: 2px solid #cbd5e1; color: #475569; font-weight: 700; text-transform: uppercase; font-size: 11px; }
+            @media print {
+              body { padding: 0; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div>
+              <div class="title">CBSE Mathematics Test Result</div>
+              <div style="font-size: 13px; color: #64748b; font-weight: 600;">Official Student Performance Report</div>
+            </div>
+            <span class="badge">${isPassed ? 'PASSED' : 'NEEDS IMPROVEMENT'}</span>
+          </div>
+
+          <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <h2 style="margin: 0; font-size: 20px; color: #0f172a;">${att.studentName || 'Student'}</h2>
+                <p style="margin: 4px 0 0 0; font-size: 13px; color: #64748b; font-weight: 600;">Class: ${att.studentClass || 'N/A'}</p>
+              </div>
+              <div style="text-align: right; font-size: 12px; color: #64748b; font-weight: 600;">
+                <div>Attempt #${att.attemptNumber}</div>
+                <div>Submitted: ${dateStr}</div>
+              </div>
+            </div>
+
+            <div class="grid">
+              <div class="stat">
+                <div class="stat-label">Test Topic</div>
+                <div class="stat-value" style="font-size: 14px; color: #1e293b;">${att.testTitle || 'Test'}</div>
+              </div>
+              <div class="stat">
+                <div class="stat-label">Score</div>
+                <div class="stat-value" style="color: #0f172a;">${att.score} / ${att.totalQuestions}</div>
+              </div>
+              <div class="stat">
+                <div class="stat-label">Percentage</div>
+                <div class="stat-value" style="color: ${isPassed ? '#16a34a' : '#d97706'};">${percentage}%</div>
+              </div>
+            </div>
+          </div>
+
+          ${
+            answersHtml
+              ? `
+              <h3 style="font-size: 15px; border-bottom: 1px solid #cbd5e1; padding-bottom: 8px; color: #1e293b; font-weight: 700;">Recorded Answers Log</h3>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>Selected Answer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${answersHtml}
+                </tbody>
+              </table>
+            `
+              : ''
+          }
+
+          <script>
+            window.onload = function() {
+              window.print();
+            };
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
   };
 
   // CSV Export Logic
@@ -597,7 +775,7 @@ export const AdminDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* TAB 3: STUDENT RESULTS & EXPORT TO CSV */}
+      {/* TAB 3: STUDENT RESULTS & REPORTS */}
       {activeTab === 'results' && (
         <div className="space-y-4">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900 p-4 border border-slate-800 rounded-2xl">
@@ -631,14 +809,38 @@ export const AdminDashboard: React.FC = () => {
               </div>
             </div>
 
-            {/* CSV Export Button */}
-            <button
-              onClick={handleExportCSV}
-              className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 shadow-lg transition-colors cursor-pointer shrink-0"
-            >
-              <Download className="w-4 h-4" />
-              <span>Export Results to CSV</span>
-            </button>
+            {/* Action Buttons: Delete Selected, Delete All, Export CSV */}
+            <div className="flex flex-wrap items-center gap-2 shrink-0">
+              {selectedAttemptIds.length > 0 && (
+                <button
+                  onClick={handleDeleteSelectedAttempts}
+                  className="bg-red-600 hover:bg-red-500 text-white font-bold px-3.5 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow-lg transition-colors cursor-pointer"
+                  title="Delete selected student results"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  <span>Delete Selected ({selectedAttemptIds.length})</span>
+                </button>
+              )}
+
+              {allAttempts.length > 0 && (
+                <button
+                  onClick={handleDeleteAllAttempts}
+                  className="bg-red-950/80 hover:bg-red-900 border border-red-800 text-red-300 font-bold px-3.5 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow-lg transition-colors cursor-pointer"
+                  title="Delete ALL student results permanently"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  <span>Delete All Results</span>
+                </button>
+              )}
+
+              <button
+                onClick={handleExportCSV}
+                className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 shadow-lg transition-colors cursor-pointer"
+              >
+                <Download className="w-4 h-4" />
+                <span>Export CSV</span>
+              </button>
+            </div>
           </div>
 
           {/* Results Table */}
@@ -652,12 +854,33 @@ export const AdminDashboard: React.FC = () => {
             <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
               <div className="p-4 bg-slate-800/80 border-b border-slate-800 flex items-center justify-between text-xs text-slate-400">
                 <span>Showing {filteredAttempts.length} Student Test Submissions</span>
+                {selectedAttemptIds.length > 0 && (
+                  <span className="text-indigo-400 font-semibold">{selectedAttemptIds.length} row(s) selected</span>
+                )}
               </div>
 
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs text-slate-300">
                   <thead className="bg-slate-950 text-slate-400 uppercase font-semibold border-b border-slate-800">
                     <tr>
+                      <th className="px-4 py-3.5 w-10 text-center">
+                        <input
+                          type="checkbox"
+                          checked={
+                            filteredAttempts.length > 0 &&
+                            filteredAttempts.every((a) => selectedAttemptIds.includes(a.id))
+                          }
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedAttemptIds(filteredAttempts.map((a) => a.id));
+                            } else {
+                              setSelectedAttemptIds([]);
+                            }
+                          }}
+                          className="w-4 h-4 accent-indigo-600 rounded cursor-pointer"
+                          title="Select All Results"
+                        />
+                      </th>
                       <th className="px-6 py-3.5">Student Name</th>
                       <th className="px-6 py-3.5">Class</th>
                       <th className="px-6 py-3.5">Test Title</th>
@@ -665,16 +888,36 @@ export const AdminDashboard: React.FC = () => {
                       <th className="px-6 py-3.5">Score</th>
                       <th className="px-6 py-3.5">Percentage</th>
                       <th className="px-6 py-3.5">Submitted At</th>
-                      <th className="px-6 py-3.5 text-right">Action</th>
+                      <th className="px-6 py-3.5 text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-800/60">
                     {filteredAttempts.map((att) => {
                       const percentage = Math.round((att.score / (att.totalQuestions || 1)) * 100);
                       const isPassed = percentage >= 40;
+                      const isSelected = selectedAttemptIds.includes(att.id);
 
                       return (
-                        <tr key={att.id} className="hover:bg-slate-800/40 transition-colors">
+                        <tr
+                          key={att.id}
+                          className={`transition-colors ${
+                            isSelected ? 'bg-indigo-950/30' : 'hover:bg-slate-800/40'
+                          }`}
+                        >
+                          <td className="px-4 py-4 w-10 text-center">
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setSelectedAttemptIds((prev) => [...prev, att.id]);
+                                } else {
+                                  setSelectedAttemptIds((prev) => prev.filter((id) => id !== att.id));
+                                }
+                              }}
+                              className="w-4 h-4 accent-indigo-600 rounded cursor-pointer"
+                            />
+                          </td>
                           <td className="px-6 py-4 font-bold text-white">{att.studentName || 'Student'}</td>
                           <td className="px-6 py-4">
                             <span className="bg-slate-800 border border-slate-700 text-blue-300 px-2 py-0.5 rounded font-semibold">
@@ -703,13 +946,33 @@ export const AdminDashboard: React.FC = () => {
                             {att.submittedAt ? new Date(att.submittedAt).toLocaleString('en-IN') : 'N/A'}
                           </td>
                           <td className="px-6 py-4 text-right">
-                            <button
-                              onClick={() => setViewingAttempt(att)}
-                              className="p-1.5 text-blue-400 hover:text-blue-300 hover:bg-slate-800 rounded-lg cursor-pointer"
-                              title="View Submission Details"
-                            >
-                              <Eye className="w-4 h-4" />
-                            </button>
+                            <div className="flex items-center justify-end gap-1">
+                              <button
+                                onClick={() => setViewingAttempt(att)}
+                                className="px-2.5 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-lg text-xs font-semibold flex items-center gap-1 cursor-pointer transition-colors"
+                                title="View Submission Details"
+                              >
+                                <Eye className="w-3.5 h-3.5" />
+                                <span>View</span>
+                              </button>
+
+                              <button
+                                onClick={() => handleDownloadPDF(att)}
+                                className="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg text-xs font-semibold flex items-center gap-1 cursor-pointer transition-colors"
+                                title="Download PDF Report"
+                              >
+                                <Download className="w-3.5 h-3.5" />
+                                <span>PDF</span>
+                              </button>
+
+                              <button
+                                onClick={() => handleDeleteAttempt(att)}
+                                className="p-1.5 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg cursor-pointer transition-colors"
+                                title="Delete Result Record"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       );
@@ -763,9 +1026,15 @@ export const AdminDashboard: React.FC = () => {
               </div>
             </div>
 
-            <p className="text-sm text-slate-300 leading-relaxed">
+            <p className="text-sm text-slate-300 leading-relaxed font-medium">
               {deletingItem.type === 'reset'
                 ? 'Are you sure you want to reset all test papers to standard CBSE Class 6-10 questions?'
+                : deletingItem.type === 'attempt'
+                ? 'Are you sure you want to delete this student result?'
+                : deletingItem.type === 'multiple_attempts'
+                ? `Are you sure you want to delete ${deletingItem.count} selected student result(s)?`
+                : deletingItem.type === 'all_attempts'
+                ? 'Are you sure you want to delete ALL student results permanently?'
                 : `Are you sure you want to delete "${deletingItem.title || 'this item'}"?`}
             </p>
 
