@@ -1594,6 +1594,479 @@ export async function createPlayingWithNumbersTestPaper2(): Promise<Test> {
 }
 
 /**
+ * Deletes all existing Integers tests and associated questions from Firestore.
+ */
+export async function deleteAllIntegersTests(): Promise<number> {
+  try {
+    const snap = await getDocs(collection(db, TESTS_COL));
+    const integersDocs = snap.docs.filter((docSnap) => {
+      const data = docSnap.data();
+      const title = (data.title || '').toLowerCase();
+      return title.includes('integers');
+    });
+
+    let count = 0;
+    for (const docSnap of integersDocs) {
+      await deleteTest(docSnap.id);
+      count++;
+    }
+    console.log(`Deleted ${count} previous Integers test papers.`);
+    return count;
+  } catch (error) {
+    console.error('Error deleting Integers tests:', error);
+    return 0;
+  }
+}
+
+/**
+ * Helper to populate official Class 6 Integers – Sample Test 1 (Questions 1 to 20)
+ */
+export async function createIntegersTestPaper1(): Promise<Test> {
+  const testObj = await createTest({
+    title: 'CBSE Class 6: Integers – Sample Test 1',
+    class: 'Class 6',
+    duration: 25,
+    published: true,
+  });
+
+  const rawQuestions: Omit<Question, 'id'>[] = [
+    {
+      testId: testObj.id,
+      question: 'Which of the following is an integer?',
+      optionA: '3.5',
+      optionB: '-7',
+      optionC: '2/3',
+      optionD: '1.2',
+      correctAnswer: 'optionB',
+      hint: 'Integers are whole numbers and their negative opposites. -7 is an integer.',
+    },
+    {
+      testId: testObj.id,
+      question: 'Which of the following is a positive integer?',
+      optionA: '-8',
+      optionB: '-1',
+      optionC: '5',
+      optionD: '0',
+      correctAnswer: 'optionC',
+      hint: 'Positive integers are integers greater than zero. 5 is a positive integer.',
+    },
+    {
+      testId: testObj.id,
+      question: 'Which of the following is a negative integer?',
+      optionA: '0',
+      optionB: '6',
+      optionC: '-9',
+      optionD: '12',
+      correctAnswer: 'optionC',
+      hint: '-9 is a negative integer as it is less than zero.',
+    },
+    {
+      testId: testObj.id,
+      question: 'Zero is',
+      optionA: 'a positive integer',
+      optionB: 'a negative integer',
+      optionC: 'neither positive nor negative',
+      optionD: 'not an integer',
+      correctAnswer: 'optionC',
+      hint: 'Zero is an integer that is neither positive nor negative.',
+    },
+    {
+      testId: testObj.id,
+      question: 'Which integer is to the right of -3 on the number line?',
+      optionA: '-5',
+      optionB: '-4',
+      optionC: '-2',
+      optionD: '-6',
+      correctAnswer: 'optionC',
+      hint: 'Numbers to the right on the number line are greater. -2 is greater than -3.',
+    },
+    {
+      testId: testObj.id,
+      question: 'Which of the following is the greatest integer?',
+      optionA: '-10',
+      optionB: '-2',
+      optionC: '0',
+      optionD: '7',
+      correctAnswer: 'optionD',
+      hint: '7 is positive and greater than 0, -2, and -10.',
+    },
+    {
+      testId: testObj.id,
+      question: 'Which of the following is the smallest integer?',
+      optionA: '-15',
+      optionB: '-5',
+      optionC: '0',
+      optionD: '9',
+      correctAnswer: 'optionA',
+      hint: 'On the number line, -15 is furthest to the left among the options, so it is the smallest.',
+    },
+    {
+      testId: testObj.id,
+      question: 'The opposite of +12 is',
+      optionA: '+12',
+      optionB: '-12',
+      optionC: '0',
+      optionD: '12/2',
+      correctAnswer: 'optionB',
+      hint: 'The opposite of positive 12 is -12.',
+    },
+    {
+      testId: testObj.id,
+      question: 'The opposite of -8 is',
+      optionA: '-8',
+      optionB: '+8',
+      optionC: '0',
+      optionD: '-16',
+      correctAnswer: 'optionB',
+      hint: 'The opposite of negative 8 is +8.',
+    },
+    {
+      testId: testObj.id,
+      question: 'Which pair represents opposite integers?',
+      optionA: '5 and 5',
+      optionB: '-7 and -7',
+      optionC: '9 and -9',
+      optionD: '0 and 1',
+      correctAnswer: 'optionC',
+      hint: 'Opposite integers are equidistant from 0 on opposite sides of the number line.',
+    },
+    {
+      testId: testObj.id,
+      question: 'Which integer lies between -4 and 2?',
+      optionA: '-5',
+      optionB: '-3',
+      optionC: '3',
+      optionD: '4',
+      correctAnswer: 'optionB',
+      hint: 'The integers strictly between -4 and 2 are -3, -2, -1, 0, 1. -3 lies in this range.',
+    },
+    {
+      testId: testObj.id,
+      question: 'Arrange the integers in ascending order: -2, 5, -7, 0',
+      optionA: '-7, -2, 0, 5',
+      optionB: '-2, -7, 0, 5',
+      optionC: '0, -7, -2, 5',
+      optionD: '5, 0, -2, -7',
+      correctAnswer: 'optionA',
+      hint: 'Ascending order means smallest to largest: -7 < -2 < 0 < 5.',
+    },
+    {
+      testId: testObj.id,
+      question: 'Arrange the integers in descending order: 4, -1, 0, -5',
+      optionA: '-5, -1, 0, 4',
+      optionB: '4, 0, -1, -5',
+      optionC: '4, -1, 0, -5',
+      optionD: '0, 4, -1, -5',
+      correctAnswer: 'optionB',
+      hint: 'Descending order means largest to smallest: 4 > 0 > -1 > -5.',
+    },
+    {
+      testId: testObj.id,
+      question: 'What is the predecessor of -3?',
+      optionA: '-2',
+      optionB: '-4',
+      optionC: '-5',
+      optionD: '0',
+      correctAnswer: 'optionB',
+      hint: 'Predecessor = Number − 1 = -3 − 1 = -4.',
+    },
+    {
+      testId: testObj.id,
+      question: 'What is the successor of -6?',
+      optionA: '-7',
+      optionB: '-5',
+      optionC: '-4',
+      optionD: '6',
+      correctAnswer: 'optionB',
+      hint: 'Successor = Number + 1 = -6 + 1 = -5.',
+    },
+    {
+      testId: testObj.id,
+      question: 'What is (-4) + 7?',
+      optionA: '-11',
+      optionB: '-3',
+      optionC: '3',
+      optionD: '11',
+      correctAnswer: 'optionC',
+      hint: '(-4) + 7 = 7 − 4 = 3.',
+    },
+    {
+      testId: testObj.id,
+      question: 'What is 5 + (-9)?',
+      optionA: '14',
+      optionB: '-14',
+      optionC: '-4',
+      optionD: '4',
+      correctAnswer: 'optionC',
+      hint: '5 + (-9) = 5 − 9 = -4.',
+    },
+    {
+      testId: testObj.id,
+      question: 'What is (-6) + (-8)?',
+      optionA: '14',
+      optionB: '-14',
+      optionC: '2',
+      optionD: '-2',
+      correctAnswer: 'optionB',
+      hint: 'Adding two negative integers: -(6 + 8) = -14.',
+    },
+    {
+      testId: testObj.id,
+      question: 'What is 0 + (-13)?',
+      optionA: '13',
+      optionB: '-13',
+      optionC: '0',
+      optionD: '1',
+      correctAnswer: 'optionB',
+      hint: 'Adding zero to any number yields the same number: -13.',
+    },
+    {
+      testId: testObj.id,
+      question: 'What is (-15) + 15?',
+      optionA: '30',
+      optionB: '-30',
+      optionC: '15',
+      optionD: '0',
+      correctAnswer: 'optionD',
+      hint: 'Sum of an integer and its additive inverse is always 0.',
+    },
+  ];
+
+  for (let idx = 0; idx < rawQuestions.length; idx++) {
+    await createQuestion({
+      ...rawQuestions[idx],
+      orderIndex: idx,
+    });
+  }
+
+  return testObj;
+}
+
+/**
+ * Helper to populate official Class 6 Integers – Sample Test 2 (Questions 21 to 40)
+ */
+export async function createIntegersTestPaper2(): Promise<Test> {
+  const testObj = await createTest({
+    title: 'CBSE Class 6: Integers – Sample Test 2',
+    class: 'Class 6',
+    duration: 25,
+    published: true,
+  });
+
+  const rawQuestions: Omit<Question, 'id'>[] = [
+    {
+      testId: testObj.id,
+      question: 'What is 9 - 14?',
+      optionA: '5',
+      optionB: '-5',
+      optionC: '23',
+      optionD: '-23',
+      correctAnswer: 'optionB',
+      hint: '9 − 14 = -5.',
+    },
+    {
+      testId: testObj.id,
+      question: 'What is (-7) - 3?',
+      optionA: '-10',
+      optionB: '-4',
+      optionC: '10',
+      optionD: '4',
+      correctAnswer: 'optionA',
+      hint: '(-7) − 3 = -7 + (-3) = -10.',
+    },
+    {
+      testId: testObj.id,
+      question: 'What is (-8) - (-5)?',
+      optionA: '-13',
+      optionB: '-3',
+      optionC: '3',
+      optionD: '13',
+      correctAnswer: 'optionB',
+      hint: '(-8) − (-5) = -8 + 5 = -3.',
+    },
+    {
+      testId: testObj.id,
+      question: 'What is 12 - (-4)?',
+      optionA: '8',
+      optionB: '-8',
+      optionC: '16',
+      optionD: '-16',
+      correctAnswer: 'optionC',
+      hint: '12 − (-4) = 12 + 4 = 16.',
+    },
+    {
+      testId: testObj.id,
+      question: 'What is (-10) - (-10)?',
+      optionA: '-20',
+      optionB: '20',
+      optionC: '10',
+      optionD: '0',
+      correctAnswer: 'optionD',
+      hint: '(-10) − (-10) = -10 + 10 = 0.',
+    },
+    {
+      testId: testObj.id,
+      question: 'What is (-3) × 4?',
+      optionA: '12',
+      optionB: '-12',
+      optionC: '7',
+      optionD: '-7',
+      correctAnswer: 'optionB',
+      hint: 'Negative × Positive = Negative. (-3) × 4 = -12.',
+    },
+    {
+      testId: testObj.id,
+      question: 'What is (-5) × (-6)?',
+      optionA: '-30',
+      optionB: '30',
+      optionC: '-11',
+      optionD: '11',
+      correctAnswer: 'optionB',
+      hint: 'Negative × Negative = Positive. (-5) × (-6) = 30.',
+    },
+    {
+      testId: testObj.id,
+      question: 'What is 7 × (-8)?',
+      optionA: '56',
+      optionB: '-56',
+      optionC: '15',
+      optionD: '-15',
+      correctAnswer: 'optionB',
+      hint: 'Positive × Negative = Negative. 7 × (-8) = -56.',
+    },
+    {
+      testId: testObj.id,
+      question: 'What is (-9) × 0?',
+      optionA: '-9',
+      optionB: '9',
+      optionC: '0',
+      optionD: '1',
+      correctAnswer: 'optionC',
+      hint: 'Any integer multiplied by 0 is 0.',
+    },
+    {
+      testId: testObj.id,
+      question: 'What is (-2) × (-3) × 4?',
+      optionA: '-24',
+      optionB: '24',
+      optionC: '-20',
+      optionD: '20',
+      correctAnswer: 'optionB',
+      hint: '(-2) × (-3) = 6, and 6 × 4 = 24.',
+    },
+    {
+      testId: testObj.id,
+      question: 'What is 24 ÷ (-6)?',
+      optionA: '4',
+      optionB: '-4',
+      optionC: '6',
+      optionD: '-6',
+      correctAnswer: 'optionB',
+      hint: 'Positive ÷ Negative = Negative. 24 ÷ (-6) = -4.',
+    },
+    {
+      testId: testObj.id,
+      question: 'What is (-36) ÷ 9?',
+      optionA: '4',
+      optionB: '-4',
+      optionC: '9',
+      optionD: '-9',
+      correctAnswer: 'optionB',
+      hint: 'Negative ÷ Positive = Negative. (-36) ÷ 9 = -4.',
+    },
+    {
+      testId: testObj.id,
+      question: 'What is (-42) ÷ (-7)?',
+      optionA: '-6',
+      optionB: '6',
+      optionC: '-49',
+      optionD: '49',
+      correctAnswer: 'optionB',
+      hint: 'Negative ÷ Negative = Positive. (-42) ÷ (-7) = 6.',
+    },
+    {
+      testId: testObj.id,
+      question: 'What is 0 ÷ (-5)?',
+      optionA: '0',
+      optionB: '5',
+      optionC: '-5',
+      optionD: 'not defined',
+      correctAnswer: 'optionA',
+      hint: 'Zero divided by any non-zero integer is 0.',
+    },
+    {
+      testId: testObj.id,
+      question: 'Which of the following statements is true?',
+      optionA: 'Every negative integer is greater than zero.',
+      optionB: 'Zero is greater than every positive integer.',
+      optionC: 'Every positive integer is greater than every negative integer.',
+      optionD: '-1 is greater than 1.',
+      correctAnswer: 'optionC',
+      hint: 'Positive integers are greater than 0, which is greater than all negative integers.',
+    },
+    {
+      testId: testObj.id,
+      question: 'The temperature in a city was -5°C in the morning and rose by 8°C. What is the new temperature?',
+      optionA: '-13°C',
+      optionB: '-3°C',
+      optionC: '3°C',
+      optionD: '13°C',
+      correctAnswer: 'optionC',
+      hint: '-5 + 8 = 3°C.',
+    },
+    {
+      testId: testObj.id,
+      question: 'A submarine is at -120 m. It rises by 45 m. What is its new position?',
+      optionA: '-165 m',
+      optionB: '-75 m',
+      optionC: '75 m',
+      optionD: '165 m',
+      correctAnswer: 'optionB',
+      hint: '-120 + 45 = -75 m.',
+    },
+    {
+      testId: testObj.id,
+      question: 'A bank account shows -₹250. After depositing ₹400, the balance becomes',
+      optionA: '-₹650',
+      optionB: '-₹150',
+      optionC: '₹150',
+      optionD: '₹650',
+      correctAnswer: 'optionC',
+      hint: '-250 + 400 = ₹150.',
+    },
+    {
+      testId: testObj.id,
+      question: 'Which of the following represents a loss of ₹35?',
+      optionA: '+35',
+      optionB: '-35',
+      optionC: '35/100',
+      optionD: '0',
+      correctAnswer: 'optionB',
+      hint: 'A loss or deficit is represented by a negative integer, i.e., -35.',
+    },
+    {
+      testId: testObj.id,
+      question: 'The integer immediately to the left of 0 on the number line is',
+      optionA: '1',
+      optionB: '-1',
+      optionC: '2',
+      optionD: '-2',
+      correctAnswer: 'optionB',
+      hint: '-1 is immediately to the left of 0 on the number line.',
+    },
+  ];
+
+  for (let idx = 0; idx < rawQuestions.length; idx++) {
+    await createQuestion({
+      ...rawQuestions[idx],
+      orderIndex: idx,
+    });
+  }
+
+  return testObj;
+}
+
+/**
  * Helper to populate official Class 6 to 10 CBSE Math Test Papers
  */
 export async function publishClass6To10DefaultTests(clearExisting = false): Promise<void> {
@@ -1611,6 +2084,12 @@ export async function publishClass6To10DefaultTests(clearExisting = false): Prom
     }
 
     console.log('Publishing CBSE Class 6 to 10 Test Papers...');
+
+    // CLASS 6: INTEGERS SAMPLE TEST 1 (20 Questions)
+    await createIntegersTestPaper1();
+
+    // CLASS 6: INTEGERS SAMPLE TEST 2 (20 Questions)
+    await createIntegersTestPaper2();
 
     // CLASS 6: PLAYING WITH NUMBERS SAMPLE TEST 1 (20 Questions)
     await createPlayingWithNumbersTestPaper1();
@@ -1914,6 +2393,140 @@ export async function deleteAllWholeNumbersTests(): Promise<number> {
 }
 
 /**
+ * Deduplicates and cleans up duplicate test papers in Firestore.
+ * Ensures:
+ * 1. Explicit copies, duplicates, clones, 'revised', '(1)', etc. are deleted.
+ * 2. Each topic keeps ONLY Sample Test 1 and Sample Test 2 (the latest unique versions with maximum questions).
+ * 3. Any extra sample tests (Sample Test 3+) or duplicate copies of Sample Test 1/2 are removed.
+ */
+export async function cleanupAndDeduplicateTests(): Promise<number> {
+  try {
+    const snap = await getDocs(collection(db, TESTS_COL));
+    if (snap.empty) return 0;
+
+    let deletedCount = 0;
+    const testRecords: {
+      id: string;
+      title: string;
+      class: string;
+      createdAt: string;
+      questionCount: number;
+      topicKey: string;
+      sampleNum: number;
+    }[] = [];
+
+    // Step 1: Collect test records and remove explicit copies/duplicates
+    for (const docSnap of snap.docs) {
+      const data = docSnap.data();
+      const title = data.title || '';
+      const cls = data.class || '';
+      const id = docSnap.id;
+      const lowerTitle = title.toLowerCase();
+
+      // Check if title explicitly indicates copy/duplicate/clone/revised/numbered suffix
+      const isExplicitCopy =
+        lowerTitle.includes('(copy)') ||
+        lowerTitle.includes(' copy') ||
+        lowerTitle.includes('- copy') ||
+        lowerTitle.includes('duplicate') ||
+        lowerTitle.includes('revised') ||
+        lowerTitle.includes('cloned') ||
+        /\(\d+\)/.test(lowerTitle) ||
+        /\s+-\s+\d+$/.test(lowerTitle);
+
+      if (isExplicitCopy) {
+        console.log(`Deleting explicit copy/duplicate test: ${title} (${id})`);
+        await deleteTest(id);
+        deletedCount++;
+        continue;
+      }
+
+      // Query question count for accuracy
+      const qSnap = await getDocs(collection(db, TESTS_COL, id, QUESTIONS_COL));
+      const qCount = qSnap.size;
+
+      // Extract Topic Key and Sample Test Number
+      let cleanTitle = lowerTitle
+        .replace(/cbse\s*class\s*\d+\s*:?/gi, '')
+        .replace(/class\s*\d+\s*:?/gi, '')
+        .replace(/[\–\—\-]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+      let sampleNum = 0;
+      const matchSample = cleanTitle.match(/sample\s*test\s*(\d+)/i);
+      if (matchSample) {
+        sampleNum = parseInt(matchSample[1], 10);
+        cleanTitle = cleanTitle.replace(/sample\s*test\s*\d+/i, '').trim();
+      }
+
+      cleanTitle = cleanTitle.replace(/^[\:\-\s]+|[\:\-\s]+$/g, '').trim();
+      const normClass = cls.toLowerCase().replace(/\s+/g, '');
+      const topicKey = `${normClass}_${cleanTitle}`;
+
+      testRecords.push({
+        id,
+        title,
+        class: cls,
+        createdAt: data.createdAt || '',
+        questionCount: qCount,
+        topicKey,
+        sampleNum,
+      });
+    }
+
+    // Step 2: Group by topicKey and sampleNum
+    const groups: Record<string, typeof testRecords> = {};
+
+    for (const rec of testRecords) {
+      // If sampleNum > 2, remove it because only Sample Test 1 and Sample Test 2 are allowed per topic
+      if (rec.sampleNum > 2) {
+        console.log(`Deleting extra sample test > 2: ${rec.title} (${rec.id})`);
+        await deleteTest(rec.id);
+        deletedCount++;
+        continue;
+      }
+
+      const groupKey = `${rec.topicKey}___sample_${rec.sampleNum}`;
+      if (!groups[groupKey]) groups[groupKey] = [];
+      groups[groupKey].push(rec);
+    }
+
+    // Step 3: For each group with > 1 record, keep only 1 (max questions, then latest createdAt)
+    for (const groupKey of Object.keys(groups)) {
+      const list = groups[groupKey];
+      if (list.length > 1) {
+        list.sort((a, b) => {
+          if (b.questionCount !== a.questionCount) {
+            return b.questionCount - a.questionCount;
+          }
+          return (b.createdAt || '').localeCompare(a.createdAt || '');
+        });
+
+        const winner = list[0];
+        console.log(`Keeping primary test: "${winner.title}" (${winner.id}) with ${winner.questionCount} questions.`);
+
+        for (let i = 1; i < list.length; i++) {
+          const dup = list[i];
+          console.log(`Deleting duplicate test: "${dup.title}" (${dup.id}) with ${dup.questionCount} questions.`);
+          await deleteTest(dup.id);
+          deletedCount++;
+        }
+      }
+    }
+
+    if (deletedCount > 0) {
+      console.log(`Cleanup completed: Successfully removed ${deletedCount} duplicate test paper(s).`);
+    }
+
+    return deletedCount;
+  } catch (error) {
+    console.error('Error during test cleanup and deduplication:', error);
+    return 0;
+  }
+}
+
+/**
  * Seed default sample data or ensure Class 6 Whole Numbers Sample Tests exist
  */
 export async function seedSampleDataIfEmpty(): Promise<void> {
@@ -1958,6 +2571,35 @@ export async function seedSampleDataIfEmpty(): Promise<void> {
       await createPlayingWithNumbersTestPaper1();
       await createPlayingWithNumbersTestPaper2();
     }
+
+    // Ensure Class 6 Integers tests are seeded with all 20 questions each
+    const integersDocs = snap.docs.filter((d) => {
+      const title = (d.data().title || '').toLowerCase();
+      const cls = (d.data().class || '').toLowerCase();
+      return title.includes('integers') && (cls.includes('6') || title.includes('class 6'));
+    });
+
+    let needsIntegersReseed = integersDocs.length < 2;
+    if (!needsIntegersReseed) {
+      for (const testDoc of integersDocs) {
+        const qSnap = await getDocs(collection(db, TESTS_COL, testDoc.id, QUESTIONS_COL));
+        if (qSnap.size < 20) {
+          console.log(`Class 6 Integers test ${testDoc.id} has only ${qSnap.size} questions (< 20). Re-seeding...`);
+          needsIntegersReseed = true;
+          break;
+        }
+      }
+    }
+
+    if (needsIntegersReseed) {
+      console.log('Seeding Class 6 Integers Sample Tests (20 questions each)...');
+      await deleteAllIntegersTests();
+      await createIntegersTestPaper1();
+      await createIntegersTestPaper2();
+    }
+
+    // Clean up any remaining duplicate test papers
+    await cleanupAndDeduplicateTests();
   } catch (error) {
     console.error('Error in seedSampleDataIfEmpty:', error);
   }

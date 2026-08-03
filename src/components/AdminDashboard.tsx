@@ -11,6 +11,7 @@ import {
   deleteQuestion,
   getAllAttempts,
   publishClass6To10DefaultTests,
+  cleanupAndDeduplicateTests,
 } from '../services/db';
 import { TestModal } from './TestModal';
 import { QuestionModal } from './QuestionModal';
@@ -67,6 +68,7 @@ export const AdminDashboard: React.FC = () => {
   const loadData = async () => {
     setIsLoading(true);
     try {
+      await cleanupAndDeduplicateTests();
       const tList = await getAllTests();
       setTests(tList);
 
@@ -78,6 +80,23 @@ export const AdminDashboard: React.FC = () => {
       setAllAttempts(attemptsList);
     } catch (err) {
       console.error('Error loading admin data:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCleanDuplicates = async () => {
+    setIsLoading(true);
+    try {
+      const removed = await cleanupAndDeduplicateTests();
+      await loadData();
+      if (removed > 0) {
+        alert(`Successfully removed ${removed} duplicate test paper(s).`);
+      } else {
+        alert('No duplicate test papers found. All test topics are clean with Sample Test 1 & Sample Test 2!');
+      }
+    } catch (err) {
+      console.error('Error cleaning duplicates:', err);
     } finally {
       setIsLoading(false);
     }
@@ -367,6 +386,15 @@ export const AdminDashboard: React.FC = () => {
             </div>
 
             <div className="flex items-center gap-2">
+              <button
+                onClick={handleCleanDuplicates}
+                className="bg-amber-600 hover:bg-amber-500 text-white font-bold px-3.5 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow-lg cursor-pointer transition-all"
+                title="Remove duplicate sample test papers and keep only Sample Test 1 & 2 per topic"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Clean Duplicates</span>
+              </button>
+
               <button
                 onClick={handlePublishClass6To10}
                 className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 shadow-lg cursor-pointer transition-all"
