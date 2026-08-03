@@ -1122,6 +1122,478 @@ export async function createWholeNumbersTestPaper2(): Promise<Test> {
 export const createWholeNumbersTestPaper = createWholeNumbersTestPaper2;
 
 /**
+ * Deletes all existing Playing With Numbers tests and associated questions from Firestore.
+ */
+export async function deleteAllPlayingWithNumbersTests(): Promise<number> {
+  try {
+    const snap = await getDocs(collection(db, TESTS_COL));
+    const pwnDocs = snap.docs.filter((docSnap) => {
+      const title = docSnap.data().title || '';
+      return title.toLowerCase().includes('playing with numbers');
+    });
+
+    let count = 0;
+    for (const docSnap of pwnDocs) {
+      await deleteTest(docSnap.id);
+      count++;
+    }
+    console.log(`Deleted ${count} previous Playing With Numbers test papers.`);
+    return count;
+  } catch (error) {
+    console.error('Error deleting Playing With Numbers tests:', error);
+    return 0;
+  }
+}
+
+/**
+ * Helper to populate official Class 6 Playing With Numbers – Sample Test 1 (Questions 1 to 20)
+ */
+export async function createPlayingWithNumbersTestPaper1(): Promise<Test> {
+  const testObj = await createTest({
+    title: 'CBSE Class 6: Playing With Numbers – Sample Test 1',
+    class: 'Class 6',
+    duration: 25,
+    published: true,
+  });
+
+  const rawQuestions: Omit<Question, 'id'>[] = [
+    {
+      testId: testObj.id,
+      question: 'Which of the following numbers is divisible by 2?',
+      optionA: '357',
+      optionB: '482',
+      optionC: '915',
+      optionD: '731',
+      correctAnswer: 'optionB',
+      hint: 'A number is divisible by 2 if its last digit is even (0, 2, 4, 6, 8). 482 ends in 2.',
+    },
+    {
+      testId: testObj.id,
+      question: 'A number divisible by 2 is called',
+      optionA: 'a prime number',
+      optionB: 'an odd number',
+      optionC: 'an even number',
+      optionD: 'a composite number',
+      correctAnswer: 'optionC',
+      hint: 'Numbers divisible by 2 are even numbers.',
+    },
+    {
+      testId: testObj.id,
+      question: 'Which of the following numbers is divisible by 5?',
+      optionA: '432',
+      optionB: '678',
+      optionC: '945',
+      optionD: '721',
+      correctAnswer: 'optionC',
+      hint: 'A number is divisible by 5 if its last digit is 0 or 5. 945 ends in 5.',
+    },
+    {
+      testId: testObj.id,
+      question: 'Which of the following numbers is divisible by both 2 and 5?',
+      optionA: '125',
+      optionB: '450',
+      optionC: '333',
+      optionD: '715',
+      correctAnswer: 'optionB',
+      hint: 'A number divisible by both 2 and 5 must end in 0. 450 ends in 0.',
+    },
+    {
+      testId: testObj.id,
+      question: 'The number 846 is divisible by 3 because',
+      optionA: 'it ends in 6',
+      optionB: 'the sum of its digits is 18',
+      optionC: 'it is an even number',
+      optionD: 'it has three digits',
+      correctAnswer: 'optionB',
+      hint: 'Sum of digits of 846 = 8 + 4 + 6 = 18, which is divisible by 3.',
+    },
+    {
+      testId: testObj.id,
+      question: 'Which of the following is divisible by 9?',
+      optionA: '729',
+      optionB: '734',
+      optionC: '715',
+      optionD: '743',
+      correctAnswer: 'optionA',
+      hint: 'Sum of digits of 729 = 7 + 2 + 9 = 18, which is divisible by 9.',
+    },
+    {
+      testId: testObj.id,
+      question: 'The sum of the digits of 5,832 is',
+      optionA: '16',
+      optionB: '17',
+      optionC: '18',
+      optionD: '19',
+      correctAnswer: 'optionC',
+      hint: '5 + 8 + 3 + 2 = 18.',
+    },
+    {
+      testId: testObj.id,
+      question: 'Which number is divisible by 6?',
+      optionA: '144',
+      optionB: '155',
+      optionC: '171',
+      optionD: '195',
+      correctAnswer: 'optionA',
+      hint: '144 is even and sum of digits 1+4+4=9 (divisible by 3), so it is divisible by 6.',
+    },
+    {
+      testId: testObj.id,
+      question: 'A number divisible by both 2 and 3 is divisible by',
+      optionA: '4',
+      optionB: '5',
+      optionC: '6',
+      optionD: '9',
+      correctAnswer: 'optionC',
+      hint: 'Since LCM(2, 3) = 6, a number divisible by both 2 and 3 is divisible by 6.',
+    },
+    {
+      testId: testObj.id,
+      question: 'Which of the following numbers is divisible by 10?',
+      optionA: '560',
+      optionB: '565',
+      optionC: '556',
+      optionD: '555',
+      correctAnswer: 'optionA',
+      hint: 'A number is divisible by 10 if its unit digit is 0. 560 ends in 0.',
+    },
+    {
+      testId: testObj.id,
+      question: 'Which of the following is a factor of 36?',
+      optionA: '5',
+      optionB: '7',
+      optionC: '9',
+      optionD: '11',
+      correctAnswer: 'optionC',
+      hint: '36 ÷ 9 = 4, so 9 is a factor of 36.',
+    },
+    {
+      testId: testObj.id,
+      question: 'The factors of 24 are',
+      optionA: '1, 2, 3, 4, 6, 8, 12, 24',
+      optionB: '1, 2, 4, 8, 16, 24',
+      optionC: '1, 3, 6, 12, 24',
+      optionD: '2, 4, 6, 8, 10, 12',
+      correctAnswer: 'optionA',
+      hint: 'Factors of 24 are 1, 2, 3, 4, 6, 8, 12, 24.',
+    },
+    {
+      testId: testObj.id,
+      question: 'Which of the following is a multiple of 18?',
+      optionA: '54',
+      optionB: '56',
+      optionC: '58',
+      optionD: '60',
+      correctAnswer: 'optionA',
+      hint: '18 × 3 = 54.',
+    },
+    {
+      testId: testObj.id,
+      question: 'The smallest factor of every natural number is',
+      optionA: '0',
+      optionB: '1',
+      optionC: '2',
+      optionD: 'the number itself',
+      correctAnswer: 'optionB',
+      hint: '1 divides every natural number, making it the smallest factor.',
+    },
+    {
+      testId: testObj.id,
+      question: 'Every number is a factor of',
+      optionA: '0',
+      optionB: '1',
+      optionC: 'itself',
+      optionD: '10',
+      correctAnswer: 'optionC',
+      hint: 'Every non-zero number divides itself completely.',
+    },
+    {
+      testId: testObj.id,
+      question: 'Which of the following is a prime number?',
+      optionA: '21',
+      optionB: '27',
+      optionC: '29',
+      optionD: '35',
+      correctAnswer: 'optionC',
+      hint: '29 has only two factors: 1 and 29.',
+    },
+    {
+      testId: testObj.id,
+      question: 'Which of the following is a composite number?',
+      optionA: '13',
+      optionB: '17',
+      optionC: '19',
+      optionD: '21',
+      correctAnswer: 'optionD',
+      hint: '21 has factors 1, 3, 7, 21, so it is composite.',
+    },
+    {
+      testId: testObj.id,
+      question: 'The number 1 is',
+      optionA: 'prime',
+      optionB: 'composite',
+      optionC: 'neither prime nor composite',
+      optionD: 'even',
+      correctAnswer: 'optionC',
+      hint: '1 has only one factor, so it is neither prime nor composite.',
+    },
+    {
+      testId: testObj.id,
+      question: 'Which of the following numbers has exactly two factors?',
+      optionA: '9',
+      optionB: '15',
+      optionC: '23',
+      optionD: '25',
+      correctAnswer: 'optionC',
+      hint: 'Prime numbers have exactly two factors (1 and itself). 23 is prime.',
+    },
+    {
+      testId: testObj.id,
+      question: 'Which of the following pairs are twin primes?',
+      optionA: '3 and 5',
+      optionB: '5 and 9',
+      optionC: '7 and 11',
+      optionD: '11 and 15',
+      correctAnswer: 'optionA',
+      hint: 'Twin primes are prime numbers that differ by 2. 3 and 5 are twin primes.',
+    },
+  ];
+
+  for (let idx = 0; idx < rawQuestions.length; idx++) {
+    await createQuestion({
+      ...rawQuestions[idx],
+      orderIndex: idx,
+    });
+  }
+
+  return testObj;
+}
+
+/**
+ * Helper to populate official Class 6 Playing With Numbers – Sample Test 2 (Questions 21 to 40)
+ */
+export async function createPlayingWithNumbersTestPaper2(): Promise<Test> {
+  const testObj = await createTest({
+    title: 'CBSE Class 6: Playing With Numbers – Sample Test 2',
+    class: 'Class 6',
+    duration: 25,
+    published: true,
+  });
+
+  const rawQuestions: Omit<Question, 'id'>[] = [
+    {
+      testId: testObj.id,
+      question: 'The prime factorisation of 36 is',
+      optionA: '2 × 2 × 3 × 3',
+      optionB: '2 × 3 × 6',
+      optionC: '4 × 9',
+      optionD: '2 × 18',
+      correctAnswer: 'optionA',
+      hint: '36 = 2 × 2 × 3 × 3.',
+    },
+    {
+      testId: testObj.id,
+      question: 'The prime factorisation of 72 is',
+      optionA: '2 × 2 × 2 × 3 × 3',
+      optionB: '2 × 2 × 3 × 6',
+      optionC: '8 × 9',
+      optionD: '4 × 18',
+      correctAnswer: 'optionA',
+      hint: '72 = 8 × 9 = 2 × 2 × 2 × 3 × 3.',
+    },
+    {
+      testId: testObj.id,
+      question: 'Which of the following is the prime factorisation of 60?',
+      optionA: '2 × 2 × 3 × 5',
+      optionB: '2 × 3 × 10',
+      optionC: '4 × 15',
+      optionD: '5 × 12',
+      correctAnswer: 'optionA',
+      hint: '60 = 2 × 2 × 3 × 5.',
+    },
+    {
+      testId: testObj.id,
+      question: 'The highest common factor (HCF) of 12 and 18 is',
+      optionA: '2',
+      optionB: '3',
+      optionC: '6',
+      optionD: '12',
+      correctAnswer: 'optionC',
+      hint: 'Factors of 12: 1, 2, 3, 4, 6, 12; Factors of 18: 1, 2, 3, 6, 9, 18. HCF = 6.',
+    },
+    {
+      testId: testObj.id,
+      question: 'The HCF of 24 and 36 is',
+      optionA: '6',
+      optionB: '8',
+      optionC: '12',
+      optionD: '24',
+      correctAnswer: 'optionC',
+      hint: '24 = 12 × 2, 36 = 12 × 3. HCF = 12.',
+    },
+    {
+      testId: testObj.id,
+      question: 'The least common multiple (LCM) of 4 and 6 is',
+      optionA: '10',
+      optionB: '12',
+      optionC: '18',
+      optionD: '24',
+      correctAnswer: 'optionB',
+      hint: 'Multiples of 4: 4, 8, 12... Multiples of 6: 6, 12... LCM = 12.',
+    },
+    {
+      testId: testObj.id,
+      question: 'The LCM of 8 and 12 is',
+      optionA: '16',
+      optionB: '20',
+      optionC: '24',
+      optionD: '48',
+      correctAnswer: 'optionC',
+      hint: 'Multiples of 8: 8, 16, 24... Multiples of 12: 12, 24... LCM = 24.',
+    },
+    {
+      testId: testObj.id,
+      question: 'The HCF of two prime numbers is always',
+      optionA: '0',
+      optionB: '1',
+      optionC: '2',
+      optionD: 'the larger prime',
+      correctAnswer: 'optionB',
+      hint: 'Prime numbers share no common factors other than 1.',
+    },
+    {
+      testId: testObj.id,
+      question: 'The LCM of two co-prime numbers is equal to',
+      optionA: 'their difference',
+      optionB: 'their sum',
+      optionC: 'their product',
+      optionD: 'their HCF',
+      correctAnswer: 'optionC',
+      hint: 'Since HCF of co-prime numbers is 1, LCM = Product / HCF = Product.',
+    },
+    {
+      testId: testObj.id,
+      question: 'Which of the following pairs are co-prime numbers?',
+      optionA: '8 and 12',
+      optionB: '9 and 27',
+      optionC: '14 and 25',
+      optionD: '18 and 24',
+      correctAnswer: 'optionC',
+      hint: '14 (2 × 7) and 25 (5 × 5) share no common factor other than 1.',
+    },
+    {
+      testId: testObj.id,
+      question: 'The HCF of 15 and 25 is',
+      optionA: '3',
+      optionB: '5',
+      optionC: '10',
+      optionD: '15',
+      correctAnswer: 'optionB',
+      hint: 'Factors of 15: 1, 3, 5, 15; Factors of 25: 1, 5, 25. HCF = 5.',
+    },
+    {
+      testId: testObj.id,
+      question: 'The LCM of 9 and 15 is',
+      optionA: '30',
+      optionB: '36',
+      optionC: '45',
+      optionD: '90',
+      correctAnswer: 'optionC',
+      hint: '9 = 3², 15 = 3 × 5. LCM = 3² × 5 = 45.',
+    },
+    {
+      testId: testObj.id,
+      question: 'Which of the following statements is true?',
+      optionA: 'Every even number is divisible by 5.',
+      optionB: 'Every number divisible by 9 is divisible by 3.',
+      optionC: 'Every odd number is prime.',
+      optionD: 'Every composite number is even.',
+      correctAnswer: 'optionB',
+      hint: 'Since 9 = 3 × 3, any multiple of 9 is also a multiple of 3.',
+    },
+    {
+      testId: testObj.id,
+      question: 'The number 1,260 is divisible by',
+      optionA: '2 only',
+      optionB: '5 only',
+      optionC: '2, 3, 5, 9 and 10',
+      optionD: '7 only',
+      correctAnswer: 'optionC',
+      hint: '1260 ends in 0 (divisible by 2, 5, 10) and sum of digits 1+2+6+0=9 (divisible by 3 and 9).',
+    },
+    {
+      testId: testObj.id,
+      question: 'The greatest common factor of 48 and 64 is',
+      optionA: '8',
+      optionB: '12',
+      optionC: '16',
+      optionD: '24',
+      correctAnswer: 'optionC',
+      hint: '48 = 16 × 3, 64 = 16 × 4. GCF/HCF = 16.',
+    },
+    {
+      testId: testObj.id,
+      question: 'The least common multiple of 18 and 24 is',
+      optionA: '36',
+      optionB: '48',
+      optionC: '72',
+      optionD: '96',
+      correctAnswer: 'optionC',
+      hint: '18 = 2 × 3², 24 = 2³ × 3. LCM = 2³ × 3² = 72.',
+    },
+    {
+      testId: testObj.id,
+      question: 'Which of the following numbers is not divisible by 3?',
+      optionA: '234',
+      optionB: '567',
+      optionC: '789',
+      optionD: '1,001',
+      correctAnswer: 'optionD',
+      hint: 'Sum of digits of 1001 is 2, which is not divisible by 3.',
+    },
+    {
+      testId: testObj.id,
+      question: 'Which of the following numbers is divisible by 9 but not by 10?',
+      optionA: '810',
+      optionB: '729',
+      optionC: '540',
+      optionD: '900',
+      correctAnswer: 'optionB',
+      hint: '729 has sum of digits 18 (divisible by 9) and does not end in 0 (not divisible by 10).',
+    },
+    {
+      testId: testObj.id,
+      question: 'The product of two odd numbers is always',
+      optionA: 'even',
+      optionB: 'odd',
+      optionC: 'prime',
+      optionD: 'composite',
+      correctAnswer: 'optionB',
+      hint: 'Multiplying any two odd numbers results in an odd number (e.g. 3 × 5 = 15).',
+    },
+    {
+      testId: testObj.id,
+      question: 'Which of the following is the correct prime factor tree result for 84?',
+      optionA: '2 × 2 × 3 × 7',
+      optionB: '2 × 3 × 14',
+      optionC: '4 × 21',
+      optionD: '6 × 14',
+      correctAnswer: 'optionA',
+      hint: 'Prime factorisation of 84 = 2 × 2 × 3 × 7.',
+    },
+  ];
+
+  for (let idx = 0; idx < rawQuestions.length; idx++) {
+    await createQuestion({
+      ...rawQuestions[idx],
+      orderIndex: idx,
+    });
+  }
+
+  return testObj;
+}
+
+/**
  * Helper to populate official Class 6 to 10 CBSE Math Test Papers
  */
 export async function publishClass6To10DefaultTests(clearExisting = false): Promise<void> {
@@ -1140,7 +1612,13 @@ export async function publishClass6To10DefaultTests(clearExisting = false): Prom
 
     console.log('Publishing CBSE Class 6 to 10 Test Papers...');
 
-    // CLASS 6: WHOLE NUMBERS SAMPLE TEST 1 (57 Questions)
+    // CLASS 6: PLAYING WITH NUMBERS SAMPLE TEST 1 (20 Questions)
+    await createPlayingWithNumbersTestPaper1();
+
+    // CLASS 6: PLAYING WITH NUMBERS SAMPLE TEST 2 (20 Questions)
+    await createPlayingWithNumbersTestPaper2();
+
+    // CLASS 6: WHOLE NUMBERS SAMPLE TEST 1 (38 Questions)
     await createWholeNumbersTestPaper1();
 
     // CLASS 6: WHOLE NUMBERS SAMPLE TEST 2 (46 Questions)
@@ -1468,15 +1946,17 @@ export async function seedSampleDataIfEmpty(): Promise<void> {
       }
     }
 
-    // Check if Whole Numbers Sample Test 2 exists
-    const hasSampleTest2 = snap.docs.some((d) => {
+    // Ensure Playing With Numbers tests are seeded
+    const pwnDocs = snap.docs.filter((d) => {
       const title = (d.data().title || '').toLowerCase();
-      return title.includes('sample test 2') && title.includes('whole numbers');
+      return title.includes('playing with numbers');
     });
 
-    if (!hasSampleTest2) {
-      console.log('Seeding Whole Numbers Sample Test 2...');
-      await createWholeNumbersTestPaper2();
+    if (pwnDocs.length < 2) {
+      console.log('Seeding Playing With Numbers Sample Tests...');
+      await deleteAllPlayingWithNumbersTests();
+      await createPlayingWithNumbersTestPaper1();
+      await createPlayingWithNumbersTestPaper2();
     }
   } catch (error) {
     console.error('Error in seedSampleDataIfEmpty:', error);
