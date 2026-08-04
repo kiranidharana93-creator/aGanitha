@@ -1,0 +1,427 @@
+import React, { useState, useMemo } from 'react';
+import { Attempt, Student, Test } from '../types';
+import { calculateStudentAnalytics, extractTopicFromTitle } from '../utils/analytics';
+import { ParentProgressCardModal } from './ParentProgressCardModal';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts';
+import {
+  School,
+  Users,
+  FileCheck,
+  Award,
+  AlertTriangle,
+  Search,
+  Eye,
+  FileText,
+  TrendingDown,
+  TrendingUp,
+} from 'lucide-react';
+
+interface AdminAnalyticsDashboardProps {
+  students: Student[];
+  allAttempts: Attempt[];
+  allTests: Test[];
+}
+
+export const AdminAnalyticsDashboard: React.FC<AdminAnalyticsDashboardProps> = ({
+  students,
+  allAttempts,
+  allTests,
+}) => {
+  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [classFilter, setClassFilter] = useState('All');
+
+  // Compute School Overview Metrics
+  const schoolMetrics = useMemo(() => {
+    const totalStudents = students.length;
+    const totalTestsConducted = allAttempts.length;
+
+    if (totalTestsConducted === 0) {
+      return {
+        totalStudents,
+        totalTestsConducted: 0,
+        avgSchoolScore: 0,
+        topTopic: 'N/A',
+        lowestTopic: 'N/A',
+        lowestTopicAvg: 0,
+        topStudentsData: [],
+        topicDifficultyData: [],
+      };
+    }
+
+    let sumPct = 0;
+    const topicMap: Record<string, { totalScore: number; totalQ: number; count: number }> = {};
+    const studentAttemptsMap: Record<string, Attempt[]> = {};
+
+    allAttempts.forEach((att) => {
+      const q = att.totalQuestions || 1;
+      const pct = Math.round((att.score / q) * 100);
+      sumPct += pct;
+
+      // Map topic
+      const topic = extractTopicFromTitle(att.testTitle || 'CBSE Test');
+      if (!topicMap[topic]) {
+        topicMap[topic] = { totalScore: 0, totalQ: 0, count: 0 };
+      }
+      topicMap[topic].totalScore += att.score;
+      topicMap[topic].totalQ += q;
+      topicMap[topic].count += 1;
+
+      // Group attempts by studentId
+      const sId = att.studentId;
+      if (!studentAttemptsMap[sId]) {
+        studentAttemptsMap[sId] = [];
+      }
+      studentAttemptsMap[sId].push(att);
+    });
+
+    const avgSchoolScore = Math.round(sumPct / totalTestsConducted);
+
+    // Topic difficulty calculations
+    const topicList = Object.entries(topicMap).map(([topic, data]) => {
+      const avgPct = Math.round((data.totalScore / (data.totalQ || 1)) * 100);
+      return {
+        topic,
+        count: data.count,
+        avgScore: avgPct,
+      };
+    });
+
+    // Sort topics by avgScore descending
+    topicList.sort((a, b) => b.avgScore - a.avgScore);
+
+    const topTopic = topicList[0]?.topic || 'N/A';
+    const lowestTopicObj = topicList[topicList.length - 1];
+    const lowestTopic = lowestTopicObj?.topic || 'N/A';
+    const lowestTopicAvg = lowestTopicObj?.avgScore || 0;
+
+    // Student Averages for Top 5 Students
+    const studentPerformanceList = students.map((s) => {
+      const sAttempts = studentAttemptsMap[s.id] || [];
+      const analytics = calculateStudentAnalytics(s.name, s.class, sAttempts);
+      return {
+        student: s,
+        analytics,
+        avgPct: analytics.avgPercentage,
+        attemptsCount: analytics.totalTestsAttempted,
+      };
+    });
+
+    studentPerformanceList.sort((a, b) => b.avgPct - a.avgPct);
+
+    const topStudentsData = studentPerformanceList
+      .filter((s) => s.attemptsCount > 0)
+      .slice(0, 5)
+      .map((s) => ({
+        name: s.student.name.length > 15 ? s.student.name.substring(0, 12) + '...' : s.student.name,
+        fullName: s.student.name,
+        Average: s.avgPct,
+      }));
+
+    return {
+      totalStudents,
+      totalTestsConducted,
+      avgSchoolScore,
+      topTopic,
+      lowestTopic,
+      lowestTopicAvg,
+      topStudentsData,
+      topicDifficultyData: topicList,
+    };
+  }, [students, allAttempts]);
+
+  // Filter student records table
+  const filteredStudents = useMemo(() => {
+    return students.filter((s) => {
+      const matchesSearch =
+        s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        s.class.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesClass = classFilter === 'All' || s.class === classFilter;
+      return matchesSearch && matchesClass;
+    });
+  }, [students, searchTerm, classFilter]);
+
+  // If inspecting a student's full analytics
+  const selectedStudentAnalytics = useMemo(() => {
+    if (!selectedStudent) return null;
+    const sAttempts = allAttempts.filter((a) => a.studentId === selectedStudent.id);
+    return calculateStudentAnalytics(selectedStudent.name, selectedStudent.class, sAttempts);
+  }, [selectedStudent, allAttempts]);
+
+  return (
+    <div className="space-y-6">
+      {/* School Overview Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-lg flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400 shrink-0">
+            <Users className="w-6 h-6" />
+          </div>
+          <div>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">
+              Total Students
+            </span>
+            <h3 className="text-2xl font-black text-white mt-0.5">{schoolMetrics.totalStudents}</h3>
+          </div>
+        </div>
+
+        <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-lg flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shrink-0">
+            <FileCheck className="w-6 h-6" />
+          </div>
+          <div>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">
+              Tests Conducted
+            </span>
+            <h3 className="text-2xl font-black text-white mt-0.5">
+              {schoolMetrics.totalTestsConducted}
+            </h3>
+          </div>
+        </div>
+
+        <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-lg flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
+            <Award className="w-6 h-6" />
+          </div>
+          <div>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">
+              School Avg Score
+            </span>
+            <h3 className="text-2xl font-black text-emerald-400 mt-0.5">
+              {schoolMetrics.avgSchoolScore}%
+            </h3>
+          </div>
+        </div>
+
+        <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-lg flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400 shrink-0">
+            <TrendingUp className="w-6 h-6" />
+          </div>
+          <div>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">
+              Top Topic
+            </span>
+            <h3 className="text-sm font-bold text-white mt-0.5 truncate max-w-[120px]">
+              {schoolMetrics.topTopic}
+            </h3>
+          </div>
+        </div>
+
+        {/* Lowest Scoring Topic Highlighted in Red */}
+        <div className="bg-red-950/30 border border-red-800/60 p-5 rounded-2xl shadow-lg flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-red-500/20 border border-red-500/40 flex items-center justify-center text-red-400 shrink-0">
+            <TrendingDown className="w-6 h-6" />
+          </div>
+          <div>
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-red-400 block">
+              Most Difficult Topic
+            </span>
+            <h3 className="text-sm font-bold text-red-200 mt-0.5 truncate max-w-[120px]">
+              {schoolMetrics.lowestTopic}
+            </h3>
+            <span className="text-[11px] font-bold text-red-400">
+              Avg: {schoolMetrics.lowestTopicAvg}%
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Analytics Charts Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Top 5 Students Chart */}
+        <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl space-y-4">
+          <div>
+            <h3 className="text-base font-bold text-white flex items-center gap-2">
+              <Award className="w-5 h-5 text-emerald-400" />
+              <span>Top 5 Performing Students</span>
+            </h3>
+            <p className="text-xs text-slate-400 mt-1">
+              Bar chart highlighting highest average percentages across all test submissions.
+            </p>
+          </div>
+
+          {schoolMetrics.topStudentsData.length === 0 ? (
+            <p className="text-center text-xs text-slate-500 py-12">No student scores recorded.</p>
+          ) : (
+            <div className="w-full h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={schoolMetrics.topStudentsData} margin={{ top: 20, right: 30, left: 0, bottom: 20 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                  <XAxis dataKey="name" stroke="#94a3b8" tick={{ fontSize: 11 }} />
+                  <YAxis domain={[0, 100]} stroke="#94a3b8" tick={{ fontSize: 11 }} />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px' }}
+                    formatter={(val: any) => [`${val}%`, 'Average Score']}
+                  />
+                  <Bar dataKey="Average" fill="#10b981" radius={[6, 6, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+        </div>
+
+        {/* Topic Difficulty Analysis Table & Highlight */}
+        <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl space-y-4">
+          <div>
+            <h3 className="text-base font-bold text-white flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-amber-400" />
+              <span>Topic Difficulty Analysis</span>
+            </h3>
+            <p className="text-xs text-slate-400 mt-1">
+              Chapter difficulty ranking based on overall student accuracy. Lowest scoring topic is highlighted in red.
+            </p>
+          </div>
+
+          <div className="overflow-y-auto max-h-60 rounded-xl border border-slate-800">
+            <table className="w-full text-left text-xs text-slate-300">
+              <thead className="bg-slate-950 text-slate-400 uppercase font-semibold sticky top-0 border-b border-slate-800">
+                <tr>
+                  <th className="px-4 py-3">Topic Chapter</th>
+                  <th className="px-4 py-3 text-center">Attempts</th>
+                  <th className="px-4 py-3 text-right">Avg Score</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-800/60">
+                {schoolMetrics.topicDifficultyData.map((t, idx) => {
+                  const isLowest = idx === schoolMetrics.topicDifficultyData.length - 1 && schoolMetrics.topicDifficultyData.length > 1;
+
+                  return (
+                    <tr
+                      key={t.topic}
+                      className={isLowest ? 'bg-red-950/40 text-red-200 font-bold' : 'hover:bg-slate-800/30'}
+                    >
+                      <td className="px-4 py-3 flex items-center gap-2">
+                        {isLowest && (
+                          <span className="bg-red-500/20 text-red-400 border border-red-500/40 text-[9px] px-2 py-0.5 rounded uppercase font-extrabold">
+                            Needs Focus
+                          </span>
+                        )}
+                        <span>{t.topic}</span>
+                      </td>
+                      <td className="px-4 py-3 text-center">{t.count}</td>
+                      <td className="px-4 py-3 text-right font-bold">
+                        <span className={isLowest ? 'text-red-400 font-black' : 'text-blue-400'}>
+                          {t.avgScore}%
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      {/* Student Progress Card Inspection Directory */}
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl space-y-4 p-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+          <div>
+            <h3 className="text-base font-bold text-white flex items-center gap-2">
+              <School className="w-5 h-5 text-blue-400" />
+              <span>Student Performance Directory & Progress Cards</span>
+            </h3>
+            <p className="text-xs text-slate-400 mt-0.5">
+              Select any student to generate and inspect their official Parent Progress Card.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <Search className="w-4 h-4 text-slate-500 absolute left-3 top-2.5" />
+              <input
+                type="text"
+                placeholder="Search student..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs text-white focus:outline-none focus:border-blue-500"
+              />
+            </div>
+
+            <select
+              value={classFilter}
+              onChange={(e) => setClassFilter(e.target.value)}
+              className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500"
+            >
+              <option value="All">All Classes</option>
+              <option value="Class 6">Class 6</option>
+              <option value="Class 7">Class 7</option>
+              <option value="Class 8">Class 8</option>
+              <option value="Class 9">Class 9</option>
+              <option value="Class 10">Class 10</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs text-slate-300">
+            <thead className="bg-slate-950 text-slate-400 uppercase font-semibold border-b border-slate-800">
+              <tr>
+                <th className="px-6 py-3.5">Student Name</th>
+                <th className="px-6 py-3.5">Class</th>
+                <th className="px-6 py-3.5">Tests Attempted</th>
+                <th className="px-6 py-3.5">Average Score</th>
+                <th className="px-6 py-3.5">Grade</th>
+                <th className="px-6 py-3.5 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-800/60">
+              {filteredStudents.map((s) => {
+                const sAttempts = allAttempts.filter((a) => a.studentId === s.id);
+                const sAnalytics = calculateStudentAnalytics(s.name, s.class, sAttempts);
+
+                return (
+                  <tr key={s.id} className="hover:bg-slate-800/40">
+                    <td className="px-6 py-4 font-bold text-white">{s.name}</td>
+                    <td className="px-6 py-4">
+                      <span className="bg-slate-800 border border-slate-700 text-blue-300 px-2.5 py-1 rounded-md font-semibold">
+                        {s.class}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">{sAnalytics.totalTestsAttempted} test(s)</td>
+                    <td className="px-6 py-4 font-bold text-blue-400">
+                      {sAnalytics.totalTestsAttempted > 0 ? `${sAnalytics.avgPercentage}%` : 'N/A'}
+                    </td>
+                    <td className="px-6 py-4">
+                      {sAnalytics.totalTestsAttempted > 0 ? (
+                        <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2.5 py-0.5 rounded-full font-bold">
+                          Grade {sAnalytics.grade}
+                        </span>
+                      ) : (
+                        <span className="text-slate-500 italic">No Tests</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <button
+                        onClick={() => setSelectedStudent(s)}
+                        className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold flex items-center gap-1.5 text-xs ml-auto cursor-pointer transition-colors"
+                      >
+                        <FileText className="w-3.5 h-3.5" />
+                        <span>Inspect Progress Card</span>
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Selected Student Progress Card Modal */}
+      {selectedStudent && selectedStudentAnalytics && (
+        <ParentProgressCardModal
+          analytics={selectedStudentAnalytics}
+          onClose={() => setSelectedStudent(null)}
+        />
+      )}
+    </div>
+  );
+};

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Student, Test, Attempt } from '../types';
 import { getPublishedTestsForClass, getAttemptsForStudent, getAttemptsForStudentAndTest } from '../services/db';
-import { Clock, HelpCircle, AlertTriangle, CheckCircle, FileText, Play, History, RefreshCw, Award } from 'lucide-react';
+import { Clock, HelpCircle, CheckCircle, FileText, Play, History, RefreshCw, Award, BarChart2 } from 'lucide-react';
+import { ProgressAnalytics } from './ProgressAnalytics';
 
 interface StudentDashboardProps {
   student: Student;
@@ -14,7 +15,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
   onStartTest,
   onViewAttemptReview,
 }) => {
-  const [activeTab, setActiveTab] = useState<'available' | 'results'>('available');
+  const [activeTab, setActiveTab] = useState<'available' | 'analytics' | 'results'>('available');
   const [tests, setTests] = useState<Test[]>([]);
   const [studentAttemptsMap, setStudentAttemptsMap] = useState<Record<string, Attempt[]>>({});
   const [allStudentAttempts, setAllStudentAttempts] = useState<Attempt[]>([]);
@@ -75,10 +76,10 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
       </div>
 
       {/* Tabs Switcher */}
-      <div className="flex border-b border-slate-800">
+      <div className="flex border-b border-slate-800 overflow-x-auto">
         <button
           onClick={() => setActiveTab('available')}
-          className={`flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 transition-all cursor-pointer ${
+          className={`flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
             activeTab === 'available'
               ? 'border-blue-500 text-blue-400 bg-blue-500/5'
               : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
@@ -87,9 +88,22 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
           <FileText className="w-4 h-4" />
           <span>Available Tests ({tests.length})</span>
         </button>
+
+        <button
+          onClick={() => setActiveTab('analytics')}
+          className={`flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
+            activeTab === 'analytics'
+              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
+              : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+          }`}
+        >
+          <BarChart2 className="w-4 h-4" />
+          <span>Progress Analytics & Parent Card</span>
+        </button>
+
         <button
           onClick={() => setActiveTab('results')}
-          className={`flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 transition-all cursor-pointer ${
+          className={`flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
             activeTab === 'results'
               ? 'border-blue-500 text-blue-400 bg-blue-500/5'
               : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
@@ -106,6 +120,12 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
           <RefreshCw className="w-8 h-8 text-blue-500 animate-spin mx-auto mb-3" />
           <p className="text-sm text-slate-400 font-medium">Loading your test portal...</p>
         </div>
+      ) : activeTab === 'analytics' ? (
+        <ProgressAnalytics
+          student={student}
+          attempts={allStudentAttempts}
+          onViewAttemptReview={onViewAttemptReview}
+        />
       ) : activeTab === 'available' ? (
         tests.length === 0 ? (
           <div className="bg-slate-900 border border-slate-800 rounded-2xl p-12 text-center space-y-3">

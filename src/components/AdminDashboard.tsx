@@ -19,6 +19,7 @@ import {
 import { TestModal } from './TestModal';
 import { QuestionModal } from './QuestionModal';
 import { ResultDetailsModal } from './ResultDetailsModal';
+import { AdminAnalyticsDashboard } from './AdminAnalyticsDashboard';
 import {
   FileText,
   Plus,
@@ -37,10 +38,12 @@ import {
   Award,
   Layers,
   Sparkles,
+  BarChart2,
 } from 'lucide-react';
+import { Student } from '../types';
 
 export const AdminDashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'tests' | 'questions' | 'results'>('tests');
+  const [activeTab, setActiveTab] = useState<'tests' | 'questions' | 'results' | 'analytics'>('tests');
 
   // Data states
   const [tests, setTests] = useState<Test[]>([]);
@@ -543,7 +546,7 @@ export const AdminDashboard: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('results')}
-          className={`flex items-center gap-2 px-5 py-3 text-xs font-bold border-b-2 transition-all cursor-pointer ${
+          className={`flex items-center gap-2 px-5 py-3 text-xs font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
             activeTab === 'results'
               ? 'border-indigo-500 text-indigo-400 bg-indigo-500/5'
               : 'border-transparent text-slate-400 hover:text-slate-200'
@@ -552,7 +555,50 @@ export const AdminDashboard: React.FC = () => {
           <Award className="w-4 h-4" />
           <span>Student Results & Reports ({allAttempts.length})</span>
         </button>
+
+        <button
+          onClick={() => setActiveTab('analytics')}
+          className={`flex items-center gap-2 px-5 py-3 text-xs font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
+            activeTab === 'analytics'
+              ? 'border-indigo-500 text-indigo-400 bg-indigo-500/5'
+              : 'border-transparent text-slate-400 hover:text-slate-200'
+          }`}
+        >
+          <BarChart2 className="w-4 h-4" />
+          <span>School Analytics & Progress Cards</span>
+        </button>
       </div>
+
+      {/* TAB 4: SCHOOL ANALYTICS */}
+      {activeTab === 'analytics' && (() => {
+        // Build list of unique students from attempts + default student roster
+        const studentMap: Record<string, Student> = {
+          'std_rahul_6': { id: 'std_rahul_6', name: 'Rahul Kumar', class: 'Class 6' },
+          'std_ananya_6': { id: 'std_ananya_6', name: 'Ananya Sharma', class: 'Class 6' },
+          'std_priya_7': { id: 'std_priya_7', name: 'Priya Patel', class: 'Class 7' },
+          'std_aarav_8': { id: 'std_aarav_8', name: 'Aarav Singh', class: 'Class 8' },
+        };
+
+        allAttempts.forEach((att) => {
+          if (att.studentId && !studentMap[att.studentId]) {
+            studentMap[att.studentId] = {
+              id: att.studentId,
+              name: att.studentName || 'Student',
+              class: att.studentClass || 'Class 6',
+            };
+          }
+        });
+
+        const studentList = Object.values(studentMap);
+
+        return (
+          <AdminAnalyticsDashboard
+            students={studentList}
+            allAttempts={allAttempts}
+            allTests={tests}
+          />
+        );
+      })()}
 
       {/* TAB 1: MANAGE TESTS */}
       {activeTab === 'tests' && (
