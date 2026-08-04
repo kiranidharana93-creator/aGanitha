@@ -1,6 +1,16 @@
 import React, { useState } from 'react';
 import { StudentAnalytics } from '../utils/analytics';
 import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Cell,
+} from 'recharts';
+import {
   X,
   Download,
   Mail,
@@ -12,6 +22,7 @@ import {
   BookOpen,
   Check,
   Copy,
+  BarChart2,
 } from 'lucide-react';
 
 interface ParentProgressCardModalProps {
@@ -308,6 +319,89 @@ export const ParentProgressCardModal: React.FC<ParentProgressCardModalProps> = (
                   {analytics.lowestScorePercentage}%
                 </span>
               </div>
+            </div>
+          </div>
+
+          {/* Lesson-wise Bar Chart Section */}
+          <div className="bg-slate-800/40 border border-slate-800 rounded-2xl p-6 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+              <div>
+                <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                  <BarChart2 className="w-4 h-4 text-blue-400" />
+                  <span>Lesson-wise Progress Bar Chart</span>
+                </h4>
+                <p className="text-[11px] text-slate-400 mt-0.5">
+                  Visual comparison of percentage scores across CBSE Class {analytics.studentClass} lessons.
+                </p>
+              </div>
+            </div>
+
+            {/* Color Rules Legend */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-slate-950 p-3 rounded-xl border border-slate-800 text-[11px]">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-sm bg-[#10b981]" />
+                <div>
+                  <span className="font-bold text-emerald-400 block">≥85%</span>
+                  <span className="text-[9px] text-slate-400">Green (Strong)</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-sm bg-[#3b82f6]" />
+                <div>
+                  <span className="font-bold text-blue-400 block">70–84%</span>
+                  <span className="text-[9px] text-slate-400">Blue (Good)</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-sm bg-[#f59e0b]" />
+                <div>
+                  <span className="font-bold text-amber-400 block">50–69%</span>
+                  <span className="text-[9px] text-slate-400">Orange (Needs Practice)</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-sm bg-[#ef4444]" />
+                <div>
+                  <span className="font-bold text-red-400 block">&lt;50%</span>
+                  <span className="text-[9px] text-slate-400">Red (Critical)</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="w-full h-64 pt-2">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={(analytics.lessonBarChartData || []).map((item) => ({
+                    lesson: item.lesson.length > 15 ? item.lesson.substring(0, 12) + '...' : item.lesson,
+                    fullLesson: item.lesson,
+                    Score: item.score,
+                    color: item.color,
+                    status: item.status,
+                  }))}
+                  margin={{ top: 15, right: 20, left: -10, bottom: 25 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                  <XAxis
+                    dataKey="lesson"
+                    stroke="#94a3b8"
+                    tick={{ fontSize: 10, fontWeight: 600 }}
+                    interval={0}
+                    angle={-15}
+                    textAnchor="end"
+                  />
+                  <YAxis domain={[0, 100]} stroke="#94a3b8" tick={{ fontSize: 10 }} unit="%" />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '10px', color: '#fff' }}
+                    formatter={(value: any, name: any, props: any) => [`${value}% (${props.payload.status})`, 'Score']}
+                    labelFormatter={(label: any, items: any) => items[0]?.payload?.fullLesson || label}
+                  />
+                  <Bar dataKey="Score" radius={[4, 4, 0, 0]}>
+                    {(analytics.lessonBarChartData || []).map((entry, index) => (
+                      <Cell key={`modal-cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           </div>
 

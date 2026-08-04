@@ -15,6 +15,8 @@ export interface StudentAnalytics {
   studentClass: string;
   totalTestsAttempted: number;
   avgPercentage: number;
+  lastTestScorePercentage: number;
+  lastTestTitle: string;
   highestScorePercentage: number;
   lowestScorePercentage: number;
   grade: string;
@@ -26,6 +28,13 @@ export interface StudentAnalytics {
   wrongPercentage: number;
   unansweredPercentage: number;
   topicPerformances: TopicPerformance[];
+  lessonBarChartData: Array<{
+    lesson: string;
+    score: number;
+    color: string;
+    status: 'Excellent' | 'Good' | 'Needs Practice' | 'Critical Improvement Required';
+    attemptsCount: number;
+  }>;
   improvementTrend: Array<{
     attemptLabel: string;
     testTitle: string;
@@ -35,6 +44,13 @@ export interface StudentAnalytics {
   }>;
   weakTopics: TopicPerformance[];
   teacherRemarks: string;
+}
+
+export function getBarColor(pct: number): string {
+  if (pct >= 85) return '#10b981'; // Green (85% and above)
+  if (pct >= 70) return '#3b82f6'; // Blue (70% to 84%)
+  if (pct >= 50) return '#f59e0b'; // Orange (50% to 69%)
+  return '#ef4444';                  // Red (Below 50%)
 }
 
 export function extractTopicFromTitle(title: string): string {
@@ -168,12 +184,32 @@ export function calculateStudentAnalytics(
 ): StudentAnalytics {
   const totalTestsAttempted = attempts.length;
 
+  const defaultStandardLessons = [
+    'Whole Numbers',
+    'Playing With Numbers',
+    'Integers',
+    'Fractions',
+    'Decimals',
+    'Data Handling',
+    'Mensuration',
+  ];
+
   if (totalTestsAttempted === 0) {
+    const emptyLessonData = defaultStandardLessons.map((lesson) => ({
+      lesson,
+      score: 0,
+      color: '#ef4444',
+      status: 'Critical Improvement Required' as const,
+      attemptsCount: 0,
+    }));
+
     return {
       studentName,
       studentClass,
       totalTestsAttempted: 0,
       avgPercentage: 0,
+      lastTestScorePercentage: 0,
+      lastTestTitle: 'No Tests Taken',
       highestScorePercentage: 0,
       lowestScorePercentage: 0,
       grade: 'N/A',
@@ -185,6 +221,7 @@ export function calculateStudentAnalytics(
       wrongPercentage: 0,
       unansweredPercentage: 0,
       topicPerformances: [],
+      lessonBarChartData: emptyLessonData,
       improvementTrend: [],
       weakTopics: [],
       teacherRemarks: 'No test attempts recorded yet. Please complete a sample test to generate analytics.',
@@ -207,6 +244,12 @@ export function calculateStudentAnalytics(
   const sortedAttempts = [...attempts].sort(
     (a, b) => new Date(a.submittedAt).getTime() - new Date(b.submittedAt).getTime()
   );
+
+  const lastAttempt = sortedAttempts[sortedAttempts.length - 1];
+  const lastTestScorePercentage = Math.round(
+    ((lastAttempt?.score || 0) / (lastAttempt?.totalQuestions || 1)) * 100
+  );
+  const lastTestTitle = lastAttempt?.testTitle || 'Sample Test';
 
   const improvementTrend = sortedAttempts.map((att, index) => {
     const totalQ = att.totalQuestions || 1;
@@ -270,6 +313,40 @@ export function calculateStudentAnalytics(
     };
   });
 
+  // Build Lesson Bar Chart Data covering standard CBSE lessons + any extra attempted lessons
+  const existingTopicNames = new Set(Object.keys(topicMap));
+  const allLessonNames = Array.from(new Set([...defaultStandardLessons, ...Array.from(existingTopicNames)]));
+
+  const lessonBarChartData = allLessonNames.map((lesson) => {
+    // Find matching topic in topicMap if available
+    const matchedKey = Object.keys(topicMap).find(
+      (k) => k.toLowerCase().includes(lesson.toLowerCase()) || lesson.toLowerCase().includes(k.toLowerCase())
+    );
+
+    let score = 0;
+    let attemptsCount = 0;
+
+    if (matchedKey && topicMap[matchedKey]) {
+      const data = topicMap[matchedKey];
+      score = Math.round((data.totalScore / (data.totalQuestions || 1)) * 100);
+      attemptsCount = data.attemptsCount;
+    } else if (existingTopicNames.size > 0) {
+      // If student has taken tests but this specific lesson hasn't been tested yet
+      score = 0;
+    }
+
+    const color = getBarColor(score);
+    const status = getStatusFromPercentage(score);
+
+    return {
+      lesson,
+      score,
+      color,
+      status,
+      attemptsCount,
+    };
+  });
+
   // Weak topics are below 70%
   const weakTopics = topicPerformances.filter((t) => t.avgPercentage < 70);
 
@@ -280,6 +357,8 @@ export function calculateStudentAnalytics(
     studentClass,
     totalTestsAttempted,
     avgPercentage,
+    lastTestScorePercentage,
+    lastTestTitle,
     highestScorePercentage: maxPct,
     lowestScorePercentage: minPct === 100 && totalTestsAttempted === 0 ? 0 : minPct,
     grade,
@@ -291,6 +370,7 @@ export function calculateStudentAnalytics(
     wrongPercentage,
     unansweredPercentage,
     topicPerformances,
+    lessonBarChartData,
     improvementTrend,
     weakTopics,
     teacherRemarks,

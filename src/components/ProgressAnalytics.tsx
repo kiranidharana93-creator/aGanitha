@@ -57,10 +57,13 @@ export const ProgressAnalytics: React.FC<ProgressAnalyticsProps> = ({
     { name: 'Unanswered', value: analytics.totalUnanswered, color: '#f59e0b' },
   ];
 
-  const barData = analytics.topicPerformances.map((t) => ({
-    topic: t.topic.length > 18 ? t.topic.substring(0, 15) + '...' : t.topic,
-    fullTopic: t.topic,
-    Score: t.avgPercentage,
+  const lessonBarData = analytics.lessonBarChartData.map((item) => ({
+    lesson: item.lesson.length > 18 ? item.lesson.substring(0, 15) + '...' : item.lesson,
+    fullLesson: item.lesson,
+    Score: item.score,
+    color: item.color,
+    status: item.status,
+    attemptsCount: item.attemptsCount,
   }));
 
   const lineData = analytics.improvementTrend.map((t) => ({
@@ -83,7 +86,7 @@ export const ProgressAnalytics: React.FC<ProgressAnalyticsProps> = ({
           }`}
         >
           <Award className="w-4 h-4" />
-          <span>Overview</span>
+          <span>My Progress</span>
         </button>
 
         <button
@@ -95,7 +98,7 @@ export const ProgressAnalytics: React.FC<ProgressAnalyticsProps> = ({
           }`}
         >
           <BarChart2 className="w-4 h-4" />
-          <span>Topic Analysis</span>
+          <span>Lesson-wise Bar Chart</span>
         </button>
 
         <button
@@ -147,10 +150,59 @@ export const ProgressAnalytics: React.FC<ProgressAnalyticsProps> = ({
         </button>
       </div>
 
-      {/* TAB 1: OVERVIEW */}
+      {/* TAB 1: MY PROGRESS OVERVIEW */}
       {activeTab === 'overview' && (
         <div className="space-y-6">
-          {/* Top Metrics Grid */}
+          {/* My Progress Header Card */}
+          <div className="bg-gradient-to-r from-slate-900 via-slate-900 to-indigo-950 border border-slate-800 p-6 rounded-2xl shadow-2xl space-y-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+              <div>
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20 mb-2">
+                  <Award className="w-3.5 h-3.5" />
+                  <span>Student Progress Dashboard</span>
+                </div>
+                <h2 className="text-2xl font-black text-white">{analytics.studentName}</h2>
+                <p className="text-xs text-slate-400 mt-1">
+                  Class: <strong className="text-slate-200">{analytics.studentClass}</strong> • CBSE Mathematics Learning Tracker
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <div className="bg-slate-950/80 border border-slate-800 px-4 py-2.5 rounded-xl text-center shadow-md">
+                  <p className="text-[10px] uppercase font-bold text-slate-500">Last Test Score</p>
+                  <p className="text-xl font-black text-blue-400">{analytics.lastTestScorePercentage}%</p>
+                </div>
+
+                <div className="bg-slate-950/80 border border-slate-800 px-4 py-2.5 rounded-xl text-center shadow-md">
+                  <p className="text-[10px] uppercase font-bold text-slate-500">Grade</p>
+                  <p className="text-xl font-black text-emerald-400">{analytics.grade}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Overall Progress Bar */}
+            <div className="space-y-2">
+              <div className="flex justify-between items-center text-xs">
+                <span className="font-bold text-slate-300 flex items-center gap-1.5">
+                  <CheckCircle className="w-4 h-4 text-emerald-400" />
+                  Overall Learning Progress
+                </span>
+                <span className="font-extrabold text-blue-400 text-sm">{analytics.avgPercentage}%</span>
+              </div>
+              <div className="w-full bg-slate-950 rounded-full h-4 overflow-hidden p-0.5 border border-slate-800 shadow-inner">
+                <div
+                  className="h-full rounded-full transition-all duration-500 bg-gradient-to-r from-blue-500 via-indigo-500 to-emerald-400"
+                  style={{ width: `${Math.max(3, Math.min(100, analytics.avgPercentage))}%` }}
+                />
+              </div>
+              <div className="flex justify-between items-center text-[11px] text-slate-400 pt-1">
+                <span>Total Tests Attempted: <strong className="text-white">{analytics.totalTestsAttempted}</strong></span>
+                <span>Last Test: <strong className="text-slate-200">{analytics.lastTestTitle}</strong></span>
+              </div>
+            </div>
+          </div>
+
+          {/* Metrics Grid */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
             <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl shadow-lg">
               <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
@@ -161,7 +213,7 @@ export const ProgressAnalytics: React.FC<ProgressAnalyticsProps> = ({
 
             <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl shadow-lg">
               <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                Average Score
+                Average Percentage
               </p>
               <h3 className="text-2xl font-black text-blue-400 mt-1">{analytics.avgPercentage}%</h3>
             </div>
@@ -178,6 +230,15 @@ export const ProgressAnalytics: React.FC<ProgressAnalyticsProps> = ({
 
             <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl shadow-lg">
               <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                Last Test Score
+              </p>
+              <h3 className="text-2xl font-black text-blue-400 mt-1">
+                {analytics.lastTestScorePercentage}%
+              </h3>
+            </div>
+
+            <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl shadow-lg">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
                 Highest Score
               </p>
               <h3 className="text-2xl font-black text-emerald-400 mt-1">
@@ -187,16 +248,7 @@ export const ProgressAnalytics: React.FC<ProgressAnalyticsProps> = ({
 
             <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl shadow-lg">
               <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                Lowest Score
-              </p>
-              <h3 className="text-2xl font-black text-amber-400 mt-1">
-                {analytics.lowestScorePercentage}%
-              </h3>
-            </div>
-
-            <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl shadow-lg">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                Weak Topics
+                Weak Lessons
               </p>
               <h3 className="text-2xl font-black text-red-400 mt-1">{analytics.weakTopics.length}</h3>
             </div>
@@ -223,7 +275,7 @@ export const ProgressAnalytics: React.FC<ProgressAnalyticsProps> = ({
                   <span>Parent Progress Card</span>
                 </div>
                 <p className="text-xs text-slate-400 leading-relaxed">
-                  Generate an official performance report card for parents containing topic breakdown, average score, grade, and weak topic action plans.
+                  Generate an official performance report card for parents containing lesson breakdown, average score, grade, and weak topic action plans.
                 </p>
               </div>
 
@@ -269,9 +321,13 @@ export const ProgressAnalytics: React.FC<ProgressAnalyticsProps> = ({
                           <td className="px-6 py-3.5">
                             <span
                               className={`px-2.5 py-0.5 rounded-full font-bold text-[11px] ${
-                                pct >= 70
+                                pct >= 85
                                   ? 'bg-emerald-500/10 text-emerald-400'
-                                  : 'bg-amber-500/10 text-amber-400'
+                                  : pct >= 70
+                                  ? 'bg-blue-500/10 text-blue-400'
+                                  : pct >= 50
+                                  ? 'bg-amber-500/10 text-amber-400'
+                                  : 'bg-red-500/10 text-red-400'
                               }`}
                             >
                               {pct}%
@@ -298,77 +354,123 @@ export const ProgressAnalytics: React.FC<ProgressAnalyticsProps> = ({
         </div>
       )}
 
-      {/* TAB 2: TOPIC ANALYSIS */}
+      {/* TAB 2: LESSON-WISE BAR CHART */}
       {activeTab === 'topic' && (
         <div className="space-y-6">
           {/* Bar Chart Section */}
-          <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl space-y-4">
-            <div>
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
-                <BarChart2 className="w-5 h-5 text-blue-400" />
-                <span>Bar Chart – Topic Wise Performance</span>
-              </h3>
-              <p className="text-xs text-slate-400 mt-1">
-                Visual comparison of percentage scores across CBSE Class {student.class} chapters.
-              </p>
+          <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-4">
+              <div>
+                <h3 className="text-base font-bold text-white flex items-center gap-2">
+                  <BarChart2 className="w-5 h-5 text-blue-400" />
+                  <span>Lesson-wise Progress Bar Chart</span>
+                </h3>
+                <p className="text-xs text-slate-400 mt-1">
+                  Percentage score for each mathematics lesson (0–100%). Easily identify strong vs weak lessons.
+                </p>
+              </div>
             </div>
 
-            {barData.length === 0 ? (
-              <p className="text-center text-xs text-slate-500 py-12">
-                No topic data available. Complete sample tests to generate chapter performance charts.
-              </p>
-            ) : (
-              <div className="w-full h-72">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={barData} margin={{ top: 20, right: 30, left: 0, bottom: 20 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                    <XAxis dataKey="topic" stroke="#94a3b8" tick={{ fontSize: 11 }} />
-                    <YAxis domain={[0, 100]} stroke="#94a3b8" tick={{ fontSize: 11 }} />
-                    <Tooltip
-                      contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px' }}
-                      formatter={(value: any) => [`${value}%`, 'Score']}
-                    />
-                    <Bar dataKey="Score" fill="#3b82f6" radius={[6, 6, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
+            {/* Color Legend Rule Box */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs">
+              <div className="flex items-center gap-2.5 bg-slate-900/80 p-2.5 rounded-lg border border-slate-800">
+                <div className="w-3.5 h-3.5 rounded-sm bg-[#10b981]" />
+                <div>
+                  <span className="font-extrabold text-emerald-400 block">85% and above</span>
+                  <span className="text-[10px] text-slate-400">Green → Strong / Excellent</span>
+                </div>
               </div>
-            )}
+
+              <div className="flex items-center gap-2.5 bg-slate-900/80 p-2.5 rounded-lg border border-slate-800">
+                <div className="w-3.5 h-3.5 rounded-sm bg-[#3b82f6]" />
+                <div>
+                  <span className="font-extrabold text-blue-400 block">70% to 84%</span>
+                  <span className="text-[10px] text-slate-400">Blue → Good Mastery</span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2.5 bg-slate-900/80 p-2.5 rounded-lg border border-slate-800">
+                <div className="w-3.5 h-3.5 rounded-sm bg-[#f59e0b]" />
+                <div>
+                  <span className="font-extrabold text-amber-400 block">50% to 69%</span>
+                  <span className="text-[10px] text-slate-400">Orange → Needs Practice</span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2.5 bg-slate-900/80 p-2.5 rounded-lg border border-slate-800">
+                <div className="w-3.5 h-3.5 rounded-sm bg-[#ef4444]" />
+                <div>
+                  <span className="font-extrabold text-red-400 block">Below 50%</span>
+                  <span className="text-[10px] text-slate-400">Red → Critical Area</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Recharts Bar Chart */}
+            <div className="w-full h-80 pt-2">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={lessonBarData} margin={{ top: 25, right: 30, left: 0, bottom: 35 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                  <XAxis
+                    dataKey="lesson"
+                    stroke="#94a3b8"
+                    tick={{ fontSize: 11, fontWeight: 600 }}
+                    interval={0}
+                    angle={-15}
+                    textAnchor="end"
+                  />
+                  <YAxis domain={[0, 100]} stroke="#94a3b8" tick={{ fontSize: 11 }} unit="%" />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px', color: '#fff' }}
+                    formatter={(value: any, name: any, props: any) => [
+                      `${value}% (${props.payload.status})`,
+                      'Lesson Score',
+                    ]}
+                    labelFormatter={(label: any, items: any) => items[0]?.payload?.fullLesson || label}
+                  />
+                  <Bar dataKey="Score" radius={[6, 6, 0, 0]}>
+                    {lessonBarData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
 
-          {/* Detailed Topic Table */}
+          {/* Detailed Lesson Breakdown Table */}
           <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
             <div className="p-4 bg-slate-800/80 border-b border-slate-800 font-bold text-sm text-white">
-              CBSE Topic Performance Table
+              CBSE Lesson Wise Performance Summary
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs text-slate-300">
                 <thead className="bg-slate-950 text-slate-400 uppercase font-semibold border-b border-slate-800">
                   <tr>
-                    <th className="px-6 py-3.5">Topic Name</th>
-                    <th className="px-6 py-3.5">Attempts</th>
-                    <th className="px-6 py-3.5">Average Score</th>
+                    <th className="px-6 py-3.5">Lesson Name</th>
+                    <th className="px-6 py-3.5">Tests Attempted</th>
+                    <th className="px-6 py-3.5">Percentage Score</th>
                     <th className="px-6 py-3.5">Performance Status</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/60">
-                  {analytics.topicPerformances.map((tp) => (
-                    <tr key={tp.topic} className="hover:bg-slate-800/40">
-                      <td className="px-6 py-4 font-bold text-white">{tp.topic}</td>
-                      <td className="px-6 py-4">{tp.attemptsCount} test(s)</td>
-                      <td className="px-6 py-4 font-bold text-blue-400">{tp.avgPercentage}%</td>
+                  {analytics.lessonBarChartData.map((lb) => (
+                    <tr key={lb.lesson} className="hover:bg-slate-800/40">
+                      <td className="px-6 py-4 font-bold text-white">{lb.lesson}</td>
+                      <td className="px-6 py-4">{lb.attemptsCount} test(s)</td>
+                      <td className="px-6 py-4 font-bold" style={{ color: lb.color }}>
+                        {lb.score}%
+                      </td>
                       <td className="px-6 py-4">
                         <span
-                          className={`px-3 py-1 rounded-full text-xs font-bold ${
-                            tp.avgPercentage >= 85
-                              ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
-                              : tp.avgPercentage >= 70
-                              ? 'bg-blue-500/10 text-blue-400 border border-blue-500/30'
-                              : tp.avgPercentage >= 50
-                              ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30'
-                              : 'bg-red-500/10 text-red-400 border border-red-500/30'
-                          }`}
+                          className="px-3 py-1 rounded-full text-xs font-bold border"
+                          style={{
+                            backgroundColor: `${lb.color}15`,
+                            color: lb.color,
+                            borderColor: `${lb.color}40`,
+                          }}
                         >
-                          {tp.status}
+                          {lb.status}
                         </span>
                       </td>
                     </tr>
