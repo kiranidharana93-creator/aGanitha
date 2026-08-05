@@ -148,7 +148,10 @@ export const AdminDashboard: React.FC = () => {
   };
 
   useEffect(() => {
-    loadData();
+    const timer = setTimeout(() => {
+      loadData();
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   // Fetch questions whenever selected test changes

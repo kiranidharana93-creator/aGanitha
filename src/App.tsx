@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { CurrentUser, Student, Test, Attempt } from './types';
 import { seedSampleDataIfEmpty } from './services/db';
 import { Navbar } from './components/Navbar';
-import { LoginModal } from './components/LoginModal';
-import { StudentDashboard } from './components/StudentDashboard';
-import { StudentTestPage } from './components/StudentTestPage';
-import { AdminDashboard } from './components/AdminDashboard';
-import { ResultDetailsModal } from './components/ResultDetailsModal';
+import LoadingScreen from './components/LoadingScreen';
+
+const LoginModal = React.lazy(() => import('./components/LoginModal').then(m => ({ default: m.LoginModal })));
+const StudentDashboard = React.lazy(() => import('./components/StudentDashboard').then(m => ({ default: m.StudentDashboard })));
+const StudentTestPage = React.lazy(() => import('./components/StudentTestPage').then(m => ({ default: m.StudentTestPage })));
+const AdminDashboard = React.lazy(() => import('./components/AdminDashboard').then(m => ({ default: m.AdminDashboard })));
+const ResultDetailsModal = React.lazy(() => import('./components/ResultDetailsModal').then(m => ({ default: m.ResultDetailsModal })));
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState<CurrentUser>({ role: null });
@@ -92,30 +94,32 @@ export default function App() {
 
       {/* View Router */}
       <main className="flex-1">
-        {!currentUser.role ? (
-          <LoginModal onStudentLogin={handleStudentLogin} onAdminLogin={handleAdminLogin} />
-        ) : currentUser.role === 'admin' ? (
-          <AdminDashboard />
-        ) : activeTest && currentUser.student ? (
-          <StudentTestPage
-            student={currentUser.student}
-            test={activeTest.test}
-            attemptNumber={activeTest.attemptNumber}
-            onFinishTest={handleFinishTest}
-          />
-        ) : currentUser.student ? (
-          <StudentDashboard
-            student={currentUser.student}
-            onStartTest={handleStartTest}
-            onViewAttemptReview={(att) => setReviewAttempt(att)}
-          />
-        ) : null}
-      </main>
+        <Suspense fallback={<LoadingScreen />}>
+          {!currentUser.role ? (
+            <LoginModal onStudentLogin={handleStudentLogin} onAdminLogin={handleAdminLogin} />
+          ) : currentUser.role === 'admin' ? (
+            <AdminDashboard />
+          ) : activeTest && currentUser.student ? (
+            <StudentTestPage
+              student={currentUser.student}
+              test={activeTest.test}
+              attemptNumber={activeTest.attemptNumber}
+              onFinishTest={handleFinishTest}
+            />
+          ) : currentUser.student ? (
+            <StudentDashboard
+              student={currentUser.student}
+              onStartTest={handleStartTest}
+              onViewAttemptReview={(att) => setReviewAttempt(att)}
+            />
+          ) : null}
 
-      {/* Review Modal for past attempts from Student Dashboard */}
-      {reviewAttempt && (
-        <ResultDetailsModal attempt={reviewAttempt} onClose={() => setReviewAttempt(null)} />
-      )}
+          {/* Review Modal for past attempts from Student Dashboard */}
+          {reviewAttempt && (
+            <ResultDetailsModal attempt={reviewAttempt} onClose={() => setReviewAttempt(null)} />
+          )}
+        </Suspense>
+      </main>
 
       {/* Footer */}
       <footer className="bg-slate-900 border-t border-slate-800/80 py-4 px-6 text-center text-xs text-slate-500">

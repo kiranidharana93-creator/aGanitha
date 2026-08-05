@@ -96,7 +96,10 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
   };
 
   useEffect(() => {
-    loadDashboardData();
+    const timer = setTimeout(() => {
+      loadDashboardData();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [student.id, selectedClass]);
 
   const handleContinueDraft = () => {
