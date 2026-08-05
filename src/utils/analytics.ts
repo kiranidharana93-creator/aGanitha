@@ -95,50 +95,62 @@ export function getGradeFromPercentage(pct: number): { grade: string; title: str
   return { grade: 'D', title: 'Critical Attention Needed' };
 }
 
-export function getRecommendationsForTopic(topic: string, status: string): string[] {
+export function getRecommendationsForTopic(topic: string, status: string, scorePct: number = 70): string[] {
   const lower = topic.toLowerCase();
   const actions: string[] = [];
 
-  if (lower.includes('playing with numbers')) {
+  if (lower.includes('playing with numbers') || lower.includes('playing numbers')) {
     actions.push('Revise divisibility rules for 2, 3, 4, 5, 6, 8, 9, 10, and 11.');
-    actions.push('Practice prime factorisation and factor trees.');
-    actions.push('Solve 5 additional word problems on HCF and LCM.');
-  } else if (lower.includes('integer')) {
-    actions.push('Practice addition and subtraction of positive and negative integers on a number line.');
-    actions.push('Revise sign multiplication rules: (+) × (-) = (-) and (-) × (-) = (+).');
-    actions.push('Attempt 2 additional sample tests focusing on integer word problems.');
+    actions.push('Practice HCF and LCM word problems.');
+    actions.push('Improve speed in prime factorisation questions.');
+    actions.push('Attempt Sample Test 2 for additional practice.');
   } else if (lower.includes('whole number')) {
-    actions.push('Revise basic properties: Closure, Commutative, Associative, and Distributive properties.');
+    actions.push('Revise commutative, associative, and distributive properties.');
     actions.push('Practice mental math calculations using distributive property patterns.');
-    actions.push('Review division by zero and pattern recognition in numbers.');
+    actions.push('Solve word problems on predecessor, successor, and pattern recognition.');
+  } else if (lower.includes('integer')) {
+    actions.push('Practice number line operations and sign rules for integers.');
+    actions.push('Revise addition and subtraction of negative and positive numbers.');
+    actions.push('Solve real-life word problems involving temperature and elevation changes.');
   } else if (lower.includes('fraction')) {
     actions.push('Practice converting between mixed fractions and improper fractions.');
     actions.push('Revise finding equivalent fractions and simplifying to lowest terms.');
-    actions.push('Solve unlike fraction addition and subtraction using LCM method.');
+    actions.push('Master unlike fraction addition and subtraction using the LCM method.');
   } else if (lower.includes('decimal')) {
     actions.push('Practice place value representation (tenths, hundredths, thousandths).');
-    actions.push('Practice alignment of decimal points during addition and subtraction.');
-    actions.push('Convert decimals to fractions and solve word problems on length and money.');
+    actions.push('Revise alignment of decimal points during addition and subtraction.');
+    actions.push('Convert decimals to fractions and solve practical word problems on money and measurement.');
   } else if (lower.includes('algebra')) {
     actions.push('Practice forming algebraic expressions from daily life statements.');
     actions.push('Revise identifying terms, factors, and coefficients in algebraic equations.');
     actions.push('Solve linear equations using trial & error and systematic balancing methods.');
-  } else if (lower.includes('geometry') || lower.includes('shape')) {
+  } else if (lower.includes('geometry') || lower.includes('geometrical') || lower.includes('shape')) {
     actions.push('Revise geometric definitions: Points, Line Segments, Rays, Parallel and Intersecting Lines.');
-    actions.push('Practice measuring and classifying angles (Acute, Right, Obtuse, Straight).');
-    actions.push('Practice identifying properties of polygons, triangles, and quadrilaterals.');
+    actions.push('Practice measuring and classifying angles (Acute, Right, Obtuse, Reflex).');
+    actions.push('Practice identifying properties of polygons, triangles, and 3D shapes.');
   } else if (lower.includes('mensuration') || lower.includes('perimeter') || lower.includes('area')) {
     actions.push('Memorize formulas for Perimeter (Square = 4a, Rectangle = 2(l+b)) and Area.');
-    actions.push('Solve word problems involving fencing boundaries and flooring rooms.');
-    actions.push('Practice unit conversions (cm² to m²).');
+    actions.push('Solve word problems involving fencing boundaries and room flooring.');
+    actions.push('Practice unit conversions (e.g. cm² to m²).');
+  } else if (lower.includes('data handling') || lower.includes('data')) {
+    actions.push('Practice constructing and reading tally charts and pictographs.');
+    actions.push('Practice drawing and interpreting bar graphs with uniform scales.');
+  } else if (lower.includes('ratio') || lower.includes('proportion')) {
+    actions.push('Practice simplifying ratios to simplest form and checking proportions.');
+    actions.push('Solve real-world word problems using the Unitary Method.');
   } else {
-    actions.push('Re-read textbook theory and solve key solved examples.');
-    actions.push('Review recorded test answers to understand mistakes made in previous attempts.');
-    actions.push('Attempt 2 additional sample practice tests to improve speed and accuracy.');
+    actions.push('Re-read NCERT textbook theory and solve key solved examples.');
+    actions.push('Review recorded test answers to rectify conceptual mistakes.');
+    actions.push('Attempt additional chapter sample tests to build speed and accuracy.');
   }
 
-  if (status === 'Critical Improvement Required') {
-    actions.unshift('Critical: Schedule a 1-on-1 revision session with the teacher.');
+  if (scorePct < 50 || status === 'Critical Improvement Required') {
+    actions.unshift('Immediate review required for basic definitions and fundamental rules.');
+    actions.push('Seek guided 1-on-1 clarification from subject teacher.');
+  } else if (scorePct < 70 || status === 'Needs Practice') {
+    actions.unshift('Focus on step-by-step problem solving to eliminate calculation oversights.');
+  } else if (scorePct >= 85 || status === 'Excellent') {
+    actions.push('Challenge yourself with Higher Order Thinking Skills (HOTS) and Mathematics Olympiad questions.');
   }
 
   return actions;
@@ -178,10 +190,14 @@ export function generateTeacherRemarks(
 }
 
 export function calculateStudentAnalytics(
-  studentName: string,
-  studentClass: string,
-  attempts: Attempt[]
+  studentOrName: Student | string,
+  classOrAttempts: string | Attempt[],
+  optionalAttempts?: Attempt[]
 ): StudentAnalytics {
+  let studentName = typeof studentOrName === 'string' ? studentOrName : studentOrName.name;
+  let studentClass = typeof studentOrName === 'string' ? (classOrAttempts as string) : studentOrName.class;
+  let attempts: Attempt[] = Array.isArray(classOrAttempts) ? classOrAttempts : (optionalAttempts || []);
+
   const totalTestsAttempted = attempts.length;
 
   const defaultStandardLessons = [
@@ -300,7 +316,7 @@ export function calculateStudentAnalytics(
   const topicPerformances: TopicPerformance[] = Object.entries(topicMap).map(([topic, data]) => {
     const avgPct = Math.round((data.totalScore / (data.totalQuestions || 1)) * 100);
     const status = getStatusFromPercentage(avgPct);
-    const recommendedActions = getRecommendationsForTopic(topic, status);
+    const recommendedActions = getRecommendationsForTopic(topic, status, avgPct);
 
     return {
       topic,

@@ -9,6 +9,9 @@ import {
   Tooltip,
   ResponsiveContainer,
   Cell,
+  PieChart,
+  Pie,
+  Legend,
 } from 'recharts';
 import {
   X,
@@ -23,6 +26,7 @@ import {
   Check,
   Copy,
   BarChart2,
+  PieChart as PieChartIcon,
 } from 'lucide-react';
 
 interface ParentProgressCardModalProps {
@@ -98,12 +102,18 @@ export const ParentProgressCardModal: React.FC<ParentProgressCardModalProps> = (
       )
       .join('');
 
-    const weakItems = analytics.weakTopics
+    const improvementItems = (analytics.topicPerformances.length > 0 ? analytics.topicPerformances : analytics.weakTopics)
       .map(
         (w) => `
-        <li style="margin-bottom: 6px; font-size: 13px; color: #334155;">
-          <strong>${w.topic} (${w.avgPercentage}%):</strong> ${w.recommendedActions.join(' ')}
-        </li>
+        <div style="margin-bottom: 12px; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px;">
+          <div style="font-weight: 700; color: #1e293b; font-size: 13px; display: flex; justify-content: space-between;">
+            <span>${w.topic}</span>
+            <span style="color: #2563eb;">${w.avgPercentage}% (${w.status})</span>
+          </div>
+          <ul style="padding-left: 18px; margin-top: 6px; margin-bottom: 0; font-size: 12px; color: #475569;">
+            ${w.recommendedActions.map((act) => `<li style="margin-bottom: 4px;">${act}</li>`).join('')}
+          </ul>
+        </div>
       `
       )
       .join('');
@@ -189,16 +199,10 @@ export const ParentProgressCardModal: React.FC<ParentProgressCardModalProps> = (
             </tbody>
           </table>
 
-          ${
-            analytics.weakTopics.length > 0
-              ? `
-              <h3 style="font-size: 15px; margin-top: 24px; margin-bottom: 8px; color: #991b1b;">Recommended Improvement Plan</h3>
-              <ul style="padding-left: 20px; margin-top: 4px;">
-                ${weakItems}
-              </ul>
-            `
-              : ''
-          }
+          <h3 style="font-size: 15px; margin-top: 24px; margin-bottom: 8px; color: #1e3a8a;">Areas for Improvement</h3>
+          <div style="margin-top: 8px;">
+            ${improvementItems}
+          </div>
 
           <div class="remarks-box">
             <strong style="color: #1e3a8a; display: block; margin-bottom: 4px;">Teacher Remarks & Feedback:</strong>
@@ -405,6 +409,55 @@ export const ParentProgressCardModal: React.FC<ParentProgressCardModalProps> = (
             </div>
           </div>
 
+          {/* Overall Performance Pie Chart Section */}
+          <div className="bg-slate-800/40 border border-slate-800 rounded-2xl p-6 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+              <div>
+                <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                  <PieChartIcon className="w-4 h-4 text-purple-400" />
+                  <span>Overall Performance Pie Chart</span>
+                </h4>
+                <p className="text-[11px] text-slate-400 mt-0.5">
+                  Breakdown of accuracy and response distribution across all test attempts.
+                </p>
+              </div>
+            </div>
+
+            <div className="w-full h-60 pt-1">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={[
+                      { name: 'Correct Answers', value: analytics.correctPercentage || (analytics.avgPercentage > 0 ? analytics.avgPercentage : 1), color: '#10b981' },
+                      { name: 'Wrong Answers', value: analytics.wrongPercentage || (100 - analytics.avgPercentage > 0 ? 100 - analytics.avgPercentage : 0), color: '#ef4444' },
+                      { name: 'Unanswered', value: analytics.unansweredPercentage || 0, color: '#f59e0b' },
+                    ].filter((d) => d.value > 0)}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={50}
+                    outerRadius={80}
+                    paddingAngle={4}
+                    dataKey="value"
+                    label={(entry) => `${entry.name}: ${entry.value}%`}
+                  >
+                    {[
+                      { name: 'Correct Answers', color: '#10b981' },
+                      { name: 'Wrong Answers', color: '#ef4444' },
+                      { name: 'Unanswered', color: '#f59e0b' },
+                    ].map((entry, index) => (
+                      <Cell key={`pie-cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '10px', color: '#fff' }}
+                    formatter={(val: any) => [`${val}%`, 'Accuracy']}
+                  />
+                  <Legend wrapperStyle={{ fontSize: '11px', color: '#94a3b8' }} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
           {/* Topic Performance Table */}
           <div className="bg-slate-800/40 border border-slate-800 rounded-2xl p-6 space-y-4">
             <h4 className="text-sm font-bold text-white flex items-center gap-2">
@@ -454,34 +507,44 @@ export const ParentProgressCardModal: React.FC<ParentProgressCardModalProps> = (
             )}
           </div>
 
-          {/* Improvement Areas & Action Items */}
-          {analytics.weakTopics.length > 0 && (
-            <div className="bg-amber-950/20 border border-amber-500/30 rounded-2xl p-6 space-y-3">
-              <h4 className="text-sm font-bold text-amber-300 flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 text-amber-400" />
-                <span>Recommended Improvement Areas & Action Plan</span>
-              </h4>
+          {/* Areas for Improvement */}
+          <div className="bg-amber-950/20 border border-amber-500/30 rounded-2xl p-6 space-y-4">
+            <h4 className="text-sm font-bold text-amber-300 flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 text-amber-400" />
+              <span>Areas for Improvement</span>
+            </h4>
 
-              <div className="space-y-3">
-                {analytics.weakTopics.map((wt) => (
-                  <div
-                    key={wt.topic}
-                    className="bg-slate-900/80 border border-slate-800 p-4 rounded-xl space-y-2"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="font-bold text-white text-xs">{wt.topic}</span>
-                      <span className="text-[11px] font-bold text-amber-400">{wt.avgPercentage}% Score</span>
-                    </div>
-                    <ul className="list-disc list-inside text-xs text-slate-300 space-y-1 pl-1">
-                      {wt.recommendedActions.map((action, idx) => (
-                        <li key={idx}>{action}</li>
-                      ))}
-                    </ul>
+            <div className="space-y-3">
+              {(analytics.topicPerformances.length > 0 ? analytics.topicPerformances : analytics.weakTopics).map((tp) => (
+                <div
+                  key={tp.topic}
+                  className="bg-slate-900/80 border border-slate-800 p-4 rounded-xl space-y-2"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-white text-xs">{tp.topic}</span>
+                    <span
+                      className={`text-[11px] font-bold ${
+                        tp.avgPercentage >= 85
+                          ? 'text-emerald-400'
+                          : tp.avgPercentage >= 70
+                          ? 'text-blue-400'
+                          : tp.avgPercentage >= 50
+                          ? 'text-amber-400'
+                          : 'text-red-400'
+                      }`}
+                    >
+                      {tp.avgPercentage}% ({tp.status})
+                    </span>
                   </div>
-                ))}
-              </div>
+                  <ul className="list-disc list-inside text-xs text-slate-300 space-y-1.5 pl-1">
+                    {tp.recommendedActions.map((action, idx) => (
+                      <li key={idx}>{action}</li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
             </div>
-          )}
+          </div>
 
           {/* Teacher Remarks Box */}
           <div className="bg-slate-800/40 border border-slate-800 rounded-2xl p-6 space-y-3">

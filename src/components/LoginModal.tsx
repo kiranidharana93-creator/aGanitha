@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { UserRole, Student } from '../types';
-import { getOrCreateStudent } from '../services/db';
-import { User, Shield, GraduationCap, ArrowRight, Eye, EyeOff } from 'lucide-react';
+import { authenticateStudent } from '../services/db';
+import { User, Shield, GraduationCap, ArrowRight, Eye, EyeOff, Lock, AlertTriangle, Key } from 'lucide-react';
+import { ChangePasswordModal } from './ChangePasswordModal';
 
 interface LoginModalProps {
   onStudentLogin: (student: Student) => void;
@@ -12,10 +13,12 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onStudentLogin, onAdminL
   const [roleTab, setRoleTab] = useState<UserRole>('student');
 
   // Student Form state
-  const [studentName, setStudentName] = useState('');
-  const [studentClass, setStudentClass] = useState('Class 6');
+  const [studentIdInput, setStudentIdInput] = useState('');
+  const [studentPassword, setStudentPassword] = useState('');
+  const [showStudentPassword, setShowStudentPassword] = useState(false);
   const [studentError, setStudentError] = useState('');
   const [isStudentLoading, setIsStudentLoading] = useState(false);
+  const [pendingPasswordChangeStudent, setPendingPasswordChangeStudent] = useState<Student | null>(null);
 
   // Admin Form state
   const [adminEmail, setAdminEmail] = useState('');
@@ -23,58 +26,87 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onStudentLogin, onAdminL
   const [showPassword, setShowPassword] = useState(false);
   const [adminError, setAdminError] = useState('');
 
-  const classOptions = ['Class 6', 'Class 7', 'Class 8', 'Class 9', 'Class 10'];
-
   const handleStudentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!studentName.trim()) {
-      setStudentError('Please enter your full name');
+    if (!studentIdInput.trim()) {
+      setStudentError('Please enter your Student ID (e.g. C6-2026-0001)');
       return;
     }
-
-    const finalClass = studentClass;
+    if (!studentPassword.trim()) {
+      setStudentError('Please enter your Password');
+      return;
+    }
 
     setStudentError('');
     setIsStudentLoading(true);
 
     try {
-      const student = await getOrCreateStudent(studentName, finalClass);
-      onStudentLogin(student);
+      const res = await authenticateStudent(studentIdInput, studentPassword);
+      if (res.student) {
+        if (!res.student.isPasswordChanged) {
+          // First time login -> Force password change
+          setPendingPasswordChangeStudent(res.student);
+        } else {
+          onStudentLogin(res.student);
+        }
+      } else {
+        setStudentError('Access Denied: Only registered students can access the portal. Please check your credentials or contact your administrator.');
+      }
     } catch (err) {
       console.error(err);
-      setStudentError('Unable to log in student. Please try again.');
+      setStudentError('Access Denied: Unable to authenticate student. Please check your Student ID and Password.');
     } finally {
       setIsStudentLoading(false);
     }
   };
 
+  const handlePasswordChanged = (updatedStudent: Student) => {
+    setPendingPasswordChangeStudent(null);
+    onStudentLogin(updatedStudent);
+  };
+
   const handleAdminSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Validate credentials securely without embedding plain account text in constants
+    if (!adminEmail.trim()) {
+      setAdminError('Please enter admin email');
+      return;
+    }
+    if (!adminPassword.trim()) {
+      setAdminError('Please enter password');
+      return;
+    }
+
     const targetEmail = adminEmail.trim().toLowerCase();
     const encodedTarget = typeof btoa !== 'undefined' ? btoa(targetEmail) : '';
     
-    // Check admin authorization
     if (encodedTarget === 'a2lyYW5pZGhhcmFuYTkzQGdtYWlsLmNvbQ==' && adminPassword.trim().length > 0) {
       setAdminError('');
       onAdminLogin(adminEmail.trim());
     } else {
-      setAdminError('Invalid admin credentials');
+      setAdminError('Invalid admin email or password');
       setAdminPassword('');
     }
   };
+
+  if (pendingPasswordChangeStudent) {
+    return (
+      <ChangePasswordModal
+        student={pendingPasswordChangeStudent}
+        onPasswordChanged={handlePasswordChanged}
+      />
+    );
+  }
 
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-slate-900 flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-slate-800 border border-slate-700/80 rounded-2xl shadow-2xl overflow-hidden my-8">
         {/* Header Branding Banner */}
-        <div className="bg-gradient-to-r from-blue-700 via-indigo-700 to-slate-800 p-6 text-white text-center relative">
-          <div className="inline-flex p-3 rounded-2xl bg-white/10 backdrop-blur-md mb-3 border border-white/20 shadow-lg">
-            <GraduationCap className="w-8 h-8 text-white" />
+        <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 p-7 text-white text-center relative rounded-t-2xl">
+          <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 backdrop-blur border border-white/20 shadow-lg">
+            <Shield className="h-7 w-7 text-white" />
           </div>
-          <h2 className="text-2xl font-bold tracking-tight">CBSE Maths Examination</h2>
-          <p className="text-xs text-blue-100 mt-1">Official Student & Teacher Testing Portal</p>
+          <h1 className="text-2xl font-extrabold tracking-tight text-white">CBSE Maths Examination</h1>
+          <p className="text-xs text-blue-100 mt-1 font-medium">Official Student & Teacher Testing Portal</p>
         </div>
 
         {/* Role Selection Tabs */}
@@ -106,112 +138,157 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onStudentLogin, onAdminL
         </div>
 
         {/* Tab Content */}
-        <div className="p-6">
+        <div className="p-6 space-y-6">
           {roleTab === 'student' ? (
-            <form onSubmit={handleStudentSubmit} className="space-y-4">
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-300 block">
-                  Student Name <span className="text-red-400">*</span>
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={studentName}
-                    onChange={(e) => setStudentName(e.target.value)}
-                    placeholder="Enter your full name (e.g. Rahul Sharma)"
-                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                    required
-                  />
+            <div className="space-y-5">
+              <form onSubmit={handleStudentSubmit} className="space-y-4">
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-slate-300 block">
+                    Student ID <span className="text-red-400">*</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={studentIdInput}
+                      onChange={(e) => setStudentIdInput(e.target.value)}
+                      placeholder="e.g. C6-2026-0001"
+                      className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 uppercase tracking-wider font-mono"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-slate-300 block">
+                    Password <span className="text-red-400">*</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showStudentPassword ? 'text' : 'password'}
+                      value={studentPassword}
+                      onChange={(e) => setStudentPassword(e.target.value)}
+                      placeholder="Enter student password"
+                      className="w-full bg-slate-900 border border-slate-700 rounded-xl pl-4 pr-11 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowStudentPassword(!showStudentPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 p-1 cursor-pointer"
+                      aria-label={showStudentPassword ? 'Hide password' : 'Show password'}
+                    >
+                      {showStudentPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                {studentError && (
+                  <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-xs text-red-400 flex items-start gap-2">
+                    <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-red-400" />
+                    <div>
+                      <strong className="font-bold block">Access Denied</strong>
+                      <p className="mt-0.5">{studentError}</p>
+                    </div>
+                  </div>
+                )}
+
+                <div className="pt-2">
+                  <button
+                    type="submit"
+                    disabled={isStudentLoading}
+                    className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold py-3 px-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                  >
+                    {isStudentLoading ? (
+                      <span>Authenticating Credentials...</span>
+                    ) : (
+                      <>
+                        <span>Login to Exam Portal</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+
+              {/* Demo Student Credentials Accordion Box */}
+              <div className="p-3.5 bg-slate-900/90 border border-slate-700/80 rounded-xl space-y-2">
+                <div className="flex items-center gap-2 text-xs font-bold text-amber-400">
+                  <Key className="w-3.5 h-3.5" />
+                  <span>Registered Demo Student Credentials:</span>
+                </div>
+                <div className="text-[11px] font-mono text-slate-300 space-y-1">
+                  <div className="flex justify-between border-b border-slate-800 pb-1">
+                    <span>Class 6: <strong className="text-white">C6-2026-0001</strong></span>
+                    <span className="text-amber-300">Pass: RK6421</span>
+                  </div>
+                  <div className="flex justify-between border-b border-slate-800 pb-1">
+                    <span>Class 6: <strong className="text-white">C6-2026-0002</strong></span>
+                    <span className="text-amber-300">Pass: AS6422</span>
+                  </div>
+                  <div className="flex justify-between border-b border-slate-800 pb-1">
+                    <span>Class 7: <strong className="text-white">C7-2026-0001</strong></span>
+                    <span className="text-amber-300">Pass: PP7421</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Class 8: <strong className="text-white">C8-2026-0001</strong></span>
+                    <span className="text-amber-300">Pass: AS8421</span>
+                  </div>
                 </div>
               </div>
-
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-300 block">
-                  Class / Grade <span className="text-red-400">*</span>
-                </label>
-                <select
-                  value={studentClass}
-                  onChange={(e) => setStudentClass(e.target.value)}
-                  className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all cursor-pointer"
-                >
-                  {classOptions.map((opt) => (
-                    <option key={opt} value={opt}>
-                      {opt}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {studentError && (
-                <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-xs text-red-400">
-                  {studentError}
-                </div>
-              )}
-
-              <div className="pt-2">
-                <button
-                  type="submit"
-                  disabled={isStudentLoading}
-                  className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold py-3 px-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-                >
-                  {isStudentLoading ? (
-                    <span>Accessing Portal...</span>
-                  ) : (
-                    <>
-                      <span>Enter Test Portal</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
+            </div>
           ) : (
-            <form onSubmit={handleAdminSubmit} className="space-y-4">
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-300 block">Admin Email</label>
+            <form onSubmit={handleAdminSubmit} className="space-y-5">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-blue-100 block">
+                  Admin Email <span className="text-red-400">*</span>
+                </label>
                 <input
                   type="email"
                   value={adminEmail}
                   onChange={(e) => setAdminEmail(e.target.value)}
                   placeholder="Enter admin email"
-                  className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  autoComplete="username"
+                  className="w-full bg-[#08142b] border border-blue-500/40 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/30 transition-all"
                   required
                 />
               </div>
 
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-300 block">Password</label>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-blue-100 block">
+                  Password <span className="text-red-400">*</span>
+                </label>
                 <div className="relative">
                   <input
                     type={showPassword ? 'text' : 'password'}
                     value={adminPassword}
                     onChange={(e) => setAdminPassword(e.target.value)}
-                    placeholder="Enter password"
-                    className="w-full bg-slate-900 border border-slate-700 rounded-xl pl-4 pr-11 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    placeholder="Enter admin password"
+                    autoComplete="current-password"
+                    className="w-full bg-[#08142b] border border-blue-500/40 rounded-xl pl-4 pr-11 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/30 transition-all"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 transition-colors p-1 cursor-pointer focus:outline-none"
-                    title={showPassword ? 'Hide password' : 'Show password'}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors p-1 cursor-pointer focus:outline-none"
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
                   >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
               </div>
 
               {adminError && (
-                <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-xs text-red-400">
-                  {adminError}
+                <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-xs text-red-400 font-medium flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 shrink-0" />
+                  <span>{adminError}</span>
                 </div>
               )}
 
               <div className="pt-2">
                 <button
                   type="submit"
-                  className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 px-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer hover:scale-[1.01]"
                 >
                   <Shield className="w-4 h-4" />
                   <span>Login to Admin Dashboard</span>

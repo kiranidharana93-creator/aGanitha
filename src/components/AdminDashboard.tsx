@@ -20,6 +20,7 @@ import { TestModal } from './TestModal';
 import { QuestionModal } from './QuestionModal';
 import { ResultDetailsModal } from './ResultDetailsModal';
 import { AdminAnalyticsDashboard } from './AdminAnalyticsDashboard';
+import { StudentManagement } from './StudentManagement';
 import {
   FileText,
   Plus,
@@ -39,11 +40,14 @@ import {
   Layers,
   Sparkles,
   BarChart2,
+  Users,
+  MessageSquare,
+  Send,
 } from 'lucide-react';
 import { Student } from '../types';
 
 export const AdminDashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'tests' | 'questions' | 'results' | 'analytics'>('tests');
+  const [activeTab, setActiveTab] = useState<'tests' | 'questions' | 'students' | 'results' | 'analytics'>('tests');
 
   // Data states
   const [tests, setTests] = useState<Test[]>([]);
@@ -72,6 +76,39 @@ export const AdminDashboard: React.FC = () => {
     title?: string;
     count?: number;
   } | null>(null);
+
+  // WhatsApp Meta Graph API Debugging States
+  const [isTestingWhatsApp, setIsTestingWhatsApp] = useState(false);
+  const [testWhatsAppResult, setTestWhatsAppResult] = useState<{
+    success?: boolean;
+    statusCode?: number;
+    apiUrl?: string;
+    metaResponse?: any;
+    error?: string;
+  } | null>(null);
+
+  const handleTestWhatsApp = async () => {
+    setIsTestingWhatsApp(true);
+    setTestWhatsAppResult(null);
+    try {
+      const res = await fetch('/api/test-whatsapp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      const data = await res.json();
+      setTestWhatsAppResult(data);
+    } catch (err: any) {
+      console.error('Test WhatsApp error:', err);
+      setTestWhatsAppResult({
+        success: false,
+        statusCode: 500,
+        error: err.message || String(err),
+        metaResponse: { fetchError: err.message || String(err) },
+      });
+    } finally {
+      setIsTestingWhatsApp(false);
+    }
+  };
 
   const loadData = async () => {
     setIsLoading(true);
@@ -518,6 +555,66 @@ export const AdminDashboard: React.FC = () => {
         </div>
       </div>
 
+      {/* WhatsApp Meta Graph API Debug Panel */}
+      <div className="bg-slate-900 border border-emerald-500/30 rounded-2xl p-5 shadow-xl space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center shrink-0">
+              <MessageSquare className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                <span>WhatsApp Parent Notification Debugger</span>
+                <span className="text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-mono">
+                  Meta Graph API v25.0
+                </span>
+              </h3>
+              <p className="text-xs text-slate-400 mt-0.5">
+                Send a test template payload directly to verified Meta test recipient (<span className="text-emerald-300 font-mono font-bold">919353913218</span>).
+              </p>
+            </div>
+          </div>
+
+          <button
+            onClick={handleTestWhatsApp}
+            disabled={isTestingWhatsApp}
+            className="bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold py-2.5 px-5 rounded-xl text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg hover:scale-[1.02] shrink-0"
+          >
+            <Send className="w-4 h-4" />
+            <span>{isTestingWhatsApp ? 'Dispatching to Meta Graph API...' : 'Test WhatsApp API'}</span>
+          </button>
+        </div>
+
+        {testWhatsAppResult && (
+          <div className="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-3 font-mono text-xs">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2">
+              <span className="text-slate-400">Final API URL:</span>
+              <span className="text-indigo-400 font-bold break-all">{testWhatsAppResult.apiUrl || 'N/A'}</span>
+            </div>
+
+            <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+              <span className="text-slate-400">HTTP Status Code:</span>
+              <span
+                className={`font-bold px-2 py-0.5 rounded ${
+                  testWhatsAppResult.statusCode === 200 || testWhatsAppResult.statusCode === 201
+                    ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
+                    : 'bg-red-500/20 text-red-400 border border-red-500/40'
+                }`}
+              >
+                {testWhatsAppResult.statusCode || 'N/A'} {testWhatsAppResult.success ? 'OK (SUCCESS)' : 'ERROR / FAILED'}
+              </span>
+            </div>
+
+            <div>
+              <p className="text-slate-400 mb-1 font-sans text-xs font-semibold">Full Meta Response Body JSON:</p>
+              <pre className="bg-slate-900 border border-slate-800 p-3 rounded-lg text-emerald-300 overflow-x-auto text-[11px] leading-relaxed max-h-80 whitespace-pre-wrap break-all">
+                {JSON.stringify(testWhatsAppResult.metaResponse || testWhatsAppResult, null, 2)}
+              </pre>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Navigation Tabs */}
       <div className="flex border-b border-slate-800 space-x-1">
         <button
@@ -545,6 +642,18 @@ export const AdminDashboard: React.FC = () => {
         </button>
 
         <button
+          onClick={() => setActiveTab('students')}
+          className={`flex items-center gap-2 px-5 py-3 text-xs font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
+            activeTab === 'students'
+              ? 'border-indigo-500 text-indigo-400 bg-indigo-500/5'
+              : 'border-transparent text-slate-400 hover:text-slate-200'
+          }`}
+        >
+          <Users className="w-4 h-4" />
+          <span>Student Management & Credentials</span>
+        </button>
+
+        <button
           onClick={() => setActiveTab('results')}
           className={`flex items-center gap-2 px-5 py-3 text-xs font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
             activeTab === 'results'
@@ -568,6 +677,9 @@ export const AdminDashboard: React.FC = () => {
           <span>School Analytics & Progress Cards</span>
         </button>
       </div>
+
+      {/* TAB: STUDENT MANAGEMENT */}
+      {activeTab === 'students' && <StudentManagement />}
 
       {/* TAB 4: SCHOOL ANALYTICS */}
       {activeTab === 'analytics' && (() => {

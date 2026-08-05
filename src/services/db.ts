@@ -12,7 +12,7 @@ import {
   serverTimestamp,
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { Student, Test, Question, Attempt } from '../types';
+import { Student, Test, Question, Attempt, DraftAttempt } from '../types';
 
 // Collections references
 const STUDENTS_COL = 'students';
@@ -59,6 +59,267 @@ export function cleanQuestionText(text: string): string {
   cleaned = cleaned.replace(/^[\s\-\–\—\:\.]+/g, '');
 
   return cleaned.trim();
+}
+
+export function formatParentPhone(mobile: string): string {
+  if (!mobile) return '';
+  const digits = mobile.replace(/\D/g, '');
+  if (digits.length === 10) {
+    return `91${digits}`;
+  }
+  if (digits.length === 12 && digits.startsWith('91')) {
+    return digits;
+  }
+  return digits || mobile.trim();
+}
+
+// Default initial registered students for seamless testing
+export const INITIAL_REGISTERED_STUDENTS: Student[] = [
+  {
+    id: 'std_rahul_6',
+    studentId: 'C6-2026-0001',
+    name: 'Rahul Kumar',
+    class: 'Class 6',
+    section: 'A',
+    rollNumber: 23,
+    parentMobile: '919876543210',
+    password: 'RK6421',
+    isPasswordChanged: false,
+    status: 'ACTIVE',
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'std_ananya_6',
+    studentId: 'C6-2026-0002',
+    name: 'Ananya Sharma',
+    class: 'Class 6',
+    section: 'B',
+    rollNumber: 12,
+    parentMobile: '919812345678',
+    password: 'AS6422',
+    isPasswordChanged: false,
+    status: 'ACTIVE',
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'std_priya_7',
+    studentId: 'C7-2026-0001',
+    name: 'Priya Patel',
+    class: 'Class 7',
+    section: 'A',
+    rollNumber: 15,
+    parentMobile: '919765432109',
+    password: 'PP7421',
+    isPasswordChanged: false,
+    status: 'ACTIVE',
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'std_aarav_8',
+    studentId: 'C8-2026-0001',
+    name: 'Aarav Singh',
+    class: 'Class 8',
+    section: 'A',
+    rollNumber: 4,
+    parentMobile: '919654321098',
+    password: 'AS8421',
+    isPasswordChanged: false,
+    status: 'ACTIVE',
+    createdAt: new Date().toISOString(),
+  },
+];
+
+export function generateStudentId(studentClass: string, index: number): string {
+  const classNum = studentClass.replace(/[^0-9]/g, '') || '6';
+  const year = new Date().getFullYear();
+  const seq = String(index).padStart(4, '0');
+  return `C${classNum}-${year}-${seq}`;
+}
+
+export function generateTempPassword(name: string): string {
+  const parts = name.trim().split(/\s+/);
+  let initials = 'ST';
+  if (parts.length >= 2) {
+    initials = (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  } else if (parts[0] && parts[0].length >= 2) {
+    initials = parts[0].substring(0, 2).toUpperCase();
+  }
+  const randomDigits = Math.floor(1000 + Math.random() * 9000);
+  return `${initials}${randomDigits}`;
+}
+
+export async function getAllRegisteredStudents(): Promise<Student[]> {
+  try {
+    const snap = await getDocs(collection(db, STUDENTS_COL));
+    if (snap.empty) {
+      await seedDefaultStudents();
+      return INITIAL_REGISTERED_STUDENTS;
+    }
+    const students: Student[] = [];
+    snap.docs.forEach((docSnap) => {
+      const data = docSnap.data();
+      students.push({
+        id: docSnap.id,
+        studentId: data.studentId || docSnap.id,
+        name: data.name || 'Student',
+        class: data.class || 'Class 6',
+        section: data.section || 'A',
+        rollNumber: data.rollNumber || '',
+        parentMobile: formatParentPhone(data.parentMobile || ''),
+        password: data.password || 'RK6421',
+        isPasswordChanged: Boolean(data.isPasswordChanged),
+        status: data.status || 'ACTIVE',
+        createdAt: data.createdAt || new Date().toISOString(),
+      });
+    });
+    return students;
+  } catch (err) {
+    console.error('Error fetching registered students:', err);
+    return INITIAL_REGISTERED_STUDENTS;
+  }
+}
+
+export async function seedDefaultStudents(): Promise<void> {
+  try {
+    for (const student of INITIAL_REGISTERED_STUDENTS) {
+      await addDoc(collection(db, STUDENTS_COL), {
+        studentId: student.studentId,
+        name: student.name,
+        class: student.class,
+        section: student.section,
+        rollNumber: student.rollNumber,
+        parentMobile: student.parentMobile,
+        password: student.password,
+        isPasswordChanged: student.isPasswordChanged,
+        status: student.status,
+        createdAt: student.createdAt,
+      });
+    }
+  } catch (err) {
+    console.error('Error seeding default students:', err);
+  }
+}
+
+export async function createRegisteredStudent(input: {
+  name: string;
+  class: string;
+  section?: string;
+  rollNumber?: string | number;
+  parentMobile: string;
+}): Promise<Student> {
+  const allStudents = await getAllRegisteredStudents();
+  const sameClassCount = allStudents.filter((s) => s.class === input.class).length;
+  const newStudentId = generateStudentId(input.class, sameClassCount + 1);
+  const tempPassword = generateTempPassword(input.name);
+
+  const newStudentData = {
+    studentId: newStudentId,
+    name: input.name.trim(),
+    class: input.class.trim(),
+    section: input.section?.trim() || 'A',
+    rollNumber: input.rollNumber || '',
+    parentMobile: formatParentPhone(input.parentMobile),
+    password: tempPassword,
+    isPasswordChanged: false,
+    status: 'ACTIVE' as const,
+    createdAt: new Date().toISOString(),
+  };
+
+  try {
+    const docRef = await addDoc(collection(db, STUDENTS_COL), newStudentData);
+    return {
+      id: docRef.id,
+      ...newStudentData,
+    };
+  } catch (err) {
+    console.error('Error creating student in Firestore:', err);
+    return {
+      id: 'std_' + Date.now(),
+      ...newStudentData,
+    };
+  }
+}
+
+export async function authenticateStudent(
+  studentIdInput: string,
+  passwordInput: string
+): Promise<{ student: Student | null; errorReason?: 'not_found' | 'invalid_password' }> {
+  const cleanId = studentIdInput.trim().toUpperCase();
+  const cleanPass = passwordInput.trim();
+
+  const allStudents = await getAllRegisteredStudents();
+  
+  const student = allStudents.find(
+    (s) =>
+      (s.studentId && s.studentId.toUpperCase() === cleanId) ||
+      (s.id && s.id.toUpperCase() === cleanId)
+  );
+
+  if (!student) {
+    return { student: null, errorReason: 'not_found' };
+  }
+
+  if (student.password && student.password !== cleanPass) {
+    return { student: null, errorReason: 'invalid_password' };
+  }
+
+  return { student };
+}
+
+export async function updateStudentPassword(studentId: string, newPassword: string): Promise<void> {
+  try {
+    const allStudents = await getAllRegisteredStudents();
+    const student = allStudents.find((s) => s.id === studentId || s.studentId === studentId);
+    if (student) {
+      student.password = newPassword;
+      student.isPasswordChanged = true;
+      if (student.id) {
+        const docRef = doc(db, STUDENTS_COL, student.id);
+        await updateDoc(docRef, {
+          password: newPassword,
+          isPasswordChanged: true,
+        });
+      }
+    }
+  } catch (err) {
+    console.error('Error updating student password:', err);
+  }
+}
+
+export async function deleteStudent(studentId: string): Promise<void> {
+  try {
+    const docRef = doc(db, STUDENTS_COL, studentId);
+    await deleteDoc(docRef);
+  } catch (err) {
+    console.error('Error deleting student:', err);
+  }
+}
+
+export function saveDraftAttempt(draft: DraftAttempt): void {
+  try {
+    localStorage.setItem(`cbse_draft_exam_${draft.studentId}`, JSON.stringify(draft));
+  } catch (err) {
+    console.error('Error saving draft exam:', err);
+  }
+}
+
+export function getDraftAttempt(studentId: string): DraftAttempt | null {
+  try {
+    const raw = localStorage.getItem(`cbse_draft_exam_${studentId}`);
+    if (!raw) return null;
+    return JSON.parse(raw) as DraftAttempt;
+  } catch (err) {
+    console.error('Error loading draft exam:', err);
+    return null;
+  }
+}
+
+export function clearDraftAttempt(studentId: string): void {
+  try {
+    localStorage.removeItem(`cbse_draft_exam_${studentId}`);
+  } catch (err) {
+    console.error('Error clearing draft exam:', err);
+  }
 }
 
 /**

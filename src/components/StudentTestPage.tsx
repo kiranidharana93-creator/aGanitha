@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Student, Test, Question, Attempt } from '../types';
-import { getQuestionsByTestId, saveAttempt, normalizeAnswerKey } from '../services/db';
-import { Clock, CheckCircle2, XCircle, AlertTriangle, ChevronLeft, ChevronRight, Send, ArrowLeft, RefreshCw, Award, Lightbulb } from 'lucide-react';
+import { getQuestionsByTestId, saveAttempt, normalizeAnswerKey, saveDraftAttempt, clearDraftAttempt, getAttemptsForStudent } from '../services/db';
+import { extractTopicFromTitle, getRecommendationsForTopic, calculateStudentAnalytics } from '../utils/analytics';
+import { Clock, CheckCircle, CheckCircle2, XCircle, AlertTriangle, ChevronLeft, ChevronRight, Send, ArrowLeft, RefreshCw, Award, Lightbulb, Share2, Copy, Check, MessageSquare, Phone } from 'lucide-react';
 
 interface StudentTestPageProps {
   student: Student;
@@ -23,10 +24,27 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [completedAttempt, setCompletedAttempt] = useState<Attempt | null>(null);
+  const [copiedAlert, setCopiedAlert] = useState(false);
 
   // Per-Question Timer state (60 seconds per question)
   const [questionTimeLeft, setQuestionTimeLeft] = useState<number>(60);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Save Draft Exam Progress whenever student selects answers or moves question
+  useEffect(() => {
+    if (!completedAttempt && questions.length > 0 && !isLoading) {
+      saveDraftAttempt({
+        studentId: student.id,
+        testId: test.id,
+        testTitle: test.title,
+        testClass: test.class,
+        currentIndex: currentIndex,
+        selectedAnswers: selectedAnswers,
+        timeLeft: questionTimeLeft,
+        updatedAt: new Date().toISOString(),
+      });
+    }
+  }, [currentIndex, selectedAnswers, questionTimeLeft, completedAttempt, questions.length, isLoading, student.id, test.id, test.title, test.class]);
 
   // Load questions
   useEffect(() => {
@@ -137,6 +155,86 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
       };
 
       const saved = await saveAttempt(attemptData);
+      clearDraftAttempt(student.id);
+
+      // Fetch student's attempts to calculate full performance analytics
+      let studentAttempts: Attempt[] = [];
+      try {
+        studentAttempts = await getAttemptsForStudent(student.id);
+      } catch (e) {
+        studentAttempts = [];
+      }
+      if (!studentAttempts.some((a) => a.id === saved.id)) {
+        studentAttempts = [saved, ...studentAttempts];
+      }
+
+      const analytics = calculateStudentAnalytics(student.name, student.class, studentAttempts);
+      const percentage = Math.round((finalScore / (questions.length || 1)) * 100);
+      const statusText =
+        percentage >= 85
+          ? 'Excellent'
+          : percentage >= 70
+          ? 'Good'
+          : percentage >= 50
+          ? 'Needs Practice'
+          : 'Critical Improvement Required';
+
+      const topicName = extractTopicFromTitle(test.title);
+      const reportingPeriod = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+      const topicSummary = analytics.topicPerformances.length > 0
+        ? analytics.topicPerformances.map((t) => `• ${t.topic}: ${t.avgPercentage}% (${t.status})`).join('\n')
+        : `• ${topicName}: ${percentage}% (${statusText})`;
+
+      const teacherRemarks = analytics.teacherRemarks;
+
+      const actionItems = analytics.weakTopics.length > 0
+        ? analytics.weakTopics.map((t) => `• ${t.topic}: Immediate review required for basic definitions and fundamental rules.`).join('\n')
+        : analytics.topicPerformances.length > 0
+        ? analytics.topicPerformances.map((t) => `• ${t.topic}: Practice additional sample exercises to maintain high proficiency.`).join('\n')
+        : `• ${topicName}: Immediate review required for basic definitions and fundamental rules.`;
+
+      // Trigger automatic Parent WhatsApp notification in the background via backend API
+      try {
+        console.log('Sending WhatsApp progress card to:', student.parentMobile || 'N/A');
+        console.log('Student Name:', student.name);
+
+        const response = await fetch('/api/send-parent-whatsapp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            student: {
+              studentId: student.studentId || student.id,
+              name: student.name,
+              class: student.class,
+              parentMobile: student.parentMobile || '',
+            },
+            reportingPeriod,
+            overallPercentage: analytics.avgPercentage,
+            grade: analytics.grade,
+            testsAttempted: analytics.totalTestsAttempted,
+            topicSummary,
+            teacherRemarks,
+            actionItems,
+            // Direct fields as fallback
+            parentPhone: student.parentMobile || '',
+            parentMobile: student.parentMobile || '',
+            studentName: student.name,
+            studentClass: student.class,
+            topic: topicName,
+            score: finalScore,
+            totalMarks: questions.length,
+            percentage,
+            status: statusText,
+          }),
+        });
+
+        const data = await response.json();
+        console.log('WhatsApp Backend Response:', data);
+      } catch (e) {
+        console.warn('Background WhatsApp notification dispatch notice:', e);
+      }
+
       setCompletedAttempt(saved);
     } catch (err) {
       console.error('Failed to submit test:', err);
@@ -159,149 +257,70 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
     );
   }
 
-  // Completed Test Result View
+  // Completed Test Result View - Clean Student Confirmation
   if (completedAttempt) {
     const percentage = Math.round((completedAttempt.score / (completedAttempt.totalQuestions || 1)) * 100);
+    const statusText =
+      percentage >= 85
+        ? 'PASSED (Excellent)'
+        : percentage >= 70
+        ? 'PASSED (Good)'
+        : percentage >= 50
+        ? 'PASSED (Needs Practice)'
+        : 'NEEDS IMPROVEMENT';
     const isPassed = percentage >= 40;
+    const topicName = extractTopicFromTitle(test.title);
 
     return (
-      <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
-        {/* Score Header Card */}
-        <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950 border border-slate-700 rounded-2xl p-8 shadow-2xl text-center space-y-4">
-          <div className="w-16 h-16 rounded-full bg-blue-500/20 border border-blue-500/40 text-blue-400 flex items-center justify-center mx-auto shadow-inner">
-            <Award className="w-8 h-8" />
+      <div className="max-w-xl mx-auto px-4 py-12">
+        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl text-center space-y-6">
+          <div className="w-16 h-16 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center mx-auto shadow-inner">
+            <CheckCircle className="w-8 h-8" />
           </div>
 
           <div>
-            <span className="text-xs uppercase font-bold tracking-widest text-blue-400 bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20">
-              Attempt {completedAttempt.attemptNumber} Submitted
-            </span>
-            <h2 className="text-2xl font-extrabold text-white mt-2">{test.title}</h2>
-            <p className="text-xs text-slate-400 mt-1">
-              Student: <strong className="text-slate-200">{student.name}</strong> ({student.class})
-            </p>
+            <h2 className="text-2xl font-black text-white">Exam Submitted Successfully</h2>
+            <p className="text-xs text-slate-400 mt-1 font-medium">CBSE Mathematics Online Examination Portal</p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-xl mx-auto pt-2">
-            <div className="bg-slate-900/80 p-4 rounded-xl border border-slate-700">
-              <p className="text-[10px] text-slate-400 font-bold uppercase">Score Achieved</p>
-              <p className="text-2xl font-black text-white mt-0.5">
-                {completedAttempt.score} / {completedAttempt.totalQuestions}
-              </p>
+          <div className="bg-slate-950/80 border border-slate-800 rounded-2xl p-5 text-left space-y-3 font-medium text-xs">
+            <div className="flex justify-between items-center py-2 border-b border-slate-800/80">
+              <span className="text-slate-400">Topic</span>
+              <span className="text-white font-bold">{topicName}</span>
             </div>
-
-            <div className="bg-slate-900/80 p-4 rounded-xl border border-slate-700">
-              <p className="text-[10px] text-slate-400 font-bold uppercase">Percentage</p>
-              <p className={`text-2xl font-black mt-0.5 ${isPassed ? 'text-emerald-400' : 'text-amber-400'}`}>
-                {percentage}%
-              </p>
+            <div className="flex justify-between items-center py-2 border-b border-slate-800/80">
+              <span className="text-slate-400">Score</span>
+              <span className="text-white font-bold">{completedAttempt.score} / {completedAttempt.totalQuestions}</span>
             </div>
-
-            <div className="bg-slate-900/80 p-4 rounded-xl border border-slate-700">
-              <p className="text-[10px] text-slate-400 font-bold uppercase">Status</p>
-              <p className={`text-lg font-bold mt-1 ${isPassed ? 'text-emerald-400' : 'text-amber-400'}`}>
+            <div className="flex justify-between items-center py-2 border-b border-slate-800/80">
+              <span className="text-slate-400">Percentage</span>
+              <span className="text-emerald-400 font-bold">{percentage}%</span>
+            </div>
+            <div className="flex justify-between items-center py-2">
+              <span className="text-slate-400">Status</span>
+              <span className={`font-bold uppercase ${isPassed ? 'text-emerald-400' : 'text-amber-400'}`}>
                 {isPassed ? 'PASSED' : 'NEEDS PRACTICE'}
-              </p>
+              </span>
             </div>
           </div>
 
-          <button
-            onClick={onFinishTest}
-            className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-all text-xs cursor-pointer"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Return to Test Portal</span>
-          </button>
-        </div>
+          <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-semibold py-3.5 px-4 rounded-xl text-center space-y-1">
+            <p className="font-bold text-sm text-emerald-300">Result submitted successfully. Parent has been notified.</p>
+          </div>
 
-        {/* Detailed Question Review */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
-          <h3 className="text-base font-bold text-white border-b border-slate-800 pb-3 flex items-center gap-2">
-            <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-            <span>Answer Breakdown & Explanations</span>
-          </h3>
-
-          <div className="space-y-6">
-            {questions.map((q, idx) => {
-              const studentAnsKey = selectedAnswers[q.id];
-              const correctKey = normalizeAnswerKey(q.correctAnswer);
-              const isCorrect = studentAnsKey && normalizeAnswerKey(studentAnsKey) === correctKey;
-
-              const optionsMap: Record<string, string> = {
-                optionA: q.optionA,
-                optionB: q.optionB,
-                optionC: q.optionC,
-                optionD: q.optionD,
-              };
-
-              return (
-                <div
-                  key={q.id}
-                  className={`p-5 rounded-xl border ${
-                    isCorrect
-                      ? 'bg-emerald-950/20 border-emerald-500/30'
-                      : 'bg-slate-800/60 border-slate-700/80'
-                  } space-y-3`}
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <p className="text-sm font-semibold text-white">
-                      <span className="text-blue-400 mr-1.5 font-bold">Q{idx + 1}.</span>
-                      {q.question}
-                    </p>
-
-                    {isCorrect ? (
-                      <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-xs px-2.5 py-1 rounded-full font-bold flex items-center gap-1 shrink-0">
-                        <CheckCircle2 className="w-3.5 h-3.5" /> Correct (+1)
-                      </span>
-                    ) : (
-                      <span className="bg-red-500/20 text-red-300 border border-red-500/40 text-xs px-2.5 py-1 rounded-full font-bold flex items-center gap-1 shrink-0">
-                        <XCircle className="w-3.5 h-3.5" /> Incorrect
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs pt-1">
-                    {['optionA', 'optionB', 'optionC', 'optionD'].map((optKey) => {
-                      const isSelected = studentAnsKey === optKey;
-                      const isThisCorrect = correctKey === optKey;
-
-                      let style = 'bg-slate-900 border-slate-800 text-slate-300';
-                      if (isThisCorrect) {
-                        style = 'bg-emerald-500/20 border-emerald-500/60 text-emerald-200 font-bold';
-                      } else if (isSelected && !isCorrect) {
-                        style = 'bg-red-500/20 border-red-500/60 text-red-200 font-bold';
-                      }
-
-                      return (
-                        <div
-                          key={optKey}
-                          className={`p-3 rounded-lg border flex items-center justify-between ${style}`}
-                        >
-                          <span>
-                            <strong className="uppercase mr-1">{optKey.replace('option', '')}:</strong>{' '}
-                            {optionsMap[optKey]}
-                          </span>
-                          {isThisCorrect && <span className="text-[10px] text-emerald-400 font-bold">✔ Correct</span>}
-                          {isSelected && !isThisCorrect && (
-                            <span className="text-[10px] text-red-400 font-bold"> Your Answer</span>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-
-                  {q.hint && (
-                    <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-xs text-amber-300 flex items-start gap-2">
-                      <Lightbulb className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                      <div>
-                        <strong className="font-bold">Educational Hint:</strong>
-                        <p className="mt-0.5 italic text-amber-200">{q.hint}</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+            <button
+              onClick={onFinishTest}
+              className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg transition-all text-xs cursor-pointer hover:scale-[1.01]"
+            >
+              Return to Dashboard
+            </button>
+            <button
+              onClick={onFinishTest}
+              className="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold py-3.5 px-4 rounded-xl transition-all text-xs cursor-pointer"
+            >
+              View My Progress
+            </button>
           </div>
         </div>
       </div>
