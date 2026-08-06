@@ -7,10 +7,11 @@ import {
   getDraftAttempt,
   clearDraftAttempt,
 } from '../services/db';
-import { calculateStudentAnalytics } from '../utils/analytics';
+import { calculateStudentAnalytics, cleanStudentTestTitle } from '../utils/analytics';
+import { SelectClassPage } from './SelectClassPage';
+import { ClassTestsPage } from './ClassTestsPage';
 import {
   Clock,
-  HelpCircle,
   CheckCircle,
   FileText,
   Play,
@@ -20,9 +21,8 @@ import {
   BarChart2,
   BookOpen,
   ArrowRight,
-  AlertCircle,
   Download,
-  Share2,
+  GraduationCap,
 } from 'lucide-react';
 
 const ProgressAnalytics = React.lazy(() => import('./ProgressAnalytics').then(m => ({ default: m.ProgressAnalytics })));
@@ -41,11 +41,17 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
   onViewAttemptReview,
   onContinueDraftTest,
 }) => {
-  // Class selection state (defaults to student's registered class)
-  const [selectedClass, setSelectedClass] = useState<string>(student.class || 'Class 6');
+  // Read saved class from localStorage or default to Class 6
+  const savedClassRaw = localStorage.getItem('selectedClass');
+  const initialClassNum = savedClassRaw ? savedClassRaw.replace(/\D/g, '') || '6' : '6';
+  const initialClassStr = `Class ${initialClassNum}`;
 
-  // Active section view / scroll tabs
-  const [activeTab, setActiveTab] = useState<'all' | 'tests' | 'results' | 'progress'>('all');
+  // Class selection state
+  const [selectedClass, setSelectedClass] = useState<string>(initialClassStr);
+
+  // Active section view mode
+  // Required flow: show 'select-class' first after login unless already selected
+  const [activeTab, setActiveTab] = useState<'select-class' | 'tests' | 'results' | 'progress'>('select-class');
 
   // Data state
   const [tests, setTests] = useState<Test[]>([]);
@@ -58,7 +64,10 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
   // Parent Progress Card Modal State
   const [showParentModal, setShowParentModal] = useState(false);
 
-  const classOptions = ['Class 6', 'Class 7', 'Class 8', 'Class 9', 'Class 10'];
+  // Set document.title
+  useEffect(() => {
+    document.title = `CBSE Maths Portal - Student ${student.name}`;
+  }, [student.name]);
 
   const loadDashboardData = async () => {
     setIsLoading(true);
@@ -83,12 +92,10 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
       let activeDraft = getDraftAttempt(student.id);
 
       if (activeDraft) {
-        // Validate against completed status or existing submitted attempts
         if (activeDraft.submitted === true || activeDraft.status === 'completed') {
           clearDraftAttempt(student.id);
           activeDraft = null;
         } else {
-          // Check if there is an attempt for activeDraft.testId
           const testAttempts = userAttempts.filter((a) => a.testId === activeDraft?.testId);
           if (testAttempts.length > 0) {
             const draftTime = activeDraft.updatedAt ? new Date(activeDraft.updatedAt).getTime() : 0;
@@ -131,6 +138,14 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
     return () => clearTimeout(timer);
   }, [student.id, selectedClass]);
 
+  const handleClassSelection = (clsVal: number | string) => {
+    const numStr = String(clsVal).replace(/\D/g, '') || '6';
+    const formattedClass = `Class ${numStr}`;
+    localStorage.setItem('selectedClass', numStr);
+    setSelectedClass(formattedClass);
+    setActiveTab('tests');
+  };
+
   const handleContinueDraft = () => {
     if (draftExam && draftTestObject && onContinueDraftTest) {
       onContinueDraftTest(draftTestObject, draftExam);
@@ -150,22 +165,25 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
     }
   };
 
-  const analytics = calculateStudentAnalytics(student, allStudentAttempts);
+  const analytics = calculateStudentAnalytics(student.name, student.class, allStudentAttempts);
+  const currentClassNum = selectedClass.replace(/\D/g, '') || '6';
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       {/* Welcome Banner */}
-      <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-blue-950 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-blue-950 border border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="inline-flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs px-3 py-1 rounded-full font-semibold mb-2">
+            <GraduationCap className="w-3.5 h-3.5" />
             <span>Official Student Examination Portal</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
             Welcome, <span className="text-blue-400">{student.name}</span>
           </h1>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            Student ID: <strong className="text-blue-300 font-mono">{student.studentId || student.id}</strong> • Class:{' '}
-            <strong className="text-slate-200">{student.class}</strong> ({student.section || 'A'})
+            Student ID: <strong className="text-blue-300 font-mono">{student.studentId || student.id}</strong> • Enrolled Class:{' '}
+            <strong className="text-slate-200">{student.class}</strong> ({student.section || 'A'}) • Active View Class:{' '}
+            <strong className="text-emerald-400">{selectedClass}</strong>
           </p>
         </div>
 
@@ -183,42 +201,42 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
             className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
-            <span>Refresh Portal</span>
+            <span>Refresh</span>
           </button>
         </div>
       </div>
 
-      {/* Navigation Quick Jump Tabs */}
-      <div className="flex border-b border-slate-800 overflow-x-auto gap-2">
+      {/* Top Navigation Bar / Quick Tabs */}
+      <div className="flex border-b border-slate-800 overflow-x-auto gap-2 no-scrollbar">
         <button
-          onClick={() => setActiveTab('all')}
-          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
-            activeTab === 'all'
-              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
+          onClick={() => setActiveTab('select-class')}
+          className={`flex items-center gap-2 px-5 py-3 text-xs font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
+            activeTab === 'select-class'
+              ? 'border-blue-500 text-blue-400 bg-blue-500/10'
               : 'border-transparent text-slate-400 hover:text-slate-200'
           }`}
         >
           <BookOpen className="w-4 h-4" />
-          <span>Full Dashboard View</span>
+          <span>Select Class</span>
         </button>
 
         <button
           onClick={() => setActiveTab('tests')}
-          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
+          className={`flex items-center gap-2 px-5 py-3 text-xs font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
             activeTab === 'tests'
-              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
+              ? 'border-blue-500 text-blue-400 bg-blue-500/10'
               : 'border-transparent text-slate-400 hover:text-slate-200'
           }`}
         >
           <FileText className="w-4 h-4" />
-          <span>Available Tests ({tests.length})</span>
+          <span>Available Tests ({selectedClass})</span>
         </button>
 
         <button
           onClick={() => setActiveTab('results')}
-          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
+          className={`flex items-center gap-2 px-5 py-3 text-xs font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
             activeTab === 'results'
-              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
+              ? 'border-blue-500 text-blue-400 bg-blue-500/10'
               : 'border-transparent text-slate-400 hover:text-slate-200'
           }`}
         >
@@ -228,9 +246,9 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
 
         <button
           onClick={() => setActiveTab('progress')}
-          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
+          className={`flex items-center gap-2 px-5 py-3 text-xs font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
             activeTab === 'progress'
-              ? 'border-blue-500 text-blue-400 bg-blue-500/5'
+              ? 'border-blue-500 text-blue-400 bg-blue-500/10'
               : 'border-transparent text-slate-400 hover:text-slate-200'
           }`}
         >
@@ -239,24 +257,26 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
         </button>
       </div>
 
-      {/* SECTION 1: CONTINUE EXAM */}
-      {(activeTab === 'all' || activeTab === 'tests') && (
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h2 className="text-base font-extrabold text-white flex items-center gap-2">
-              <Clock className="w-4 h-4 text-amber-400" />
-              <span>1. Active / Unfinished Exam Status</span>
-            </h2>
-          </div>
+      {/* VIEW 1: SELECT CLASS PAGE */}
+      {activeTab === 'select-class' && (
+        <SelectClassPage
+          student={student}
+          onClassSelect={handleClassSelection}
+        />
+      )}
 
-          {draftExam ? (
-            <div className="bg-gradient-to-r from-amber-950/40 via-slate-900 to-slate-900 border-2 border-amber-500/50 rounded-2xl p-6 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-5 relative overflow-hidden">
-              <div className="space-y-2 relative z-10">
+      {/* VIEW 2: AVAILABLE TESTS PAGE */}
+      {activeTab === 'tests' && (
+        <div className="space-y-6">
+          {/* Active / Unfinished Exam Draft Banner */}
+          {draftExam && (
+            <div className="bg-gradient-to-r from-amber-950/40 via-slate-900 to-slate-900 border-2 border-amber-500/50 rounded-3xl p-6 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-5">
+              <div className="space-y-2">
                 <span className="bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
                   Unfinished Exam Found
                 </span>
                 <h3 className="text-xl font-bold text-white mt-1">
-                  {draftExam.testTitle || 'CBSE Mathematics Test'}
+                  {cleanStudentTestTitle(draftExam.testTitle || 'Mathematics Test')}
                 </h3>
                 <div className="flex flex-wrap items-center gap-4 text-xs text-slate-300">
                   <span>Class: <strong className="text-white">{draftExam.testClass}</strong></span>
@@ -265,7 +285,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 relative z-10">
+              <div className="flex items-center gap-3">
                 <button
                   onClick={handleDiscardDraft}
                   className="px-4 py-3 rounded-xl border border-slate-700 text-slate-400 hover:text-red-400 hover:border-red-500/40 text-xs font-semibold transition-all cursor-pointer"
@@ -282,212 +302,71 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
                 </button>
               </div>
             </div>
-          ) : (
-            <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 bg-slate-800 border border-slate-700 text-slate-400 rounded-xl">
-                  <CheckCircle className="w-5 h-5 text-emerald-400" />
-                </div>
-                <div>
-                  <p className="text-sm font-bold text-slate-200">No active exam found.</p>
-                  <p className="text-xs text-slate-400">All previous exam attempts have been submitted cleanly.</p>
-                </div>
-              </div>
-            </div>
           )}
+
+          {/* Available Tests List Component */}
+          <ClassTestsPage
+            classId={currentClassNum}
+            tests={tests}
+            studentAttemptsMap={studentAttemptsMap}
+            draftExam={draftExam}
+            isLoading={isLoading}
+            onChangeClass={() => setActiveTab('select-class')}
+            onStartTest={onStartTest}
+            onContinueDraft={handleContinueDraft}
+          />
         </div>
       )}
 
-      {/* SECTION 2: CHOOSE CLASS */}
-      {(activeTab === 'all' || activeTab === 'tests') && (
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-base font-extrabold text-white flex items-center gap-2">
-              <BookOpen className="w-4 h-4 text-blue-400" />
-              <span>2. Choose Class for Examination Papers</span>
-            </h2>
-            <span className="text-xs text-slate-400">Pre-selected: <strong className="text-blue-400">{student.class}</strong></span>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-            {classOptions.map((cls) => {
-              const isSelected = selectedClass === cls;
-              const isRegisteredClass = student.class === cls;
-
-              return (
-                <button
-                  key={cls}
-                  onClick={() => setSelectedClass(cls)}
-                  className={`p-4 rounded-xl border font-bold text-xs flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer relative ${
-                    isSelected
-                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 border-blue-400 text-white shadow-lg ring-2 ring-blue-500/30'
-                      : 'bg-slate-950 border-slate-800 text-slate-300 hover:border-slate-700 hover:bg-slate-800/60'
-                  }`}
-                >
-                  {isRegisteredClass && (
-                    <span className="absolute -top-2 right-2 bg-emerald-500 text-slate-950 text-[9px] font-black px-2 py-0.5 rounded-full uppercase">
-                      Enrolled
-                    </span>
-                  )}
-                  <span className="text-sm font-black">{cls}</span>
-                  <span className="text-[10px] opacity-80 font-normal">CBSE Maths</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* SECTION 3: AVAILABLE TESTS */}
-      {(activeTab === 'all' || activeTab === 'tests') && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-base font-extrabold text-white flex items-center gap-2">
-              <FileText className="w-4 h-4 text-indigo-400" />
-              <span>3. Available Tests ({selectedClass})</span>
-            </h2>
-            <span className="text-xs text-slate-400">Showing published test papers for {selectedClass}</span>
-          </div>
-
-          {isLoading ? (
-            <div className="text-center py-12 bg-slate-900 border border-slate-800 rounded-2xl">
-              <RefreshCw className="w-8 h-8 text-blue-500 animate-spin mx-auto mb-2" />
-              <p className="text-xs text-slate-400">Loading test papers...</p>
-            </div>
-          ) : tests.length === 0 ? (
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-10 text-center space-y-2">
-              <FileText className="w-10 h-10 text-slate-600 mx-auto" />
-              <h3 className="text-base font-bold text-slate-200">No Tests Available for {selectedClass}</h3>
-              <p className="text-xs text-slate-400 max-w-md mx-auto">
-                No active published tests available for <strong>{selectedClass}</strong> right now.
-              </p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {tests.map((test) => {
-                const attempts = studentAttemptsMap[test.id] || [];
-                const attemptsCount = attempts.length;
-                const nextAttemptNumber = attemptsCount + 1;
-                const isDraftForThis = draftExam && draftExam.testId === test.id;
-
-                return (
-                  <div
-                    key={test.id}
-                    className="bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-2xl p-6 shadow-lg flex flex-col justify-between transition-all space-y-5"
-                  >
-                    <div className="space-y-3">
-                      <div className="flex items-start justify-between gap-2">
-                        <span className="bg-slate-800 text-blue-300 text-xs font-semibold px-2.5 py-1 rounded-lg border border-slate-700">
-                          {test.class}
-                        </span>
-
-                        {isDraftForThis ? (
-                          <span className="bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[11px] px-2.5 py-1 rounded-full font-bold">
-                            In Progress
-                          </span>
-                        ) : attemptsCount > 0 ? (
-                          <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[11px] px-2.5 py-1 rounded-full font-bold flex items-center gap-1">
-                            <CheckCircle className="w-3.5 h-3.5" />
-                            Attempted {attemptsCount} {attemptsCount === 1 ? 'Time' : 'Times'}
-                          </span>
-                        ) : (
-                          <span className="bg-blue-500/10 text-blue-400 border border-blue-500/30 text-[11px] px-2.5 py-1 rounded-full font-bold">
-                            New Test
-                          </span>
-                        )}
-                      </div>
-
-                      <h3 className="text-lg font-bold text-white leading-snug">{test.title}</h3>
-
-                      <div className="grid grid-cols-2 gap-2 text-xs text-slate-400 pt-1">
-                        <div className="bg-slate-800/60 p-2.5 rounded-xl border border-slate-800 flex items-center gap-2">
-                          <Clock className="w-4 h-4 text-blue-400" />
-                          <div>
-                            <p className="text-[10px] text-slate-500 font-semibold uppercase">Per Qn Time</p>
-                            <p className="font-bold text-slate-200">60 Seconds</p>
-                          </div>
-                        </div>
-
-                        <div className="bg-slate-800/60 p-2.5 rounded-xl border border-slate-800 flex items-center gap-2">
-                          <HelpCircle className="w-4 h-4 text-indigo-400" />
-                          <div>
-                            <p className="text-[10px] text-slate-500 font-semibold uppercase">Questions</p>
-                            <p className="font-bold text-slate-200">{test.questionCount || 0} Questions</p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2 pt-2">
-                      {isDraftForThis ? (
-                        <button
-                          onClick={handleContinueDraft}
-                          className="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold py-3.5 rounded-xl shadow-lg transition-all text-xs flex items-center justify-center gap-2 cursor-pointer"
-                        >
-                          <Play className="w-4 h-4 fill-slate-950" />
-                          <span>Resume Test</span>
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => onStartTest(test, nextAttemptNumber)}
-                          disabled={(test.questionCount || 0) === 0}
-                          className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-3.5 rounded-xl shadow-lg transition-all text-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-                        >
-                          <Play className="w-4 h-4 fill-white" />
-                          <span>{attemptsCount > 0 ? `Retake (${nextAttemptNumber})` : 'Start Test'}</span>
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* SECTION 4: MY RESULTS */}
-      {(activeTab === 'all' || activeTab === 'results') && (
+      {/* VIEW 3: MY RESULTS */}
+      {activeTab === 'results' && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-base font-extrabold text-white flex items-center gap-2">
               <History className="w-4 h-4 text-emerald-400" />
-              <span>4. My Results ({allStudentAttempts.length})</span>
+              <span>My Results ({allStudentAttempts.length})</span>
             </h2>
             <span className="text-xs text-slate-400">History of submitted test attempts</span>
           </div>
 
           {allStudentAttempts.length === 0 ? (
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-10 text-center space-y-2">
-              <Award className="w-10 h-10 text-slate-600 mx-auto" />
+            <div className="bg-slate-900 border border-slate-800 rounded-3xl p-12 text-center space-y-2">
+              <Award className="w-12 h-12 text-slate-600 mx-auto" />
               <h3 className="text-base font-bold text-slate-200">No Test Results Recorded Yet</h3>
-              <p className="text-xs text-slate-400">Complete an available test paper above to record test results.</p>
+              <p className="text-xs text-slate-400">Complete an available test paper to record test results.</p>
+              <button
+                onClick={() => setActiveTab('select-class')}
+                className="mt-3 bg-blue-600 hover:bg-blue-500 text-white font-bold px-5 py-2.5 rounded-xl text-xs shadow-md cursor-pointer"
+              >
+                Start a Test Now
+              </button>
             </div>
           ) : (
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+            <div className="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-xl">
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs text-slate-300">
                   <thead className="bg-slate-950 text-slate-400 uppercase font-semibold border-b border-slate-800">
                     <tr>
-                      <th className="px-6 py-3.5">Test Title</th>
-                      <th className="px-6 py-3.5">Attempt #</th>
-                      <th className="px-6 py-3.5">Score</th>
-                      <th className="px-6 py-3.5">Percentage</th>
-                      <th className="px-6 py-3.5">Submitted Date</th>
-                      <th className="px-6 py-3.5 text-right">Action</th>
+                      <th className="px-6 py-4">Lesson Test Name</th>
+                      <th className="px-6 py-4">Attempt #</th>
+                      <th className="px-6 py-4">Score</th>
+                      <th className="px-6 py-4">Percentage</th>
+                      <th className="px-6 py-4">Submitted Date</th>
+                      <th className="px-6 py-4 text-right">Action</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-800/60">
                     {allStudentAttempts.map((att) => {
                       const percentage = Math.round((att.score / (att.totalQuestions || 1)) * 100);
                       const isPassed = percentage >= 40;
+                      const cleanTitle = cleanStudentTestTitle(att.testTitle || 'Mathematics Test');
 
                       return (
                         <tr key={att.id} className="hover:bg-slate-800/40 transition-colors">
-                          <td className="px-6 py-4 font-bold text-white">{att.testTitle || 'CBSE Maths Test'}</td>
+                          <td className="px-6 py-4 font-bold text-white">{cleanTitle}</td>
                           <td className="px-6 py-4">
                             <span className="bg-slate-800 border border-slate-700 text-slate-200 px-2.5 py-1 rounded-full font-semibold">
-                              Attempt {att.attemptNumber}
+                              Attempt #{att.attemptNumber}
                             </span>
                           </td>
                           <td className="px-6 py-4 font-bold text-slate-200">
@@ -526,13 +405,13 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
         </div>
       )}
 
-      {/* SECTION 5: MY PROGRESS & BAR CHARTS */}
-      {(activeTab === 'all' || activeTab === 'progress') && (
+      {/* VIEW 4: MY PROGRESS ANALYTICS */}
+      {activeTab === 'progress' && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-base font-extrabold text-white flex items-center gap-2">
               <BarChart2 className="w-4 h-4 text-purple-400" />
-              <span>5. My Progress Analytics & Lesson Bar Chart</span>
+              <span>My Progress Analytics & Lesson Bar Chart</span>
             </h2>
 
             <button

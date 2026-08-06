@@ -53,12 +53,21 @@ export function getBarColor(pct: number): string {
   return '#ef4444';                  // Red (Below 50%)
 }
 
+export function cleanStudentTestTitle(title: string): string {
+  if (!title) return '';
+  return title
+    .replace(/^cbse\s*class\s*\d+\s*:?\s*/gi, '')
+    .replace(/^cbse\s*:?\s*/gi, '')
+    .replace(/^class\s*\d+\s*:?\s*/gi, '')
+    .replace(/\s*\(\s*class\s*\d+\s*\)/gi, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
+
 export function extractTopicFromTitle(title: string): string {
   if (!title) return 'General Mathematics';
 
-  const clean = title
-    .replace(/cbse\s*class\s*\d+\s*:?/gi, '')
-    .replace(/class\s*\d+\s*:?/gi, '')
+  const clean = cleanStudentTestTitle(title)
     .replace(/sample\s*test\s*\d+/gi, '')
     .replace(/sample\s*test/gi, '')
     .replace(/test\s*paper\s*\d+/gi, '')

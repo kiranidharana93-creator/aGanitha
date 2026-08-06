@@ -1,5 +1,6 @@
 import React from 'react';
 import { Attempt } from '../types';
+import { cleanStudentTestTitle } from '../utils/analytics';
 import { X, Award, CheckCircle2, XCircle } from 'lucide-react';
 
 interface ResultDetailsModalProps {
@@ -10,6 +11,7 @@ interface ResultDetailsModalProps {
 export const ResultDetailsModal: React.FC<ResultDetailsModalProps> = ({ attempt, onClose }) => {
   const percentage = Math.round((attempt.score / (attempt.totalQuestions || 1)) * 100);
   const isPassed = percentage >= 40;
+  const cleanTitle = cleanStudentTestTitle(attempt.testTitle || 'Test');
 
   return (
     <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
@@ -40,7 +42,7 @@ export const ResultDetailsModal: React.FC<ResultDetailsModalProps> = ({ attempt,
             <div className="border-t border-slate-800 pt-3 grid grid-cols-3 gap-2 text-center text-xs">
               <div className="bg-slate-900 p-2 rounded-lg border border-slate-800">
                 <p className="text-[10px] text-slate-500 font-bold uppercase">Test</p>
-                <p className="font-semibold text-slate-200 truncate">{attempt.testTitle || 'Test'}</p>
+                <p className="font-semibold text-slate-200 truncate">{cleanTitle}</p>
               </div>
               <div className="bg-slate-900 p-2 rounded-lg border border-slate-800">
                 <p className="text-[10px] text-slate-500 font-bold uppercase">Score</p>

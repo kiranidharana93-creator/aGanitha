@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Student, Test, Question, Attempt } from '../types';
 import { getQuestionsByTestId, saveAttempt, normalizeAnswerKey, saveDraftAttempt, clearDraftAttempt, getAttemptsForStudent } from '../services/db';
-import { extractTopicFromTitle, getRecommendationsForTopic, calculateStudentAnalytics } from '../utils/analytics';
+import { extractTopicFromTitle, getRecommendationsForTopic, calculateStudentAnalytics, cleanStudentTestTitle } from '../utils/analytics';
 import { Clock, CheckCircle, CheckCircle2, XCircle, AlertTriangle, ChevronLeft, ChevronRight, Send, ArrowLeft, RefreshCw, Award, Lightbulb, Share2, Copy, Check, MessageSquare, Phone } from 'lucide-react';
 
 interface StudentTestPageProps {
@@ -64,6 +64,11 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
       );
     }
   }, [completedAttempt, student.id, test.id]);
+
+  // Update document.title cleanly
+  useEffect(() => {
+    document.title = `${cleanStudentTestTitle(test.title)} - CBSE Maths`;
+  }, [test.title]);
 
   // Load questions
   useEffect(() => {
@@ -419,7 +424,7 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
           <span className="bg-blue-600/20 text-blue-300 border border-blue-500/30 text-[11px] font-bold px-2.5 py-0.5 rounded-full">
             CBSE Examination Mode • Attempt #{attemptNumber}
           </span>
-          <h2 className="text-base sm:text-lg font-bold text-white mt-1">{test.title}</h2>
+          <h2 className="text-base sm:text-lg font-bold text-white mt-1">{cleanStudentTestTitle(test.title)}</h2>
         </div>
 
         {/* Global Action & Finish Button */}
