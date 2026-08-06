@@ -171,28 +171,70 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
       const analytics = calculateStudentAnalytics(student.name, student.class, studentAttempts);
       const percentage = Math.round((finalScore / (questions.length || 1)) * 100);
       const statusText =
-        percentage >= 85
+        analytics.avgPercentage >= 85
           ? 'Excellent'
-          : percentage >= 70
+          : analytics.avgPercentage >= 70
           ? 'Good'
-          : percentage >= 50
-          ? 'Needs Practice'
+          : analytics.avgPercentage >= 50
+          ? 'Needs Improvement'
           : 'Critical Improvement Required';
 
       const topicName = extractTopicFromTitle(test.title);
       const reportingPeriod = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
+      // Format Topic-wise performance with dots line up
       const topicSummary = analytics.topicPerformances.length > 0
-        ? analytics.topicPerformances.map((t) => `• ${t.topic}: ${t.avgPercentage}% (${t.status})`).join('\n')
-        : `• ${topicName}: ${percentage}% (${statusText})`;
+        ? analytics.topicPerformances.map((t) => {
+            const name = t.topic;
+            const pctStr = `${t.avgPercentage}%`;
+            const dotsCount = Math.max(2, 28 - name.length - pctStr.length);
+            return `${name} ${'.'.repeat(dotsCount)} ${pctStr}`;
+          }).join('\n')
+        : `${topicName} ${'.'.repeat(Math.max(2, 28 - topicName.length - `${percentage}%`.length))} ${percentage}%`;
 
-      const teacherRemarks = analytics.teacherRemarks;
+      // Generate 3 concise, single-line points for Areas Requiring Improvement
+      const actionItemsList: string[] = [];
+      if (analytics.weakTopics.length > 0) {
+        analytics.weakTopics.slice(0, 3).forEach((wt) => {
+          const tLower = wt.topic.toLowerCase();
+          if (tLower.includes('integer')) {
+            actionItemsList.push('• Integer operations and sign rules');
+          } else if (tLower.includes('playing with numbers') || tLower.includes('divisibility')) {
+            actionItemsList.push('• Divisibility rules, HCF and LCM concepts');
+          } else if (tLower.includes('whole number')) {
+            actionItemsList.push('• Commutative and distributive property patterns');
+          } else if (tLower.includes('fraction')) {
+            actionItemsList.push('• Equivalent fractions and LCM simplification');
+          } else if (tLower.includes('decimal')) {
+            actionItemsList.push('• Decimal alignment and place value conversions');
+          } else if (tLower.includes('algebra')) {
+            actionItemsList.push('• Forming and balancing linear equations');
+          } else if (tLower.includes('geometry')) {
+            actionItemsList.push('• Geometric definitions and angle measurements');
+          } else {
+            actionItemsList.push(`• Key concepts and formula practice in ${wt.topic}`);
+          }
+        });
+      }
 
-      const actionItems = analytics.weakTopics.length > 0
-        ? analytics.weakTopics.map((t) => `• ${t.topic}: Immediate review required for basic definitions and fundamental rules.`).join('\n')
-        : analytics.topicPerformances.length > 0
-        ? analytics.topicPerformances.map((t) => `• ${t.topic}: Practice additional sample exercises to maintain high proficiency.`).join('\n')
-        : `• ${topicName}: Immediate review required for basic definitions and fundamental rules.`;
+      const defaultPoints = [
+        '• Speed and accuracy in problem solving',
+        '• Fundamental definitions and rules review',
+        '• Daily practice of NCERT textbook exercises',
+      ];
+
+      for (const pt of defaultPoints) {
+        if (actionItemsList.length < 3 && !actionItemsList.includes(pt)) {
+          actionItemsList.push(pt);
+        }
+      }
+
+      const actionItems = actionItemsList.slice(0, 3).join('\n');
+
+      const weakTopicNames = analytics.weakTopics.map((w) => w.topic).join(' and ');
+      const teacherRemarks = analytics.weakTopics.length > 0
+        ? `The student is showing regular participation in assessments. Additional practice is recommended in ${weakTopicNames} to improve conceptual understanding and calculation accuracy.`
+        : `The student is showing regular participation in assessments with good overall mastery. Continued revision is recommended to maintain high speed and accuracy.`;
 
       // Trigger automatic Parent WhatsApp notification in the background via backend API
       try {
