@@ -32,7 +32,7 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
 
   // Save Draft Exam Progress whenever student selects answers or moves question
   useEffect(() => {
-    if (!completedAttempt && questions.length > 0 && !isLoading) {
+    if (!completedAttempt && !isSubmitting && questions.length > 0 && !isLoading) {
       saveDraftAttempt({
         studentId: student.id,
         testId: test.id,
@@ -41,10 +41,29 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
         currentIndex: currentIndex,
         selectedAnswers: selectedAnswers,
         timeLeft: questionTimeLeft,
+        status: 'in-progress',
+        submitted: false,
         updatedAt: new Date().toISOString(),
       });
+    } else if (completedAttempt) {
+      clearDraftAttempt(student.id);
     }
-  }, [currentIndex, selectedAnswers, questionTimeLeft, completedAttempt, questions.length, isLoading, student.id, test.id, test.title, test.class]);
+  }, [currentIndex, selectedAnswers, questionTimeLeft, completedAttempt, isSubmitting, questions.length, isLoading, student.id, test.id, test.title, test.class]);
+
+  // Always ensure cleanup on result view mount
+  useEffect(() => {
+    if (completedAttempt) {
+      clearDraftAttempt(student.id);
+      localStorage.setItem(
+        'lastCompletedExam',
+        JSON.stringify({
+          testId: test.id,
+          studentId: student.id,
+          completedAt: Date.now(),
+        })
+      );
+    }
+  }, [completedAttempt, student.id, test.id]);
 
   // Load questions
   useEffect(() => {
@@ -140,6 +159,9 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
     setIsSubmitting(true);
 
     try {
+      // Clear draft immediately before network request
+      clearDraftAttempt(student.id);
+
       const finalScore = calculateScore();
       const attemptData: Omit<Attempt, 'id'> = {
         studentId: student.id,
@@ -155,7 +177,14 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
       };
 
       const saved = await saveAttempt(attemptData);
+      
+      // Clear draft again to prevent any timer race condition
       clearDraftAttempt(student.id);
+      localStorage.setItem('lastCompletedExam', JSON.stringify({
+        testId: test.id,
+        studentId: student.id,
+        completedAt: Date.now(),
+      }));
 
       // Fetch student's attempts to calculate full performance analytics
       let studentAttempts: Attempt[] = [];

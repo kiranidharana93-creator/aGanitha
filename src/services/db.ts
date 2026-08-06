@@ -73,61 +73,68 @@ export function formatParentPhone(mobile: string): string {
   return digits || mobile.trim();
 }
 
-// Default initial registered students for seamless testing
+// Default initial registered students for seamless testing (Only Kiran)
 export const INITIAL_REGISTERED_STUDENTS: Student[] = [
   {
-    id: 'std_rahul_6',
-    studentId: 'C6-2026-0001',
-    name: 'Rahul Kumar',
+    id: 'std_kiran_6',
+    studentId: 'c6-2026-0012',
+    name: 'kiran',
     class: 'Class 6',
     section: 'A',
-    rollNumber: 23,
-    parentMobile: '919876543210',
-    password: 'RK6421',
-    isPasswordChanged: false,
-    status: 'ACTIVE',
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: 'std_ananya_6',
-    studentId: 'C6-2026-0002',
-    name: 'Ananya Sharma',
-    class: 'Class 6',
-    section: 'B',
     rollNumber: 12,
-    parentMobile: '919812345678',
-    password: 'AS6422',
-    isPasswordChanged: false,
-    status: 'ACTIVE',
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: 'std_priya_7',
-    studentId: 'C7-2026-0001',
-    name: 'Priya Patel',
-    class: 'Class 7',
-    section: 'A',
-    rollNumber: 15,
-    parentMobile: '919765432109',
-    password: 'PP7421',
-    isPasswordChanged: false,
-    status: 'ACTIVE',
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: 'std_aarav_8',
-    studentId: 'C8-2026-0001',
-    name: 'Aarav Singh',
-    class: 'Class 8',
-    section: 'A',
-    rollNumber: 4,
-    parentMobile: '919654321098',
-    password: 'AS8421',
+    parentMobile: '919353913218',
+    password: 'KR6421',
     isPasswordChanged: false,
     status: 'ACTIVE',
     createdAt: new Date().toISOString(),
   },
 ];
+
+const UNWANTED_STUDENT_IDS = new Set([
+  '3rj8lt7blh3fs8fkdnum',
+  '4exmtdmsjmpdcdfphofz',
+  'bawcjtrkvuygclgtdotc',
+  'efzob3a1f0w5iulkxesl',
+  'ihbbzqvi4yfzena7ij47',
+  'izowmv6zwrthw7f64dwa',
+  'jy4xhko0bd96cbzkdlmg',
+  'q0vbpfun2agppdqc9c0w',
+  'sq2y0kzo7gh1xm9xodvh',
+  'yehfheng4emcnnpw4jy8',
+  'lkmjgti3z6xkhspqgocb',
+  'tfxxddvxursonhpiers',
+  'vbqanh9wbgnehwgg8o9j',
+  'voxpyhf38fgyqrishgyb',
+  'x1stuudgizj5et4rx15t',
+  'c6-2026-0001',
+  'c6-2026-0002',
+  'c7-2026-0001',
+  'c8-2026-0001',
+  'std_rahul_6',
+  'std_ananya_6',
+  'std_priya_7',
+  'std_aarav_8',
+  'demo-001',
+]);
+
+const UNWANTED_STUDENT_NAMES = new Set([
+  'yoshmitha',
+  'kumar',
+  'tanushree.m',
+  'vishwa',
+  'p krishna',
+  'kavya',
+  'test',
+  'harshitha bm',
+  'srinivas',
+  'kannika mailar',
+  'rahul kumar',
+  'ananya sharma',
+  'priya patel',
+  'aarav singh',
+  'demo student',
+  'test user',
+]);
 
 export function generateStudentId(studentClass: string, index: number): string {
   const classNum = studentClass.replace(/[^0-9]/g, '') || '6';
@@ -149,34 +156,98 @@ export function generateTempPassword(name: string): string {
 }
 
 export async function getAllRegisteredStudents(): Promise<Student[]> {
+  const mapByKey = new Map<string, Student>();
+  const docsToDelete: string[] = [];
+
+  // Fetch from Firestore
   try {
     const snap = await getDocs(collection(db, STUDENTS_COL));
-    if (snap.empty) {
-      await seedDefaultStudents();
-      return INITIAL_REGISTERED_STUDENTS;
-    }
-    const students: Student[] = [];
     snap.docs.forEach((docSnap) => {
       const data = docSnap.data();
-      students.push({
-        id: docSnap.id,
-        studentId: data.studentId || docSnap.id,
-        name: data.name || 'Student',
-        class: data.class || 'Class 6',
-        section: data.section || 'A',
-        rollNumber: data.rollNumber || '',
-        parentMobile: formatParentPhone(data.parentMobile || ''),
-        password: data.password || 'RK6421',
-        isPasswordChanged: Boolean(data.isPasswordChanged),
-        status: data.status || 'ACTIVE',
-        createdAt: data.createdAt || new Date().toISOString(),
-      });
+      const docId = docSnap.id;
+      const rawStudentId = (data.studentId || '').trim();
+      const name = (data.name || '').trim();
+
+      const isJunkDoc =
+        UNWANTED_STUDENT_IDS.has(docId.toLowerCase()) ||
+        UNWANTED_STUDENT_IDS.has(rawStudentId.toLowerCase()) ||
+        UNWANTED_STUDENT_NAMES.has(name.toLowerCase()) ||
+        (name.toLowerCase() === 'kiran' && rawStudentId.toLowerCase() !== 'c6-2026-0012') ||
+        (rawStudentId.length > 15 && !rawStudentId.includes('-'));
+
+      if (isJunkDoc) {
+        docsToDelete.push(docId);
+      } else {
+        const student: Student = {
+          id: docId,
+          studentId: rawStudentId || docId,
+          name: name || 'Student',
+          class: data.class || 'Class 6',
+          section: data.section || 'A',
+          rollNumber: data.rollNumber || '',
+          parentMobile: formatParentPhone(data.parentMobile || ''),
+          password: data.password || 'KR6421',
+          isPasswordChanged: Boolean(data.isPasswordChanged),
+          status: data.status || 'ACTIVE',
+          createdAt: data.createdAt || new Date().toISOString(),
+        };
+        const key = (student.studentId || student.id).toLowerCase();
+        mapByKey.set(key, student);
+      }
     });
-    return students;
   } catch (err) {
-    console.error('Error fetching registered students:', err);
-    return INITIAL_REGISTERED_STUDENTS;
+    console.error('Error fetching registered students from Firestore:', err);
   }
+
+  // Asynchronously clean up junk docs from Firestore
+  if (docsToDelete.length > 0) {
+    Promise.all(docsToDelete.map((id) => deleteDoc(doc(db, STUDENTS_COL, id)).catch(() => {}))).catch(
+      () => {}
+    );
+  }
+
+  // Read from localStorage
+  try {
+    const localRaw = localStorage.getItem('cbse_registered_students');
+    if (localRaw) {
+      const localList: Student[] = JSON.parse(localRaw);
+      localList.forEach((s) => {
+        const sId = (s.studentId || s.id || '').toLowerCase();
+        const sName = (s.name || '').toLowerCase();
+        const isJunk =
+          UNWANTED_STUDENT_IDS.has(sId) ||
+          UNWANTED_STUDENT_IDS.has((s.id || '').toLowerCase()) ||
+          UNWANTED_STUDENT_NAMES.has(sName) ||
+          (sName === 'kiran' && sId !== 'c6-2026-0012');
+
+        if (!isJunk && !mapByKey.has(sId)) {
+          mapByKey.set(sId, s);
+        }
+      });
+    }
+  } catch (e) {
+    // ignore
+  }
+
+  let students = Array.from(mapByKey.values());
+
+  // Always ensure Kiran (c6-2026-0012) exists as the primary student
+  const kiranExists = students.some(
+    (s) => s.studentId && s.studentId.toLowerCase() === 'c6-2026-0012'
+  );
+
+  if (!kiranExists) {
+    students.unshift(INITIAL_REGISTERED_STUDENTS[0]);
+  }
+
+  // Save clean list back to localStorage
+  try {
+    localStorage.setItem('cbse_registered_students', JSON.stringify(students));
+  } catch (e) {
+    console.error('Error saving registered students to localStorage:', e);
+  }
+
+  return students;
 }
 
 export async function seedDefaultStudents(): Promise<void> {
@@ -227,16 +298,22 @@ export async function createRegisteredStudent(input: {
 
   try {
     const docRef = await addDoc(collection(db, STUDENTS_COL), newStudentData);
-    return {
+    const createdStudent = {
       id: docRef.id,
       ...newStudentData,
     };
+    const updatedList = [...allStudents, createdStudent];
+    localStorage.setItem('cbse_registered_students', JSON.stringify(updatedList));
+    return createdStudent;
   } catch (err) {
     console.error('Error creating student in Firestore:', err);
-    return {
+    const createdStudent = {
       id: 'std_' + Date.now(),
       ...newStudentData,
     };
+    const updatedList = [...allStudents, createdStudent];
+    localStorage.setItem('cbse_registered_students', JSON.stringify(updatedList));
+    return createdStudent;
   }
 }
 
@@ -244,15 +321,16 @@ export async function authenticateStudent(
   studentIdInput: string,
   passwordInput: string
 ): Promise<{ student: Student | null; errorReason?: 'not_found' | 'invalid_password' }> {
-  const cleanId = studentIdInput.trim().toUpperCase();
+  const cleanId = studentIdInput.trim().toLowerCase();
   const cleanPass = passwordInput.trim();
 
   const allStudents = await getAllRegisteredStudents();
   
   const student = allStudents.find(
     (s) =>
-      (s.studentId && s.studentId.toUpperCase() === cleanId) ||
-      (s.id && s.id.toUpperCase() === cleanId)
+      (s.studentId && s.studentId.toLowerCase() === cleanId) ||
+      (s.id && s.id.toLowerCase() === cleanId) ||
+      (s.name && s.name.toLowerCase() === cleanId)
   );
 
   if (!student) {
@@ -280,24 +358,112 @@ export async function updateStudentPassword(studentId: string, newPassword: stri
           isPasswordChanged: true,
         });
       }
+      localStorage.setItem('cbse_registered_students', JSON.stringify(allStudents));
     }
   } catch (err) {
     console.error('Error updating student password:', err);
   }
 }
 
-export async function deleteStudent(studentId: string): Promise<void> {
-  try {
-    const docRef = doc(db, STUDENTS_COL, studentId);
-    await deleteDoc(docRef);
-  } catch (err) {
-    console.error('Error deleting student:', err);
+export async function deleteStudent(studentIdOrDocId: string, customStudentId?: string, name?: string): Promise<void> {
+  const isProtected =
+    studentIdOrDocId === 'std_kiran_6' ||
+    studentIdOrDocId?.toLowerCase() === 'c6-2026-0012' ||
+    customStudentId?.toLowerCase() === 'c6-2026-0012' ||
+    (name && name.toLowerCase() === 'kiran' && (customStudentId?.toLowerCase() === 'c6-2026-0012' || studentIdOrDocId?.toLowerCase() === 'c6-2026-0012'));
+
+  if (isProtected) {
+    console.warn('Cannot delete protected student kiran (c6-2026-0012)');
+    return;
   }
+
+  // Update localStorage immediately
+  try {
+    const localRaw = localStorage.getItem('cbse_registered_students');
+    if (localRaw) {
+      let list: Student[] = JSON.parse(localRaw);
+      list = list.filter(
+        (s) =>
+          s.id !== studentIdOrDocId &&
+          s.studentId !== studentIdOrDocId &&
+          (customStudentId ? s.studentId !== customStudentId : true) &&
+          (name ? s.name.toLowerCase() !== name.toLowerCase() : true)
+      );
+      localStorage.setItem('cbse_registered_students', JSON.stringify(list));
+    }
+  } catch (e) {
+    console.error('Error updating localStorage on delete:', e);
+  }
+
+  // Delete from Firestore by document ID
+  try {
+    const docRef = doc(db, STUDENTS_COL, studentIdOrDocId);
+    await deleteDoc(docRef);
+  } catch (e) {
+    // ignore
+  }
+
+  // Delete from Firestore by studentId or name query
+  try {
+    if (customStudentId) {
+      const q = query(collection(db, STUDENTS_COL), where('studentId', '==', customStudentId));
+      const snap = await getDocs(q);
+      for (const docSnap of snap.docs) {
+        await deleteDoc(docSnap.ref);
+      }
+    }
+    if (name) {
+      const qName = query(collection(db, STUDENTS_COL), where('name', '==', name));
+      const snapName = await getDocs(qName);
+      for (const docSnap of snapName.docs) {
+        if (docSnap.data().studentId !== 'c6-2026-0012') {
+          await deleteDoc(docSnap.ref);
+        }
+      }
+    }
+  } catch (err) {
+    console.error('Error deleting student from Firestore:', err);
+  }
+}
+
+export async function deleteAllStudentsExceptKiran(): Promise<Student[]> {
+  const kiran = INITIAL_REGISTERED_STUDENTS[0];
+
+  // Clean Firestore
+  try {
+    const snap = await getDocs(collection(db, STUDENTS_COL));
+    for (const docSnap of snap.docs) {
+      const data = docSnap.data();
+      const sId = (data.studentId || docSnap.id || '').toLowerCase();
+      const sName = (data.name || '').toLowerCase();
+      if (sId !== 'c6-2026-0012' && sName !== 'kiran') {
+        await deleteDoc(docSnap.ref);
+      }
+    }
+  } catch (e) {
+    console.error('Error deleting Firestore students except Kiran:', e);
+  }
+
+  // Clean localStorage
+  try {
+    localStorage.setItem('cbse_registered_students', JSON.stringify([kiran]));
+  } catch (e) {
+    // ignore
+  }
+
+  return [kiran];
 }
 
 export function saveDraftAttempt(draft: DraftAttempt): void {
   try {
-    localStorage.setItem(`cbse_draft_exam_${draft.studentId}`, JSON.stringify(draft));
+    const payload: DraftAttempt = {
+      ...draft,
+      status: draft.status || 'in-progress',
+      submitted: draft.submitted || false,
+    };
+    localStorage.setItem(`cbse_draft_exam_${draft.studentId}`, JSON.stringify(payload));
+    localStorage.setItem('unfinishedExam', JSON.stringify(payload));
+    localStorage.setItem('examDraft', JSON.stringify(payload));
   } catch (err) {
     console.error('Error saving draft exam:', err);
   }
@@ -305,18 +471,52 @@ export function saveDraftAttempt(draft: DraftAttempt): void {
 
 export function getDraftAttempt(studentId: string): DraftAttempt | null {
   try {
-    const raw = localStorage.getItem(`cbse_draft_exam_${studentId}`);
+    const raw = localStorage.getItem(`cbse_draft_exam_${studentId}`) || localStorage.getItem('unfinishedExam') || localStorage.getItem('examDraft');
     if (!raw) return null;
-    return JSON.parse(raw) as DraftAttempt;
+    const draft = JSON.parse(raw) as DraftAttempt;
+
+    // Validate that draft is truly in-progress and not submitted/completed
+    if (!draft || draft.submitted === true || draft.status === 'completed') {
+      clearDraftAttempt(studentId);
+      return null;
+    }
+
+    if (draft.studentId && draft.studentId !== studentId) {
+      return null;
+    }
+
+    return draft;
   } catch (err) {
     console.error('Error loading draft exam:', err);
+    clearDraftAttempt(studentId);
     return null;
   }
+}
+
+export function hasValidUnfinishedExam(studentId: string): boolean {
+  const draft = getDraftAttempt(studentId);
+  return Boolean(draft && draft.status === 'in-progress' && !draft.submitted);
 }
 
 export function clearDraftAttempt(studentId: string): void {
   try {
     localStorage.removeItem(`cbse_draft_exam_${studentId}`);
+    localStorage.removeItem('unfinishedExam');
+    localStorage.removeItem('examDraft');
+    localStorage.removeItem('currentTest');
+    localStorage.removeItem('savedAnswers');
+    localStorage.removeItem('remainingTime');
+    localStorage.removeItem('currentQuestionIndex');
+
+    // Remove any lesson-specific or student-specific keys
+    const keysToRemove: string[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && (key.startsWith('draft_') || key.startsWith('cbse_draft_') || key.includes('unfinishedExam') || key.includes('examDraft'))) {
+        keysToRemove.push(key);
+      }
+    }
+    keysToRemove.forEach((k) => localStorage.removeItem(k));
   } catch (err) {
     console.error('Error clearing draft exam:', err);
   }
@@ -1879,6 +2079,1519 @@ export async function createPlayingWithNumbersTestPaper2(): Promise<Test> {
 }
 
 /**
+ * Deletes all existing Ratio and Proportion tests and associated questions from Firestore.
+ */
+export async function deleteAllRatioTests(): Promise<number> {
+  try {
+    const snap = await getDocs(collection(db, TESTS_COL));
+    const ratioDocs = snap.docs.filter((docSnap) => {
+      const data = docSnap.data();
+      const title = (data.title || '').toLowerCase();
+      return title.includes('ratio') || title.includes('proportion');
+    });
+
+    let count = 0;
+    for (const docSnap of ratioDocs) {
+      await deleteTest(docSnap.id);
+      count++;
+    }
+    console.log(`Deleted ${count} previous Ratio and Proportion test papers.`);
+    return count;
+  } catch (error) {
+    console.error('Error deleting Ratio and Proportion tests:', error);
+    return 0;
+  }
+}
+
+/**
+ * Helper to populate official CBSE Class 6 Mathematics – Chapter 12: Ratio and Proportion – Sample Test 1 (30 Questions)
+ */
+export async function createRatioTestPaper1(): Promise<Test> {
+  const testObj = await createTest({
+    title: 'CBSE Class 6: Ratio and Proportion – Sample Test 1',
+    class: 'Class 6',
+    duration: 60,
+    published: true,
+  });
+
+  const rawQuestions: Omit<Question, 'id'>[] = [
+    {
+      testId: testObj.id,
+      orderIndex: 1,
+      question: '1. Which of the following is written in the form of a ratio?',
+      optionA: '3 + 5',
+      optionB: '3 : 5',
+      optionC: '3 × 5',
+      optionD: '3 – 5',
+      correctAnswer: 'optionB',
+      hint: '3 : 5 is written in ratio form using the colon symbol.',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 2,
+      question: '2. The ratio of 4 pens to 8 pens is:',
+      optionA: '4 : 8',
+      optionB: '1 : 2',
+      optionC: '2 : 1',
+      optionD: '8 : 4',
+      correctAnswer: 'optionB',
+      hint: '4 / 8 = 1 / 2, which gives 1 : 2.',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 3,
+      question: '3. Which of the following ratios is equivalent to 2 : 3?',
+      optionA: '4 : 6',
+      optionB: '3 : 4',
+      optionC: '6 : 4',
+      optionD: '8 : 9',
+      correctAnswer: 'optionA',
+      hint: '2/3 = (2×2)/(3×2) = 4/6 = 4 : 6.',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 4,
+      question: '4. In the ratio 5 : 7, the first term is:',
+      optionA: '7',
+      optionB: '5',
+      optionC: '12',
+      optionD: '35',
+      correctAnswer: 'optionB',
+      hint: 'In 5 : 7, 5 is the first term (antecedent).',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 5,
+      question: '5. If 12 chocolates are shared among 3 children, the ratio of chocolates to children is:',
+      optionA: '12 : 3',
+      optionB: '3 : 12',
+      optionC: '4 : 1',
+      optionD: 'Both a and c',
+      correctAnswer: 'optionD',
+      hint: '12 : 3 simplifies to 4 : 1, so both a and c represent the ratio.',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 6,
+      question: '6. Which pair is in proportion?',
+      optionA: '2 : 4 and 4 : 8',
+      optionB: '3 : 5 and 6 : 8',
+      optionC: '5 : 6 and 10 : 11',
+      optionD: '4 : 7 and 8 : 15',
+      correctAnswer: 'optionA',
+      hint: '2/4 = 1/2 and 4/8 = 1/2, so 2:4 = 4:8.',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 7,
+      question: '7. The simplest form of 15 : 25 is:',
+      optionA: '15 : 25',
+      optionB: '5 : 25',
+      optionC: '3 : 5',
+      optionD: '5 : 3',
+      correctAnswer: 'optionC',
+      hint: '15/25 = (15÷5)/(25÷5) = 3/5 = 3 : 5.',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 8,
+      question: '8. Which of the following is not a ratio?',
+      optionA: '7 : 9',
+      optionB: '12 : 4',
+      optionC: '5/8',
+      optionD: '3 + 2',
+      correctAnswer: 'optionD',
+      hint: '3 + 2 is an addition expression, not a comparison ratio.',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 9,
+      question: '9. If a : b = 6 : 9, then the simplified ratio is:',
+      optionA: '6 : 9',
+      optionB: '3 : 2',
+      optionC: '2 : 3',
+      optionD: '9 : 6',
+      correctAnswer: 'optionC',
+      hint: '6/9 = (6÷3)/(9÷3) = 2/3 = 2 : 3.',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 10,
+      question: '10. The ratio of 20 cm to 1 m is:',
+      optionA: '20 : 1',
+      optionB: '20 : 100',
+      optionC: '1 : 5',
+      optionD: 'Both b and c',
+      correctAnswer: 'optionD',
+      hint: '1 m = 100 cm. Ratio is 20 cm : 100 cm = 20 : 100 = 1 : 5. So both b and c.',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 11,
+      question: '11. A comparison of two quantities by division is called a __________.',
+      optionA: 'ratio',
+      optionB: 'fraction',
+      optionC: 'proportion',
+      optionD: 'product',
+      correctAnswer: 'optionA',
+      hint: 'ratio',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 12,
+      question: '12. The ratio 8 : 12 in simplest form is __________.',
+      optionA: '4 : 6',
+      optionB: '2 : 3',
+      optionC: '3 : 2',
+      optionD: '1 : 2',
+      correctAnswer: 'optionB',
+      hint: '2 : 3',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 13,
+      question: '13. In 3 : 4 = 6 : 8, the two ratios are said to be in __________.',
+      optionA: 'equality',
+      optionB: 'fraction',
+      optionC: 'proportion',
+      optionD: 'equation',
+      correctAnswer: 'optionC',
+      hint: 'proportion',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 14,
+      question: '14. The first and fourth terms of a proportion are called __________ terms.',
+      optionA: 'middle',
+      optionB: 'extreme',
+      optionC: 'mean',
+      optionD: 'last',
+      correctAnswer: 'optionB',
+      hint: 'extreme',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 15,
+      question: '15. The ratio of 10 rupees to 50 rupees is __________.',
+      optionA: '5 : 1',
+      optionB: '1 : 5',
+      optionC: '10 : 5',
+      optionD: '1 : 10',
+      correctAnswer: 'optionB',
+      hint: '1 : 5',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 16,
+      question: '16. 6 : 18 = 1 : __________',
+      optionA: '2',
+      optionB: '3',
+      optionC: '6',
+      optionD: '18',
+      correctAnswer: 'optionB',
+      hint: '3',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 17,
+      question: '17. If 2 : 5 = 8 : x, then x = __________.',
+      optionA: '10',
+      optionB: '15',
+      optionC: '20',
+      optionD: '25',
+      correctAnswer: 'optionC',
+      hint: '20',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 18,
+      question: '18. The ratio 9 : 27 in simplest form is __________.',
+      optionA: '3 : 9',
+      optionB: '1 : 3',
+      optionC: '3 : 1',
+      optionD: '1 : 9',
+      correctAnswer: 'optionB',
+      hint: '1 : 3',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 19,
+      question: '19. 4 : 8 = 1 : 2. _________',
+      optionA: 'True',
+      optionB: 'False',
+      optionC: 'Cannot say',
+      optionD: 'None of these',
+      correctAnswer: 'optionA',
+      hint: 'True',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 20,
+      question: '20. 5 : 10 and 2 : 4 are equivalent ratios. _________',
+      optionA: 'True',
+      optionB: 'False',
+      optionC: 'Cannot say',
+      optionD: 'None of these',
+      correctAnswer: 'optionA',
+      hint: 'True',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 21,
+      question: '21. 3 : 7 = 6 : 14 forms a proportion. _________',
+      optionA: 'True',
+      optionB: 'False',
+      optionC: 'Cannot say',
+      optionD: 'None of these',
+      correctAnswer: 'optionA',
+      hint: 'True',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 22,
+      question: '22. A ratio can compare quantities with different units without converting them first. _________',
+      optionA: 'True',
+      optionB: 'False',
+      optionC: 'Cannot say',
+      optionD: 'None of these',
+      correctAnswer: 'optionB',
+      hint: 'False',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 23,
+      question: '23. 12 : 18 simplifies to 2 : 3. _________',
+      optionA: 'True',
+      optionB: 'False',
+      optionC: 'Cannot say',
+      optionD: 'None of these',
+      correctAnswer: 'optionA',
+      hint: 'True',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 24,
+      question: '24. 8 : 20 = 2 : 5. _________',
+      optionA: 'True',
+      optionB: 'False',
+      optionC: 'Cannot say',
+      optionD: 'None of these',
+      correctAnswer: 'optionA',
+      hint: 'True',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 25,
+      question: '25. Simplify the following ratios:\n\na) 18 : 24\nb) 21 : 35',
+      optionA: 'a) 3 : 4  b) 3 : 5',
+      optionB: 'a) 2 : 3  b) 3 : 5',
+      optionC: 'a) 3 : 4  b) 5 : 3',
+      optionD: 'a) 4 : 3  b) 5 : 7',
+      correctAnswer: 'optionA',
+      hint: 'a) 3 : 4  b) 3 : 5',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 26,
+      question: '26. Check whether the following are in proportion:\n\na) 2 : 3 and 8 : 12\nb) 4 : 5 and 12 : 15',
+      optionA: 'a) Not in proportion  b) Yes',
+      optionB: 'a) Yes  b) Yes',
+      optionC: 'a) Yes  b) Not in proportion',
+      optionD: 'a) Not in proportion  b) Not in proportion',
+      correctAnswer: 'optionA',
+      hint: 'a) Not in proportion  b) Yes',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 27,
+      question: '27. Write the ratio in simplest form:\n\na) 36 cm : 48 cm\nb) 250 g : 1 kg',
+      optionA: 'a) 3 : 4  b) 1 : 4',
+      optionB: 'a) 4 : 3  b) 1 : 4',
+      optionC: 'a) 3 : 4  b) 250 : 1',
+      optionD: 'a) 3 : 5  b) 1 : 4',
+      correctAnswer: 'optionA',
+      hint: 'a) 3 : 4  b) 1 : 4',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 28,
+      question: '28. Complete the proportion:\n\na) 5 : 8 = 15 : ___\nb) 7 : 9 = ___ : 27',
+      optionA: 'a) 24  b) 21',
+      optionB: 'a) 20  b) 21',
+      optionC: 'a) 24  b) 18',
+      optionD: 'a) 18  b) 21',
+      correctAnswer: 'optionA',
+      hint: 'a) 24  b) 21',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 29,
+      question: '29. In a class, there are 18 boys and 12 girls.\n\n• Write the ratio of boys to girls.\n• Write the ratio of girls to total students.\n• Simplify both ratios.',
+      optionA: 'Boys : Girls = 3 : 2; Girls : Total = 2 : 5',
+      optionB: 'Boys : Girls = 2 : 3; Girls : Total = 2 : 5',
+      optionC: 'Boys : Girls = 3 : 2; Girls : Total = 3 : 5',
+      optionD: 'Boys : Girls = 3 : 2; Girls : Total = 5 : 2',
+      correctAnswer: 'optionA',
+      hint: 'Boys : Girls = 3 : 2; Girls : Total = 2 : 5',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 30,
+      question: '30. A recipe uses 2 cups of rice for 5 people.\n\n• Write the ratio of rice to people.\n• How many cups of rice are needed for 10 people if the proportion remains the same?',
+      optionA: 'Rice : People = 2 : 5; For 10 people = 4 cups',
+      optionB: 'Rice : People = 5 : 2; For 10 people = 4 cups',
+      optionC: 'Rice : People = 2 : 5; For 10 people = 5 cups',
+      optionD: 'Rice : People = 1 : 2.5; For 10 people = 10 cups',
+      correctAnswer: 'optionA',
+      hint: 'Rice : People = 2 : 5; For 10 people = 4 cups',
+    },
+  ];
+
+  for (const q of rawQuestions) {
+    await createQuestion(q);
+  }
+
+  return testObj;
+}
+
+/**
+ * Deletes all existing Algebra tests and associated questions from Firestore.
+ */
+export async function deleteAllAlgebraTests(): Promise<number> {
+  try {
+    const snap = await getDocs(collection(db, TESTS_COL));
+    const algebraDocs = snap.docs.filter((docSnap) => {
+      const data = docSnap.data();
+      const title = (data.title || '').toLowerCase();
+      return title.includes('algebra');
+    });
+
+    let count = 0;
+    for (const docSnap of algebraDocs) {
+      await deleteTest(docSnap.id);
+      count++;
+    }
+    console.log(`Deleted ${count} previous Algebra test papers.`);
+    return count;
+  } catch (error) {
+    console.error('Error deleting Algebra tests:', error);
+    return 0;
+  }
+}
+
+/**
+ * Helper to populate official CBSE Class 6 Mathematics – Chapter 11: Algebra – Sample Test 1 (30 Questions)
+ */
+export async function createAlgebraTestPaper1(): Promise<Test> {
+  const testObj = await createTest({
+    title: 'CBSE Class 6: Algebra – Sample Test 1',
+    class: 'Class 6',
+    duration: 60,
+    published: true,
+  });
+
+  const rawQuestions: Omit<Question, 'id'>[] = [
+    {
+      testId: testObj.id,
+      orderIndex: 1,
+      question: '1. Which of the following is a variable?',
+      optionA: '5',
+      optionB: '12',
+      optionC: 'x',
+      optionD: '20',
+      correctAnswer: 'optionC',
+      hint: 'x is a letter representing an unknown quantity that can take different values.',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 2,
+      question: '2. In the expression x + 7, x is called:',
+      optionA: 'constant',
+      optionB: 'variable',
+      optionC: 'coefficient',
+      optionD: 'number',
+      correctAnswer: 'optionB',
+      hint: 'x is a variable.',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 3,
+      question: '3. Which of the following is an algebraic expression?',
+      optionA: '8',
+      optionB: '5 + x',
+      optionC: '12',
+      optionD: '20',
+      correctAnswer: 'optionB',
+      hint: '5 + x contains both numbers and a variable connected by an operator.',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 4,
+      question: '4. The expression for 5 more than a number y is:',
+      optionA: '5y',
+      optionB: 'y – 5',
+      optionC: 'y + 5',
+      optionD: '5 – y',
+      correctAnswer: 'optionC',
+      hint: '5 more than y means y + 5.',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 5,
+      question: '5. Which of the following is a constant?',
+      optionA: 'a',
+      optionB: 'p',
+      optionC: '9',
+      optionD: 'z',
+      correctAnswer: 'optionC',
+      hint: '9 has a fixed numerical value, so it is a constant.',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 6,
+      question: '6. The expression for twice a number n is:',
+      optionA: 'n + 2',
+      optionB: '2n',
+      optionC: 'n/2',
+      optionD: 'n – 2',
+      correctAnswer: 'optionB',
+      hint: 'Twice a number n means 2 × n = 2n.',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 7,
+      question: '7. Which expression represents 3 less than x?',
+      optionA: 'x + 3',
+      optionB: '3x',
+      optionC: 'x – 3',
+      optionD: '3 – x',
+      correctAnswer: 'optionC',
+      hint: '3 less than x is x – 3.',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 8,
+      question: '8. In 4a + 7, the coefficient of a is:',
+      optionA: '4',
+      optionB: '7',
+      optionC: 'a',
+      optionD: '11',
+      correctAnswer: 'optionA',
+      hint: 'The numerical factor multiplied with variable a is 4.',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 9,
+      question: '9. Which of the following contains a variable?',
+      optionA: '15',
+      optionB: '3 + y',
+      optionC: '24',
+      optionD: '100',
+      correctAnswer: 'optionB',
+      hint: '3 + y contains the variable y.',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 10,
+      question: '10. The expression for the sum of a number p and 10 is:',
+      optionA: '10p',
+      optionB: 'p – 10',
+      optionC: 'p + 10',
+      optionD: '10 – p',
+      correctAnswer: 'optionC',
+      hint: 'Sum of p and 10 is p + 10.',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 11,
+      question: '11. A symbol whose value can change is called a __________.',
+      optionA: 'variable',
+      optionB: 'constant',
+      optionC: 'coefficient',
+      optionD: 'term',
+      correctAnswer: 'optionA',
+      hint: 'variable',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 12,
+      question: '12. In m – 8, 8 is a __________.',
+      optionA: 'variable',
+      optionB: 'constant',
+      optionC: 'coefficient',
+      optionD: 'expression',
+      correctAnswer: 'optionB',
+      hint: 'constant',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 13,
+      question: '13. The expression for 7 added to x is __________.',
+      optionA: 'x – 7',
+      optionB: '7x',
+      optionC: 'x + 7',
+      optionD: 'x/7',
+      correctAnswer: 'optionC',
+      hint: 'x + 7',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 14,
+      question: '14. 3n means __________ times n.',
+      optionA: '1',
+      optionB: '2',
+      optionC: '3',
+      optionD: '4',
+      correctAnswer: 'optionC',
+      hint: '3',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 15,
+      question: '15. In 5p + 2, p is the __________.',
+      optionA: 'constant',
+      optionB: 'variable',
+      optionC: 'coefficient',
+      optionD: 'sum',
+      correctAnswer: 'optionB',
+      hint: 'variable',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 16,
+      question: '16. The expression for one-fourth of y is __________.',
+      optionA: '4y',
+      optionB: 'y/4',
+      optionC: 'y – 4',
+      optionD: 'y + 4',
+      correctAnswer: 'optionB',
+      hint: 'y/4',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 17,
+      question: '17. In 2a + 9, the constant term is __________.',
+      optionA: '2',
+      optionB: 'a',
+      optionC: '9',
+      optionD: '2a',
+      correctAnswer: 'optionC',
+      hint: '9',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 18,
+      question: '18. The expression for 10 less than a number t is __________.',
+      optionA: 't + 10',
+      optionB: '10t',
+      optionC: 't – 10',
+      optionD: '10 – t',
+      correctAnswer: 'optionC',
+      hint: 't – 10',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 19,
+      question: '19. x + 5 is an algebraic expression. _________',
+      optionA: 'True',
+      optionB: 'False',
+      optionC: 'Cannot say',
+      optionD: 'None of these',
+      correctAnswer: 'optionA',
+      hint: 'True',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 20,
+      question: '20. A variable always has a fixed value. _________',
+      optionA: 'True',
+      optionB: 'False',
+      optionC: 'Cannot say',
+      optionD: 'None of these',
+      correctAnswer: 'optionB',
+      hint: 'False',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 21,
+      question: '21. 2m means m + m. _________',
+      optionA: 'True',
+      optionB: 'False',
+      optionC: 'Cannot say',
+      optionD: 'None of these',
+      correctAnswer: 'optionA',
+      hint: 'True',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 22,
+      question: '22. In 7 + p, 7 is a constant. _________',
+      optionA: 'True',
+      optionB: 'False',
+      optionC: 'Cannot say',
+      optionD: 'None of these',
+      correctAnswer: 'optionA',
+      hint: 'True',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 23,
+      question: '23. a – 4 and 4 – a are the same. _________',
+      optionA: 'True',
+      optionB: 'False',
+      optionC: 'Cannot say',
+      optionD: 'None of these',
+      correctAnswer: 'optionB',
+      hint: 'False',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 24,
+      question: '24. The expression 5x contains a variable. _________',
+      optionA: 'True',
+      optionB: 'False',
+      optionC: 'Cannot say',
+      optionD: 'None of these',
+      correctAnswer: 'optionA',
+      hint: 'True',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 25,
+      question: '25. Write algebraic expressions for:\n\na) 9 more than a number x\nb) 4 times a number p',
+      optionA: 'a) x + 9  b) 4p',
+      optionB: 'a) 9x  b) 4 + p',
+      optionC: 'a) x – 9  b) p/4',
+      optionD: 'a) 9 – x  b) 4 – p',
+      correctAnswer: 'optionA',
+      hint: 'a) x + 9  b) 4p',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 26,
+      question: '26. Write algebraic expressions for:\n\na) 12 less than a number y\nb) Half of a number n',
+      optionA: 'a) y – 12  b) n/2',
+      optionB: 'a) 12 – y  b) 2n',
+      optionC: 'a) y + 12  b) n – 2',
+      optionD: 'a) 12y  b) n + 2',
+      correctAnswer: 'optionA',
+      hint: 'a) y – 12  b) n/2',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 27,
+      question: '27. If x = 5, find the value of:\n\na) x + 3\nb) 2x',
+      optionA: 'a) 8  b) 10',
+      optionB: 'a) 15  b) 10',
+      optionC: 'a) 8  b) 25',
+      optionD: 'a) 2  b) 10',
+      correctAnswer: 'optionA',
+      hint: 'a) 8  b) 10',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 28,
+      question: '28. If a = 4, find the value of:\n\na) 3a + 2\nb) a – 1',
+      optionA: 'a) 14  b) 3',
+      optionB: 'a) 12  b) 3',
+      optionC: 'a) 14  b) 5',
+      optionD: 'a) 10  b) 3',
+      correctAnswer: 'optionA',
+      hint: 'a) 14  b) 3',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 29,
+      question: '29. A matchstick pattern has 4 matchsticks in one square.\n\n• How many matchsticks are needed for 2 squares?\n• How many matchsticks are needed for 5 squares if each new square shares one side with the previous square?',
+      optionA: '2 squares = 7 matchsticks; 5 squares = 16 matchsticks',
+      optionB: '2 squares = 8 matchsticks; 5 squares = 20 matchsticks',
+      optionC: '2 squares = 7 matchsticks; 5 squares = 15 matchsticks',
+      optionD: '2 squares = 6 matchsticks; 5 squares = 16 matchsticks',
+      correctAnswer: 'optionA',
+      hint: '2 squares = 7 matchsticks; 5 squares = 16 matchsticks',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 30,
+      question: '30. Ravi has x marbles. His friend gives him 7 more marbles.\n\n• Write an algebraic expression for the total number of marbles.\n• Find the total if x = 12.',
+      optionA: 'Total expression = x + 7; if x = 12, total = 19',
+      optionB: 'Total expression = 7x; if x = 12, total = 84',
+      optionC: 'Total expression = x – 7; if x = 12, total = 5',
+      optionD: 'Total expression = x + 7; if x = 12, total = 12',
+      correctAnswer: 'optionA',
+      hint: 'Total expression = x + 7; if x = 12, total = 19',
+    },
+  ];
+
+  for (const q of rawQuestions) {
+    await createQuestion(q);
+  }
+
+  return testObj;
+}
+
+/**
+ * Deletes all existing Decimals tests and associated questions from Firestore.
+ */
+export async function deleteAllDecimalsTests(): Promise<number> {
+  try {
+    const snap = await getDocs(collection(db, TESTS_COL));
+    const decimalsDocs = snap.docs.filter((docSnap) => {
+      const data = docSnap.data();
+      const title = (data.title || '').toLowerCase();
+      return title.includes('decimals');
+    });
+
+    let count = 0;
+    for (const docSnap of decimalsDocs) {
+      await deleteTest(docSnap.id);
+      count++;
+    }
+    console.log(`Deleted ${count} previous Decimals test papers.`);
+    return count;
+  } catch (error) {
+    console.error('Error deleting Decimals tests:', error);
+    return 0;
+  }
+}
+
+/**
+ * Helper to populate official CBSE Class 6 Mathematics – Chapter 8: Decimals – Sample Test 1 (30 Questions)
+ */
+export async function createDecimalsTestPaper1(): Promise<Test> {
+  const testObj = await createTest({
+    title: 'CBSE Class 6: Decimals – Sample Test 1',
+    class: 'Class 6',
+    duration: 60,
+    published: true,
+  });
+
+  const rawQuestions: Omit<Question, 'id'>[] = [
+    {
+      testId: testObj.id,
+      orderIndex: 1,
+      question: '1. Which of the following is a decimal number?',
+      optionA: '3/4',
+      optionB: '0.5',
+      optionC: '7/8',
+      optionD: '9/10',
+      correctAnswer: 'optionB',
+      hint: '0.5 is a number written in decimal notation with a decimal point.',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 2,
+      question: '2. The decimal form of 5/10 is:',
+      optionA: '5.0',
+      optionB: '0.5',
+      optionC: '0.05',
+      optionD: '50.0',
+      correctAnswer: 'optionB',
+      hint: '5/10 = 0.5',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 3,
+      question: '3. Which number has 3 in the tenths place?',
+      optionA: '2.35',
+      optionB: '4.03',
+      optionC: '5.30',
+      optionD: '3.25',
+      correctAnswer: 'optionC',
+      hint: 'In 5.30, the digit 3 is in the tenths place.',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 4,
+      question: '4. The decimal 0.7 represents:',
+      optionA: '7/100',
+      optionB: '7/10',
+      optionC: '70/1000',
+      optionD: '1/7',
+      correctAnswer: 'optionB',
+      hint: '0.7 = 7/10',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 5,
+      question: '5. Which is the greatest?',
+      optionA: '0.8',
+      optionB: '0.08',
+      optionC: '0.18',
+      optionD: '0.81',
+      correctAnswer: 'optionD',
+      hint: '0.81 > 0.80 > 0.18 > 0.08',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 6,
+      question: '6. The decimal form of 25/100 is:',
+      optionA: '2.5',
+      optionB: '0.25',
+      optionC: '25.0',
+      optionD: '0.025',
+      correctAnswer: 'optionB',
+      hint: '25/100 = 0.25',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 7,
+      question: '7. Which of the following is equal to 1 whole?',
+      optionA: '0.1',
+      optionB: '0.01',
+      optionC: '1.0',
+      optionD: '10.0',
+      correctAnswer: 'optionC',
+      hint: '1.0 is equal to 1 whole.',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 8,
+      question: '8. The place value of 6 in 4.68 is:',
+      optionA: '6 ones',
+      optionB: '6 tenths',
+      optionC: '6 hundredths',
+      optionD: '6 tens',
+      correctAnswer: 'optionB',
+      hint: 'In 4.68, 6 is in the tenths place.',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 9,
+      question: '9. Which is the smallest decimal?',
+      optionA: '0.9',
+      optionB: '0.09',
+      optionC: '0.19',
+      optionD: '0.29',
+      correctAnswer: 'optionB',
+      hint: '0.09 is the smallest decimal.',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 10,
+      question: '10. The decimal form of 3 + 2/10 is:',
+      optionA: '3.02',
+      optionB: '3.2',
+      optionC: '32.0',
+      optionD: '2.3',
+      correctAnswer: 'optionB',
+      hint: '3 + 2/10 = 3 + 0.2 = 3.2',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 11,
+      question: '11. In 5.4, the digit 4 is in the __________ place.',
+      optionA: 'tenths',
+      optionB: 'hundredths',
+      optionC: 'ones',
+      optionD: 'tens',
+      correctAnswer: 'optionA',
+      hint: 'tenths',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 12,
+      question: '12. 0.3 = 3/__________',
+      optionA: '100',
+      optionB: '10',
+      optionC: '1',
+      optionD: '1000',
+      correctAnswer: 'optionB',
+      hint: '10',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 13,
+      question: '13. 0.45 has 4 tenths and __________ hundredths.',
+      optionA: '4',
+      optionB: '5',
+      optionC: '45',
+      optionD: '0',
+      correctAnswer: 'optionB',
+      hint: '5',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 14,
+      question: '14. 7/10 in decimal form is __________.',
+      optionA: '0.07',
+      optionB: '0.7',
+      optionC: '7.0',
+      optionD: '70.0',
+      correctAnswer: 'optionB',
+      hint: '0.7',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 15,
+      question: '15. The number 2.50 has __________ digits after the decimal point.',
+      optionA: '1',
+      optionB: '2',
+      optionC: '3',
+      optionD: '0',
+      correctAnswer: 'optionB',
+      hint: '2',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 16,
+      question: '16. 0.9 + 0.1 = __________',
+      optionA: '0.10',
+      optionB: '1.0',
+      optionC: '0.91',
+      optionD: '1.1',
+      correctAnswer: 'optionB',
+      hint: '1.0',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 17,
+      question: '17. 1.25 = 125/__________',
+      optionA: '10',
+      optionB: '100',
+      optionC: '1000',
+      optionD: '1',
+      correctAnswer: 'optionB',
+      hint: '100',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 18,
+      question: '18. 0.75 is read as __________.',
+      optionA: 'seventy-five',
+      optionB: 'seventy-five hundredths',
+      optionC: 'seven tenths five ones',
+      optionD: 'seven point five',
+      correctAnswer: 'optionB',
+      hint: 'seventy-five hundredths',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 19,
+      question: '19. 0.5 = 5/10. _________',
+      optionA: 'True',
+      optionB: 'False',
+      optionC: 'Cannot say',
+      optionD: 'None of these',
+      correctAnswer: 'optionA',
+      hint: 'True',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 20,
+      question: '20. 0.25 is greater than 0.5. _________',
+      optionA: 'True',
+      optionB: 'False',
+      optionC: 'Cannot say',
+      optionD: 'None of these',
+      correctAnswer: 'optionB',
+      hint: 'False',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 21,
+      question: '21. 3.40 and 3.4 represent the same value. _________',
+      optionA: 'True',
+      optionB: 'False',
+      optionC: 'Cannot say',
+      optionD: 'None of these',
+      correctAnswer: 'optionA',
+      hint: 'True',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 22,
+      question: '22. The number 0.07 has 7 hundredths. _________',
+      optionA: 'True',
+      optionB: 'False',
+      optionC: 'Cannot say',
+      optionD: 'None of these',
+      correctAnswer: 'optionA',
+      hint: 'True',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 23,
+      question: '23. 1.0 is equal to 1. _________',
+      optionA: 'True',
+      optionB: 'False',
+      optionC: 'Cannot say',
+      optionD: 'None of these',
+      correctAnswer: 'optionA',
+      hint: 'True',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 24,
+      question: '24. 0.99 is smaller than 1.00. _________',
+      optionA: 'True',
+      optionB: 'False',
+      optionC: 'Cannot say',
+      optionD: 'None of these',
+      correctAnswer: 'optionA',
+      hint: 'True',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 25,
+      question: '25. Convert the following fractions into decimals:\n\na) 4/10\nb) 36/100',
+      optionA: 'a) 0.4  b) 0.36',
+      optionB: 'a) 4.0  b) 3.6',
+      optionC: 'a) 0.04  b) 0.036',
+      optionD: 'a) 0.4  b) 3.6',
+      correctAnswer: 'optionA',
+      hint: 'a) 0.4  b) 0.36',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 26,
+      question: '26. Write the place value of the underlined digit in:\n\na) 7.8\nb) 3.46',
+      optionA: 'a) 8 ones  b) 6 tens',
+      optionB: 'a) 8 tenths  b) 6 hundredths',
+      optionC: 'a) 8 hundredths  b) 6 tenths',
+      optionD: 'a) 8 tens  b) 6 ones',
+      correctAnswer: 'optionB',
+      hint: 'a) 8 tenths  b) 6 hundredths',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 27,
+      question: '27. Arrange the following decimals in ascending order:\n\n0.9, 0.09, 0.5',
+      optionA: '0.09 < 0.5 < 0.9',
+      optionB: '0.9 < 0.5 < 0.09',
+      optionC: '0.5 < 0.09 < 0.9',
+      optionD: '0.09 < 0.9 < 0.5',
+      correctAnswer: 'optionA',
+      hint: '0.09 < 0.5 < 0.9',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 28,
+      question: '28. Add the following decimals:\n\na) 2.3 + 1.5\nb) 4.25 + 0.50',
+      optionA: 'a) 3.8  b) 4.75',
+      optionB: 'a) 3.5  b) 4.25',
+      optionC: 'a) 3.8  b) 4.50',
+      optionD: 'a) 2.8  b) 4.75',
+      correctAnswer: 'optionA',
+      hint: 'a) 3.8  b) 4.75',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 29,
+      question: '29. A ribbon is 3.5 m long. Another ribbon is 2.25 m long.\n\n• What is the total length of the two ribbons?\n• Which ribbon is longer?',
+      optionA: 'Total = 5.75 m; Longer ribbon = 3.5 m ribbon',
+      optionB: 'Total = 5.50 m; Longer ribbon = 2.25 m ribbon',
+      optionC: 'Total = 5.75 m; Longer ribbon = 2.25 m ribbon',
+      optionD: 'Total = 5.25 m; Longer ribbon = 3.5 m ribbon',
+      correctAnswer: 'optionA',
+      hint: 'Total = 5.75 m; Longer ribbon = 3.5 m ribbon',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 30,
+      question: '30. A bottle contains 1.75 litres of juice. 0.50 litres is used.\n\n• How much juice was used?\n• How much juice remains in the bottle?',
+      optionA: 'Used = 0.50 L; Remaining = 1.25 L',
+      optionB: 'Used = 1.75 L; Remaining = 0.50 L',
+      optionC: 'Used = 1.25 L; Remaining = 0.50 L',
+      optionD: 'Used = 0.50 L; Remaining = 1.75 L',
+      correctAnswer: 'optionA',
+      hint: 'Used = 0.50 L; Remaining = 1.25 L',
+    },
+  ];
+
+  for (const q of rawQuestions) {
+    await createQuestion(q);
+  }
+
+  return testObj;
+}
+
+/**
+ * Deletes all existing Fractions tests and associated questions from Firestore.
+ */
+export async function deleteAllFractionsTests(): Promise<number> {
+  try {
+    const snap = await getDocs(collection(db, TESTS_COL));
+    const fractionsDocs = snap.docs.filter((docSnap) => {
+      const data = docSnap.data();
+      const title = (data.title || '').toLowerCase();
+      return title.includes('fractions');
+    });
+
+    let count = 0;
+    for (const docSnap of fractionsDocs) {
+      await deleteTest(docSnap.id);
+      count++;
+    }
+    console.log(`Deleted ${count} previous Fractions test papers.`);
+    return count;
+  } catch (error) {
+    console.error('Error deleting Fractions tests:', error);
+    return 0;
+  }
+}
+
+/**
+ * Helper to populate official CBSE Class 6 Mathematics – Chapter 7: Fractions – Sample Test 1 (30 Questions)
+ */
+export async function createFractionsTestPaper1(): Promise<Test> {
+  const testObj = await createTest({
+    title: 'CBSE Class 6: Fractions – Sample Test 1',
+    class: 'Class 6',
+    duration: 60,
+    published: true,
+  });
+
+  const rawQuestions: Omit<Question, 'id'>[] = [
+    // Section A – Multiple Choice Questions (1 mark each)
+    {
+      testId: testObj.id,
+      orderIndex: 1,
+      question: '1. Which of the following is a proper fraction?',
+      optionA: '7/5',
+      optionB: '9/4',
+      optionC: '3/8',
+      optionD: '11/6',
+      correctAnswer: 'optionC',
+      hint: 'In a proper fraction, the numerator is less than the denominator. Here 3 < 8, so 3/8 is a proper fraction.',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 2,
+      question: '2. The numerator of 5/9 is:',
+      optionA: '5',
+      optionB: '9',
+      optionC: '14',
+      optionD: '4',
+      correctAnswer: 'optionA',
+      hint: 'In a fraction a/b, the number on top (a) is the numerator. In 5/9, 5 is the numerator.',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 3,
+      question: '3. Which fraction is equal to one whole?',
+      optionA: '4/5',
+      optionB: '5/5',
+      optionC: '3/5',
+      optionD: '2/5',
+      correctAnswer: 'optionB',
+      hint: 'When the numerator equals the denominator (5/5 = 1), the fraction is equal to one whole.',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 4,
+      question: '4. Equivalent fraction of 2/3 is:',
+      optionA: '4/6',
+      optionB: '5/6',
+      optionC: '3/5',
+      optionD: '6/8',
+      correctAnswer: 'optionA',
+      hint: 'Multiplying both numerator and denominator of 2/3 by 2 gives (2×2)/(3×2) = 4/6.',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 5,
+      question: '5. Which fraction is the greatest?',
+      optionA: '1/4',
+      optionB: '1/2',
+      optionC: '3/8',
+      optionD: '2/5',
+      correctAnswer: 'optionB',
+      hint: 'Converting to decimals: 1/2 = 0.5, 2/5 = 0.4, 3/8 = 0.375, 1/4 = 0.25. So 1/2 is the greatest.',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 6,
+      question: '6. Which of the following is an improper fraction?',
+      optionA: '3/7',
+      optionB: '5/9',
+      optionC: '9/4',
+      optionD: '2/11',
+      correctAnswer: 'optionC',
+      hint: 'An improper fraction has a numerator greater than or equal to its denominator. In 9/4, 9 > 4.',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 7,
+      question: '7. 6/12 in simplest form is:',
+      optionA: '6/12',
+      optionB: '3/6',
+      optionC: '1/2',
+      optionD: '2/3',
+      correctAnswer: 'optionC',
+      hint: 'Dividing numerator and denominator by 6 gives (6÷6)/(12÷6) = 1/2.',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 8,
+      question: '8. Which pair of fractions is equivalent?',
+      optionA: '2/5 and 4/10',
+      optionB: '1/3 and 2/5',
+      optionC: '3/4 and 6/10',
+      optionD: '5/6 and 10/13',
+      correctAnswer: 'optionA',
+      hint: '2/5 = (2×2)/(5×2) = 4/10. Thus, 2/5 and 4/10 are equivalent.',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 9,
+      question: '9. Which fraction is smaller?',
+      optionA: '3/5',
+      optionB: '2/5',
+      optionC: '4/5',
+      optionD: '5/5',
+      correctAnswer: 'optionB',
+      hint: 'For fractions with the same denominator, the fraction with the smaller numerator is smaller. 2/5 < 3/5.',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 10,
+      question: '10. The denominator of 11/15 is:',
+      optionA: '11',
+      optionB: '15',
+      optionC: '26',
+      optionD: '4',
+      correctAnswer: 'optionB',
+      hint: 'In a fraction a/b, the bottom number (b) is the denominator. In 11/15, 15 is the denominator.',
+    },
+
+    // Section B – Fill in the Blanks (1 mark each)
+    {
+      testId: testObj.id,
+      orderIndex: 11,
+      question: '11. A fraction whose numerator is smaller than the denominator is called a __________ fraction.',
+      optionA: 'proper',
+      optionB: 'improper',
+      optionC: 'mixed',
+      optionD: 'equivalent',
+      correctAnswer: 'optionA',
+      hint: 'A fraction with numerator smaller than denominator is called a proper fraction.',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 12,
+      question: '12. 8/8 = __________',
+      optionA: '0',
+      optionB: '1',
+      optionC: '8',
+      optionD: '16',
+      correctAnswer: 'optionB',
+      hint: 'Any non-zero number divided by itself equals 1. 8/8 = 1.',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 13,
+      question: '13. Two fractions representing the same value are called __________ fractions.',
+      optionA: 'like',
+      optionB: 'unlike',
+      optionC: 'equivalent',
+      optionD: 'improper',
+      correctAnswer: 'optionC',
+      hint: 'Fractions representing the same value are called equivalent fractions.',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 14,
+      question: '14. 3/9 in simplest form is __________.',
+      optionA: '1/3',
+      optionB: '3/1',
+      optionC: '1/9',
+      optionD: '2/3',
+      correctAnswer: 'optionA',
+      hint: 'Dividing numerator and denominator by 3 gives 1/3.',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 15,
+      question: '15. In the fraction 7/10, the denominator is __________.',
+      optionA: '7',
+      optionB: '10',
+      optionC: '17',
+      optionD: '3',
+      correctAnswer: 'optionB',
+      hint: 'The denominator is the bottom number, which is 10.',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 16,
+      question: '16. 1/2 is equivalent to __________/8.',
+      optionA: '2',
+      optionB: '3',
+      optionC: '4',
+      optionD: '6',
+      correctAnswer: 'optionC',
+      hint: 'Multiply top and bottom of 1/2 by 4: (1×4)/(2×4) = 4/8.',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 17,
+      question: '17. The fraction representing three parts out of eight equal parts is __________.',
+      optionA: '8/3',
+      optionB: '3/8',
+      optionC: '1/8',
+      optionD: '3/5',
+      correctAnswer: 'optionB',
+      hint: 'Three parts out of eight equal parts is represented as 3/8.',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 18,
+      question: '18. 10/5 = __________',
+      optionA: '1',
+      optionB: '2',
+      optionC: '5',
+      optionD: '10',
+      correctAnswer: 'optionB',
+      hint: '10 divided by 5 equals 2.',
+    },
+
+    // Section C – True or False (1 mark each)
+    {
+      testId: testObj.id,
+      orderIndex: 19,
+      question: '19. 4/8 and 1/2 are equivalent fractions. _________',
+      optionA: 'True',
+      optionB: 'False',
+      optionC: 'Cannot say',
+      optionD: 'None of these',
+      correctAnswer: 'optionA',
+      hint: '4/8 simplifies to 1/2. Thus the statement is True.',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 20,
+      question: '20. In an improper fraction, the numerator is greater than or equal to the denominator. _________',
+      optionA: 'True',
+      optionB: 'False',
+      optionC: 'Cannot say',
+      optionD: 'None of these',
+      correctAnswer: 'optionA',
+      hint: 'An improper fraction has numerator ≥ denominator. The statement is True.',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 21,
+      question: '21. 5/10 is equal to 1/5. _________',
+      optionA: 'True',
+      optionB: 'False',
+      optionC: 'Cannot say',
+      optionD: 'None of these',
+      correctAnswer: 'optionB',
+      hint: '5/10 = 1/2, which is not equal to 1/5. The statement is False.',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 22,
+      question: '22. Every proper fraction is less than 1. _________',
+      optionA: 'True',
+      optionB: 'False',
+      optionC: 'Cannot say',
+      optionD: 'None of these',
+      correctAnswer: 'optionA',
+      hint: 'Since numerator < denominator in a proper fraction, it is always less than 1 (True).',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 23,
+      question: '23. 2/4 and 3/6 represent the same value. _________',
+      optionA: 'True',
+      optionB: 'False',
+      optionC: 'Cannot say',
+      optionD: 'None of these',
+      correctAnswer: 'optionA',
+      hint: '2/4 = 1/2 and 3/6 = 1/2. Both represent the same value (True).',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 24,
+      question: '24. The fraction 7/7 is less than 1. _________',
+      optionA: 'True',
+      optionB: 'False',
+      optionC: 'Cannot say',
+      optionD: 'None of these',
+      correctAnswer: 'optionB',
+      hint: '7/7 = 1, which is equal to 1, not less than 1. The statement is False.',
+    },
+
+    // Section D – Short Answer Questions (2 marks each)
+    {
+      testId: testObj.id,
+      orderIndex: 25,
+      question: '25. Write two equivalent fractions of 3/7.',
+      optionA: '6/14, 9/21',
+      optionB: '4/7, 5/7',
+      optionC: '3/14, 3/21',
+      optionD: '7/3, 14/6',
+      correctAnswer: 'optionA',
+      hint: '3/7 × 2/2 = 6/14 and 3/7 × 3/3 = 9/21.',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 26,
+      question: '26. Compare 3/4 and 5/8 and write the greater fraction.',
+      optionA: '3/4 > 5/8',
+      optionB: '5/8 > 3/4',
+      optionC: '3/4 = 5/8',
+      optionD: 'Cannot be compared',
+      correctAnswer: 'optionA',
+      hint: '3/4 = 6/8. Since 6/8 > 5/8, 3/4 is greater.',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 27,
+      question: '27. Arrange the following fractions in ascending order: 1/2, 3/4, 2/5',
+      optionA: '2/5 < 1/2 < 3/4',
+      optionB: '1/2 < 2/5 < 3/4',
+      optionC: '3/4 < 1/2 < 2/5',
+      optionD: '2/5 < 3/4 < 1/2',
+      correctAnswer: 'optionA',
+      hint: 'Converting to decimals: 2/5 = 0.4, 1/2 = 0.5, 3/4 = 0.75. So ascending order is 2/5 < 1/2 < 3/4.',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 28,
+      question: '28. Simplify the following fractions: a) 8/16  b) 15/25',
+      optionA: 'a) 1/2, b) 3/5',
+      optionB: 'a) 2/4, b) 5/3',
+      optionC: 'a) 1/4, b) 2/5',
+      optionD: 'a) 1/2, b) 5/3',
+      correctAnswer: 'optionA',
+      hint: '8/16 = 1/2 and 15/25 = 3/5.',
+    },
+
+    // Section E – Word Problems (3 marks each)
+    {
+      testId: testObj.id,
+      orderIndex: 29,
+      question: '29. A chocolate bar is divided into 12 equal pieces. Rohan eats 5 pieces. What fraction of the chocolate did he eat? What fraction is left?',
+      optionA: 'Eaten = 5/12, Left = 7/12',
+      optionB: 'Eaten = 7/12, Left = 5/12',
+      optionC: 'Eaten = 5/12, Left = 5/12',
+      optionD: 'Eaten = 12/5, Left = 12/7',
+      correctAnswer: 'optionA',
+      hint: 'Fraction eaten = 5/12. Remaining pieces = 12 - 5 = 7, so fraction left = 7/12.',
+    },
+    {
+      testId: testObj.id,
+      orderIndex: 30,
+      question: '30. A water tank is filled up to 7/10 of its capacity. Later 2/10 of the water is used. What fraction of water was used? What fraction of water remains in the tank?',
+      optionA: 'Used = 2/10, Remaining = 5/10 = 1/2',
+      optionB: 'Used = 7/10, Remaining = 2/10',
+      optionC: 'Used = 5/10, Remaining = 2/10',
+      optionD: 'Used = 2/10, Remaining = 7/10',
+      correctAnswer: 'optionA',
+      hint: 'Used fraction = 2/10. Remaining fraction = 7/10 - 2/10 = 5/10 = 1/2.',
+    },
+  ];
+
+  for (const q of rawQuestions) {
+    await createQuestion(q);
+  }
+
+  return testObj;
+}
+
+/**
  * Deletes all existing Integers tests and associated questions from Firestore.
  */
 export async function deleteAllIntegersTests(): Promise<number> {
@@ -2369,6 +4082,18 @@ export async function publishClass6To10DefaultTests(clearExisting = false): Prom
     }
 
     console.log('Publishing CBSE Class 6 to 10 Test Papers...');
+
+    // CLASS 6: RATIO AND PROPORTION SAMPLE TEST 1 (30 Questions)
+    await createRatioTestPaper1();
+
+    // CLASS 6: ALGEBRA SAMPLE TEST 1 (30 Questions)
+    await createAlgebraTestPaper1();
+
+    // CLASS 6: DECIMALS SAMPLE TEST 1 (30 Questions)
+    await createDecimalsTestPaper1();
+
+    // CLASS 6: FRACTIONS SAMPLE TEST 1 (30 Questions)
+    await createFractionsTestPaper1();
 
     // CLASS 6: INTEGERS SAMPLE TEST 1 (20 Questions)
     await createIntegersTestPaper1();
@@ -2881,6 +4606,106 @@ export async function seedSampleDataIfEmpty(): Promise<void> {
       await deleteAllIntegersTests();
       await createIntegersTestPaper1();
       await createIntegersTestPaper2();
+    }
+
+    // Ensure Class 6 Fractions test is seeded with all 30 questions
+    const fractionsDocs = snap.docs.filter((d) => {
+      const title = (d.data().title || '').toLowerCase();
+      const cls = (d.data().class || '').toLowerCase();
+      return title.includes('fractions') && (cls.includes('6') || title.includes('class 6'));
+    });
+
+    let needsFractionsReseed = fractionsDocs.length === 0;
+    if (!needsFractionsReseed) {
+      for (const testDoc of fractionsDocs) {
+        const qSnap = await getDocs(collection(db, TESTS_COL, testDoc.id, QUESTIONS_COL));
+        if (qSnap.size < 30) {
+          console.log(`Class 6 Fractions test ${testDoc.id} has only ${qSnap.size} questions (< 30). Re-seeding...`);
+          needsFractionsReseed = true;
+          break;
+        }
+      }
+    }
+
+    if (needsFractionsReseed) {
+      console.log('Seeding Class 6 Fractions Sample Test 1 (30 questions)...');
+      await deleteAllFractionsTests();
+      await createFractionsTestPaper1();
+    }
+
+    // Ensure Class 6 Decimals test is seeded with all 30 questions
+    const decimalsDocs = snap.docs.filter((d) => {
+      const title = (d.data().title || '').toLowerCase();
+      const cls = (d.data().class || '').toLowerCase();
+      return title.includes('decimals') && (cls.includes('6') || title.includes('class 6'));
+    });
+
+    let needsDecimalsReseed = decimalsDocs.length === 0;
+    if (!needsDecimalsReseed) {
+      for (const testDoc of decimalsDocs) {
+        const qSnap = await getDocs(collection(db, TESTS_COL, testDoc.id, QUESTIONS_COL));
+        if (qSnap.size < 30) {
+          console.log(`Class 6 Decimals test ${testDoc.id} has only ${qSnap.size} questions (< 30). Re-seeding...`);
+          needsDecimalsReseed = true;
+          break;
+        }
+      }
+    }
+
+    if (needsDecimalsReseed) {
+      console.log('Seeding Class 6 Decimals Sample Test 1 (30 questions)...');
+      await deleteAllDecimalsTests();
+      await createDecimalsTestPaper1();
+    }
+
+    // Ensure Class 6 Algebra test is seeded with all 30 questions
+    const algebraDocs = snap.docs.filter((d) => {
+      const title = (d.data().title || '').toLowerCase();
+      const cls = (d.data().class || '').toLowerCase();
+      return title.includes('algebra') && (cls.includes('6') || title.includes('class 6'));
+    });
+
+    let needsAlgebraReseed = algebraDocs.length === 0;
+    if (!needsAlgebraReseed) {
+      for (const testDoc of algebraDocs) {
+        const qSnap = await getDocs(collection(db, TESTS_COL, testDoc.id, QUESTIONS_COL));
+        if (qSnap.size < 30) {
+          console.log(`Class 6 Algebra test ${testDoc.id} has only ${qSnap.size} questions (< 30). Re-seeding...`);
+          needsAlgebraReseed = true;
+          break;
+        }
+      }
+    }
+
+    if (needsAlgebraReseed) {
+      console.log('Seeding Class 6 Algebra Sample Test 1 (30 questions)...');
+      await deleteAllAlgebraTests();
+      await createAlgebraTestPaper1();
+    }
+
+    // Ensure Class 6 Ratio and Proportion test is seeded with all 30 questions
+    const ratioDocs = snap.docs.filter((d) => {
+      const title = (d.data().title || '').toLowerCase();
+      const cls = (d.data().class || '').toLowerCase();
+      return (title.includes('ratio') || title.includes('proportion')) && (cls.includes('6') || title.includes('class 6'));
+    });
+
+    let needsRatioReseed = ratioDocs.length === 0;
+    if (!needsRatioReseed) {
+      for (const testDoc of ratioDocs) {
+        const qSnap = await getDocs(collection(db, TESTS_COL, testDoc.id, QUESTIONS_COL));
+        if (qSnap.size < 30) {
+          console.log(`Class 6 Ratio test ${testDoc.id} has only ${qSnap.size} questions (< 30). Re-seeding...`);
+          needsRatioReseed = true;
+          break;
+        }
+      }
+    }
+
+    if (needsRatioReseed) {
+      console.log('Seeding Class 6 Ratio and Proportion Sample Test 1 (30 questions)...');
+      await deleteAllRatioTests();
+      await createRatioTestPaper1();
     }
 
     // Clean up any remaining duplicate test papers

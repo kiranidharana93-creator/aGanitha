@@ -29,7 +29,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onStudentLogin, onAdminL
   const handleStudentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!studentIdInput.trim()) {
-      setStudentError('Please enter your Student ID (e.g. C6-2026-0001)');
+      setStudentError('Please enter your Student ID');
       return;
     }
     if (!studentPassword.trim()) {
@@ -151,7 +151,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onStudentLogin, onAdminL
                       type="text"
                       value={studentIdInput}
                       onChange={(e) => setStudentIdInput(e.target.value)}
-                      placeholder="e.g. C6-2026-0001"
+                      placeholder="e.g. c6-2026-0012"
                       className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 uppercase tracking-wider font-mono"
                       required
                     />
@@ -209,32 +209,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onStudentLogin, onAdminL
                   </button>
                 </div>
               </form>
-
-              {/* Demo Student Credentials Accordion Box */}
-              <div className="p-3.5 bg-slate-900/90 border border-slate-700/80 rounded-xl space-y-2">
-                <div className="flex items-center gap-2 text-xs font-bold text-amber-400">
-                  <Key className="w-3.5 h-3.5" />
-                  <span>Registered Demo Student Credentials:</span>
-                </div>
-                <div className="text-[11px] font-mono text-slate-300 space-y-1">
-                  <div className="flex justify-between border-b border-slate-800 pb-1">
-                    <span>Class 6: <strong className="text-white">C6-2026-0001</strong></span>
-                    <span className="text-amber-300">Pass: RK6421</span>
-                  </div>
-                  <div className="flex justify-between border-b border-slate-800 pb-1">
-                    <span>Class 6: <strong className="text-white">C6-2026-0002</strong></span>
-                    <span className="text-amber-300">Pass: AS6422</span>
-                  </div>
-                  <div className="flex justify-between border-b border-slate-800 pb-1">
-                    <span>Class 7: <strong className="text-white">C7-2026-0001</strong></span>
-                    <span className="text-amber-300">Pass: PP7421</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Class 8: <strong className="text-white">C8-2026-0001</strong></span>
-                    <span className="text-amber-300">Pass: AS8421</span>
-                  </div>
-                </div>
-              </div>
             </div>
           ) : (
             <form onSubmit={handleAdminSubmit} className="space-y-5">

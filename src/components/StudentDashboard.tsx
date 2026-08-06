@@ -63,32 +63,60 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
   const loadDashboardData = async () => {
     setIsLoading(true);
     try {
-      // 1. Check for unfinished/draft exam for this student
-      const activeDraft = getDraftAttempt(student.id);
-      setDraftExam(activeDraft);
-
-      // 2. Fetch published tests for the selected class
+      // 1. Fetch published tests for the selected class
       const availableTests = await getPublishedTestsForClass(selectedClass);
       setTests(availableTests);
 
-      if (activeDraft) {
-        const foundTest = availableTests.find((t) => t.id === activeDraft.testId);
-        if (foundTest) {
-          setDraftTestObject(foundTest);
-        }
-      }
-
-      // 3. Fetch all attempts for this student
+      // 2. Fetch all attempts for this student
       const userAttempts = await getAttemptsForStudent(student.id);
       setAllStudentAttempts(userAttempts);
 
-      // 4. Map attempts by testId
+      // 3. Map attempts by testId
       const map: Record<string, Attempt[]> = {};
       for (const t of availableTests) {
         const testAttempts = await getAttemptsForStudentAndTest(student.id, t.id);
         map[t.id] = testAttempts;
       }
       setStudentAttemptsMap(map);
+
+      // 4. Check for unfinished/draft exam for this student
+      let activeDraft = getDraftAttempt(student.id);
+
+      if (activeDraft) {
+        // Validate against completed status or existing submitted attempts
+        if (activeDraft.submitted === true || activeDraft.status === 'completed') {
+          clearDraftAttempt(student.id);
+          activeDraft = null;
+        } else {
+          // Check if there is an attempt for activeDraft.testId
+          const testAttempts = userAttempts.filter((a) => a.testId === activeDraft?.testId);
+          if (testAttempts.length > 0) {
+            const draftTime = activeDraft.updatedAt ? new Date(activeDraft.updatedAt).getTime() : 0;
+            const hasRecentAttempt = testAttempts.some((a) => {
+              const subTime = a.submittedAt ? new Date(a.submittedAt).getTime() : 0;
+              return subTime >= draftTime - 120000;
+            });
+
+            if (hasRecentAttempt) {
+              clearDraftAttempt(student.id);
+              activeDraft = null;
+            }
+          }
+        }
+      }
+
+      setDraftExam(activeDraft);
+
+      if (activeDraft) {
+        const foundTest = availableTests.find((t) => t.id === activeDraft.testId);
+        if (foundTest) {
+          setDraftTestObject(foundTest);
+        } else {
+          setDraftTestObject(null);
+        }
+      } else {
+        setDraftTestObject(null);
+      }
     } catch (err) {
       console.error('Error loading student dashboard data:', err);
     } finally {
@@ -390,23 +418,23 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
                       </div>
                     </div>
 
-                    <div className="space-y-2">
+                    <div className="space-y-2 pt-2">
                       {isDraftForThis ? (
                         <button
                           onClick={handleContinueDraft}
-                          className="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold py-3 rounded-xl shadow-lg transition-all text-xs flex items-center justify-center gap-2 cursor-pointer"
+                          className="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold py-3.5 rounded-xl shadow-lg transition-all text-xs flex items-center justify-center gap-2 cursor-pointer"
                         >
                           <Play className="w-4 h-4 fill-slate-950" />
-                          <span>Resume Exam Progress</span>
+                          <span>Resume Test</span>
                         </button>
                       ) : (
                         <button
                           onClick={() => onStartTest(test, nextAttemptNumber)}
                           disabled={(test.questionCount || 0) === 0}
-                          className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold py-3 rounded-xl shadow-lg transition-all text-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                          className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-3.5 rounded-xl shadow-lg transition-all text-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                         >
                           <Play className="w-4 h-4 fill-white" />
-                          <span>{attemptsCount > 0 ? `Retake Test (Attempt ${nextAttemptNumber})` : 'Start Test'}</span>
+                          <span>{attemptsCount > 0 ? `Retake (${nextAttemptNumber})` : 'Start Test'}</span>
                         </button>
                       )}
                     </div>

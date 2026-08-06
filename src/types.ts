@@ -1,6 +1,6 @@
 export interface Student {
   id: string;
-  studentId?: string; // Generated ID e.g., "C6-2026-0001"
+  studentId?: string; // Generated ID e.g., "c6-2026-0012"
   name: string;
   class: string; // e.g., "Class 6", "Class 7", "Class 8", "Class 9", "Class 10"
   section?: string; // e.g., "A", "B"
@@ -20,6 +20,8 @@ export interface DraftAttempt {
   currentIndex: number;
   selectedAnswers: Record<string, string>;
   timeLeft: number;
+  status?: 'in-progress' | 'completed';
+  submitted?: boolean;
   updatedAt: string;
 }
 

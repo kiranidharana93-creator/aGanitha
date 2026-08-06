@@ -4,6 +4,7 @@ import {
   getAllRegisteredStudents,
   createRegisteredStudent,
   deleteStudent,
+  deleteAllStudentsExceptKiran,
   INITIAL_REGISTERED_STUDENTS,
 } from '../services/db';
 import {
@@ -99,10 +100,35 @@ export const StudentManagement: React.FC = () => {
     }
   };
 
-  const handleDelete = async (id: string, studentName: string) => {
-    if (confirm(`Are you sure you want to remove student "${studentName}"?`)) {
-      await deleteStudent(id);
-      await loadStudents();
+  const handleDeleteStudent = async (student: Student) => {
+    const isProtected =
+      student.studentId?.toLowerCase() === 'c6-2026-0012' ||
+      (student.name?.toLowerCase() === 'kiran' && student.class === 'Class 6');
+
+    if (isProtected) {
+      alert('Primary registered student kiran (c6-2026-0012) is protected and cannot be deleted.');
+      return;
+    }
+
+    if (!window.confirm(`Delete student ${student.name} (${student.studentId || student.id})?`)) return;
+
+    // Immediately update UI state
+    setStudents((prev) => prev.filter((s) => s.id !== student.id && s.studentId !== student.studentId));
+
+    // Delete from database & local storage
+    await deleteStudent(student.id, student.studentId, student.name);
+  };
+
+  const handleDeleteAllExceptKiran = async () => {
+    if (!window.confirm('Delete all students except kiran (c6-2026-0012)? This will remove all other records from the database.')) return;
+    setIsLoading(true);
+    try {
+      const remaining = await deleteAllStudentsExceptKiran();
+      setStudents(remaining);
+    } catch (err) {
+      console.error('Failed to clear students:', err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -139,7 +165,16 @@ export const StudentManagement: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={handleDeleteAllExceptKiran}
+            title="Delete all students except c6-2026-0012 ID"
+            className="flex items-center gap-2 bg-red-600/20 hover:bg-red-600/30 text-red-300 border border-red-500/30 px-3.5 py-2 rounded-xl text-xs font-bold cursor-pointer transition-colors"
+          >
+            <Trash2 className="w-3.5 h-3.5 text-red-400" />
+            <span>Delete All Except c6-2026-0012</span>
+          </button>
+
           <button
             onClick={loadStudents}
             className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3.5 py-2 rounded-xl text-xs font-semibold cursor-pointer transition-colors"
@@ -213,45 +248,54 @@ export const StudentManagement: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/60">
-                {filteredStudents.map((s) => (
-                  <tr key={s.id} className="hover:bg-slate-800/40 transition-colors">
-                    <td className="px-6 py-4 font-mono font-bold text-blue-400">
-                      {s.studentId || s.id}
-                    </td>
-                    <td className="px-6 py-4 font-bold text-white">{s.name}</td>
-                    <td className="px-6 py-4">
-                      <span className="bg-slate-800 border border-slate-700 text-slate-200 px-2.5 py-1 rounded-lg font-semibold">
-                        {s.class} {s.section ? `(${s.section})` : ''}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 font-medium text-slate-300">{s.rollNumber || '-'}</td>
-                    <td className="px-6 py-4 font-mono text-slate-300 flex items-center gap-1.5 pt-4">
-                      <Phone className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                      <span>{s.parentMobile || 'Not provided'}</span>
-                    </td>
-                    <td className="px-6 py-4">
-                      {s.isPasswordChanged ? (
-                        <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[11px] px-2.5 py-1 rounded-full font-bold">
-                          Custom Set
+                {filteredStudents.map((s) => {
+                  const isProtected = s.studentId?.toLowerCase() === 'c6-2026-0012';
+
+                  return (
+                    <tr key={s.id} className="hover:bg-slate-800/40 transition-colors">
+                      <td className="px-6 py-4 font-mono font-bold text-blue-400">
+                        {s.studentId || s.id}
+                      </td>
+                      <td className="px-6 py-4 font-bold text-white">{s.name}</td>
+                      <td className="px-6 py-4">
+                        <span className="bg-slate-800 border border-slate-700 text-slate-200 px-2.5 py-1 rounded-lg font-semibold">
+                          {s.class} {s.section ? `(${s.section})` : ''}
                         </span>
-                      ) : (
-                        <span className="bg-amber-500/10 text-amber-400 border border-amber-500/30 text-[11px] px-2.5 py-1 rounded-full font-bold flex items-center gap-1 w-max">
-                          <Key className="w-3 h-3" />
-                          Temp ({s.password})
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <button
-                        onClick={() => handleDelete(s.id, s.name)}
-                        className="p-1.5 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg cursor-pointer transition-colors"
-                        title="Remove student"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                      <td className="px-6 py-4 font-medium text-slate-300">{s.rollNumber || '-'}</td>
+                      <td className="px-6 py-4 font-mono text-slate-300 flex items-center gap-1.5 pt-4">
+                        <Phone className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                        <span>{s.parentMobile || 'Not provided'}</span>
+                      </td>
+                      <td className="px-6 py-4">
+                        {s.isPasswordChanged ? (
+                          <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[11px] px-2.5 py-1 rounded-full font-bold">
+                            Custom Set
+                          </span>
+                        ) : (
+                          <span className="bg-amber-500/10 text-amber-400 border border-amber-500/30 text-[11px] px-2.5 py-1 rounded-full font-bold flex items-center gap-1 w-max">
+                            <Key className="w-3 h-3" />
+                            Temp ({s.password})
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <button
+                          disabled={isProtected}
+                          onClick={() => handleDeleteStudent(s)}
+                          className={
+                            isProtected
+                              ? 'p-1.5 text-slate-600 opacity-40 cursor-not-allowed rounded-lg'
+                              : 'p-1.5 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg cursor-pointer transition-colors'
+                          }
+                          title={isProtected ? 'Primary registered student cannot be deleted' : 'Delete Student'}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -288,7 +332,7 @@ export const StudentManagement: React.FC = () => {
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. Rahul Kumar"
+                  placeholder="e.g. Kiran"
                   className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 />

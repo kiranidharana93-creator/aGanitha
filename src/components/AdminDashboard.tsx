@@ -22,11 +22,13 @@ const QuestionModal = React.lazy(() => import('./QuestionModal').then(m => ({ de
 const ResultDetailsModal = React.lazy(() => import('./ResultDetailsModal').then(m => ({ default: m.ResultDetailsModal })));
 const AdminAnalyticsDashboard = React.lazy(() => import('./AdminAnalyticsDashboard').then(m => ({ default: m.AdminAnalyticsDashboard })));
 const StudentManagement = React.lazy(() => import('./StudentManagement').then(m => ({ default: m.StudentManagement })));
+import { printCBSEQuestionPaper } from '../utils/paperPrinter';
 import {
   FileText,
   Plus,
   HelpCircle,
   Download,
+  Printer,
   Search,
   Filter,
   CheckCircle,
@@ -78,38 +80,7 @@ export const AdminDashboard: React.FC = () => {
     count?: number;
   } | null>(null);
 
-  // WhatsApp Meta Graph API Debugging States
-  const [isTestingWhatsApp, setIsTestingWhatsApp] = useState(false);
-  const [testWhatsAppResult, setTestWhatsAppResult] = useState<{
-    success?: boolean;
-    statusCode?: number;
-    apiUrl?: string;
-    metaResponse?: any;
-    error?: string;
-  } | null>(null);
 
-  const handleTestWhatsApp = async () => {
-    setIsTestingWhatsApp(true);
-    setTestWhatsAppResult(null);
-    try {
-      const res = await fetch('/api/test-whatsapp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      const data = await res.json();
-      setTestWhatsAppResult(data);
-    } catch (err: any) {
-      console.error('Test WhatsApp error:', err);
-      setTestWhatsAppResult({
-        success: false,
-        statusCode: 500,
-        error: err.message || String(err),
-        metaResponse: { fetchError: err.message || String(err) },
-      });
-    } finally {
-      setIsTestingWhatsApp(false);
-    }
-  };
 
   const loadData = async () => {
     setIsLoading(true);
@@ -328,6 +299,29 @@ export const AdminDashboard: React.FC = () => {
         console.error('Error deleting all student results:', err);
         await loadData();
       }
+    }
+  };
+
+  // PDF Question Paper Download / Print Logic
+  const downloadQuestionPaper = async (test: Test) => {
+    try {
+      if ((test as any).pdfUrl) {
+        const response = await fetch((test as any).pdfUrl);
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${test.title}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+      } else {
+        await printCBSEQuestionPaper(test);
+      }
+    } catch (error) {
+      console.error('PDF download failed', error);
+      await printCBSEQuestionPaper(test);
     }
   };
 
@@ -559,65 +553,7 @@ export const AdminDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* WhatsApp Meta Graph API Debug Panel */}
-      <div className="bg-slate-900 border border-emerald-500/30 rounded-2xl p-5 shadow-xl space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center shrink-0">
-              <MessageSquare className="w-5 h-5" />
-            </div>
-            <div>
-              <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                <span>WhatsApp Parent Notification Debugger</span>
-                <span className="text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-mono">
-                  Meta Graph API v25.0
-                </span>
-              </h3>
-              <p className="text-xs text-slate-400 mt-0.5">
-                Send a test template payload directly to verified Meta test recipient (<span className="text-emerald-300 font-mono font-bold">919353913218</span>).
-              </p>
-            </div>
-          </div>
 
-          <button
-            onClick={handleTestWhatsApp}
-            disabled={isTestingWhatsApp}
-            className="bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold py-2.5 px-5 rounded-xl text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg hover:scale-[1.02] shrink-0"
-          >
-            <Send className="w-4 h-4" />
-            <span>{isTestingWhatsApp ? 'Dispatching to Meta Graph API...' : 'Test WhatsApp API'}</span>
-          </button>
-        </div>
-
-        {testWhatsAppResult && (
-          <div className="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-3 font-mono text-xs">
-            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2">
-              <span className="text-slate-400">Final API URL:</span>
-              <span className="text-indigo-400 font-bold break-all">{testWhatsAppResult.apiUrl || 'N/A'}</span>
-            </div>
-
-            <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-              <span className="text-slate-400">HTTP Status Code:</span>
-              <span
-                className={`font-bold px-2 py-0.5 rounded ${
-                  testWhatsAppResult.statusCode === 200 || testWhatsAppResult.statusCode === 201
-                    ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
-                    : 'bg-red-500/20 text-red-400 border border-red-500/40'
-                }`}
-              >
-                {testWhatsAppResult.statusCode || 'N/A'} {testWhatsAppResult.success ? 'OK (SUCCESS)' : 'ERROR / FAILED'}
-              </span>
-            </div>
-
-            <div>
-              <p className="text-slate-400 mb-1 font-sans text-xs font-semibold">Full Meta Response Body JSON:</p>
-              <pre className="bg-slate-900 border border-slate-800 p-3 rounded-lg text-emerald-300 overflow-x-auto text-[11px] leading-relaxed max-h-80 whitespace-pre-wrap break-all">
-                {JSON.stringify(testWhatsAppResult.metaResponse || testWhatsAppResult, null, 2)}
-              </pre>
-            </div>
-          </div>
-        )}
-      </div>
 
       {/* Navigation Tabs */}
       <div className="flex border-b border-slate-800 space-x-1">
@@ -693,10 +629,7 @@ export const AdminDashboard: React.FC = () => {
       {activeTab === 'analytics' && (() => {
         // Build list of unique students from attempts + default student roster
         const studentMap: Record<string, Student> = {
-          'std_rahul_6': { id: 'std_rahul_6', name: 'Rahul Kumar', class: 'Class 6' },
-          'std_ananya_6': { id: 'std_ananya_6', name: 'Ananya Sharma', class: 'Class 6' },
-          'std_priya_7': { id: 'std_priya_7', name: 'Priya Patel', class: 'Class 7' },
-          'std_aarav_8': { id: 'std_aarav_8', name: 'Aarav Singh', class: 'Class 8' },
+          'std_kiran_6': { id: 'std_kiran_6', studentId: 'c6-2026-0012', name: 'kiran', class: 'Class 6' },
         };
 
         allAttempts.forEach((att) => {
@@ -802,6 +735,14 @@ export const AdminDashboard: React.FC = () => {
                         </button>
                       </td>
                       <td className="px-6 py-4 text-right space-x-2">
+                        <button
+                          onClick={() => downloadQuestionPaper(t)}
+                          className="px-2.5 py-1.5 bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/30 border border-emerald-500/30 rounded-lg text-xs font-bold inline-flex items-center gap-1 cursor-pointer transition-colors"
+                          title="Print / Download CBSE Question Paper PDF"
+                        >
+                          <Printer className="w-3.5 h-3.5" />
+                          <span>📄 Download PDF</span>
+                        </button>
                         <button
                           onClick={() => {
                             setSelectedTestId(t.id);
