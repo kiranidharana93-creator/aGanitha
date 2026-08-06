@@ -584,6 +584,11 @@ export async function getAllTests(): Promise<Test[]> {
         .replace(/\s{2,}/g, ' ')
         .trim();
       
+      if (rawTitle.toLowerCase().includes('odd numbers') || cleanTitle.toLowerCase().includes('odd numbers')) {
+        deleteDoc(doc(db, TESTS_COL, docSnap.id)).catch(() => {});
+        continue;
+      }
+
       if (rawTitle !== cleanTitle) {
         updateDoc(doc(db, TESTS_COL, docSnap.id), { title: cleanTitle }).catch(() => {});
       }
@@ -4138,57 +4143,6 @@ export async function publishClass6To10DefaultTests(clearExisting = false): Prom
     // CLASS 6: WHOLE NUMBERS SAMPLE TEST 2 (46 Questions)
     await createWholeNumbersTestPaper2();
 
-    // CLASS 6: ODD NUMBERS TEST PAPER
-    const testOdd = await createTest({
-      title: 'CBSE Class 6: Odd Numbers',
-      class: 'Class 6',
-      duration: 15,
-      published: true,
-    });
-    const testOddQuestions: Omit<Question, 'id'>[] = [
-      {
-        testId: testOdd.id,
-        question: 'Which of the following is an odd number?',
-        optionA: '24',
-        optionB: '36',
-        optionC: '51',
-        optionD: '60',
-        correctAnswer: 'optionC',
-        hint: 'Odd numbers are not divisible by 2 and usually end in 1, 3, 5, 7, or 9.',
-      },
-      {
-        testId: testOdd.id,
-        question: 'What is the next odd number after 97?',
-        optionA: '98',
-        optionB: '99',
-        optionC: '100',
-        optionD: '101',
-        correctAnswer: 'optionB',
-        hint: 'Odd numbers increase by 2 each time: 95, 97, 99, 101.',
-      },
-      {
-        testId: testOdd.id,
-        question: 'Which pair contains only odd numbers?',
-        optionA: '13 and 17',
-        optionB: '12 and 15',
-        optionC: '18 and 21',
-        optionD: '25 and 30',
-        correctAnswer: 'optionA',
-        hint: 'Check whether both numbers are not divisible by 2.',
-      },
-      {
-        testId: testOdd.id,
-        question: 'The sum of two odd numbers is usually:',
-        optionA: 'Odd',
-        optionB: 'Even',
-        optionC: 'Prime',
-        optionD: 'Negative',
-        correctAnswer: 'optionB',
-        hint: 'Try adding two odd numbers such as 5 + 7 or 9 + 11 and observe the result.',
-      },
-    ];
-    for (const q of testOddQuestions) await createQuestion(q);
-
     // CLASS 6 TEST PAPER
     const test6 = await createTest({
       title: 'CBSE Class 6: Whole Numbers, Decimals & Geometry',
@@ -4458,8 +4412,9 @@ export async function cleanupAndDeduplicateTests(): Promise<number> {
       const id = docSnap.id;
       const lowerTitle = title.toLowerCase();
 
-      // Check if title explicitly indicates copy/duplicate/clone/revised/numbered suffix
+      // Check if test is Odd Numbers test or explicit copy/duplicate/clone
       const isExplicitCopy =
+        lowerTitle.includes('odd numbers') ||
         lowerTitle.includes('(copy)') ||
         lowerTitle.includes(' copy') ||
         lowerTitle.includes('- copy') ||
