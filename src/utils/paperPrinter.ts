@@ -54,24 +54,21 @@ export async function printCBSEQuestionPaper(test: Test, existingQuestions?: Que
   const isDecimals = test.title.toLowerCase().includes('decimals');
   const isFractions = test.title.toLowerCase().includes('fractions');
   const isRatio = test.title.toLowerCase().includes('ratio') || test.title.toLowerCase().includes('proportion');
+  const isTest2 = test.title.toLowerCase().includes('test 2') || test.title.toLowerCase().includes('test-2') || test.title.toLowerCase().includes('test–2');
 
   let subTitle = 'Mathematics Test Paper';
-  let sampleTestTitle = 'Sample Test – 1';
+  let sampleTestTitle = isTest2 ? 'Test – 2' : 'Test – 1';
 
   if (isRatio) {
     subTitle = 'Chapter 12 – Ratio and Proportion';
-    sampleTestTitle = 'Sample Test – 1';
   } else if (isAlgebra) {
     subTitle = 'Chapter 11 – Algebra';
-    sampleTestTitle = 'Sample Test – 1';
   } else if (isDecimals) {
     subTitle = 'Chapter 8 – Decimals';
-    sampleTestTitle = 'Sample Test – 1';
   } else if (isFractions) {
     subTitle = 'Chapter 7 – Fractions';
-    sampleTestTitle = 'Sample Test – 1';
   } else {
-    subTitle = test.title;
+    subTitle = test.title.replace(/sample\s*/gi, '');
   }
 
   const renderQuestionBlock = (q: Question, idx: number, markLabel: string) => {

@@ -577,9 +577,20 @@ export async function getAllTests(): Promise<Test[]> {
     const tests: Test[] = [];
     for (const docSnap of snap.docs) {
       const data = docSnap.data();
+      const rawTitle = data.title || '';
+      const cleanTitle = rawTitle
+        .replace(/\bsample\s*/gi, '')
+        .replace(/\s*\(\s*Class\s*\d+\s*\)/gi, '')
+        .replace(/\s{2,}/g, ' ')
+        .trim();
+      
+      if (rawTitle !== cleanTitle) {
+        updateDoc(doc(db, TESTS_COL, docSnap.id), { title: cleanTitle }).catch(() => {});
+      }
+
       tests.push({
         id: docSnap.id,
-        title: data.title || '',
+        title: cleanTitle,
         class: data.class || '',
         duration: data.duration || 15,
         published: Boolean(data.published),
@@ -621,8 +632,14 @@ export async function getPublishedTestsForClass(studentClass: string): Promise<T
  * Create a new test
  */
 export async function createTest(testData: { title: string; class: string; duration: number; published: boolean }): Promise<Test> {
+  const cleanTitle = (testData.title || '')
+    .replace(/\bsample\s*/gi, '')
+    .replace(/\s*\(\s*Class\s*\d+\s*\)/gi, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
   const payload = {
     ...testData,
+    title: cleanTitle,
     createdAt: new Date().toISOString(),
   };
   const docRef = await addDoc(collection(db, TESTS_COL), payload);
@@ -637,8 +654,16 @@ export async function createTest(testData: { title: string; class: string; durat
  * Update test publish status or details
  */
 export async function updateTest(id: string, updates: Partial<Test>): Promise<void> {
+  const payload = { ...updates };
+  if (payload.title) {
+    payload.title = payload.title
+      .replace(/\bsample\s*/gi, '')
+      .replace(/\s*\(\s*Class\s*\d+\s*\)/gi, '')
+      .replace(/\s{2,}/g, ' ')
+      .trim();
+  }
   const docRef = doc(db, TESTS_COL, id);
-  await updateDoc(docRef, updates);
+  await updateDoc(docRef, payload);
 }
 
 /**
@@ -864,7 +889,7 @@ export async function deleteAllAttempts(): Promise<void> {
  */
 export async function createWholeNumbersTestPaper1(): Promise<Test> {
   const testObj = await createTest({
-    title: 'CBSE Class 6: Whole Numbers – Sample Test 1',
+    title: 'CBSE Class 6: Whole Numbers – Test 1',
     class: 'Class 6',
     duration: 45,
     published: true,
@@ -1280,7 +1305,7 @@ export async function createWholeNumbersTestPaper1(): Promise<Test> {
  */
 export async function createWholeNumbersTestPaper2(): Promise<Test> {
   const testObj = await createTest({
-    title: 'CBSE Class 6: Whole Numbers – Sample Test 2',
+    title: 'CBSE Class 6: Whole Numbers – Test 2',
     class: 'Class 6',
     duration: 45,
     published: true,
@@ -1635,7 +1660,7 @@ export async function deleteAllPlayingWithNumbersTests(): Promise<number> {
  */
 export async function createPlayingWithNumbersTestPaper1(): Promise<Test> {
   const testObj = await createTest({
-    title: 'CBSE Class 6: Playing With Numbers – Sample Test 1',
+    title: 'CBSE Class 6: Playing With Numbers – Test 1',
     class: 'Class 6',
     duration: 25,
     published: true,
@@ -1859,7 +1884,7 @@ export async function createPlayingWithNumbersTestPaper1(): Promise<Test> {
  */
 export async function createPlayingWithNumbersTestPaper2(): Promise<Test> {
   const testObj = await createTest({
-    title: 'CBSE Class 6: Playing With Numbers – Sample Test 2',
+    title: 'CBSE Class 6: Playing With Numbers – Test 2',
     class: 'Class 6',
     duration: 25,
     published: true,
@@ -2108,7 +2133,7 @@ export async function deleteAllRatioTests(): Promise<number> {
  */
 export async function createRatioTestPaper1(): Promise<Test> {
   const testObj = await createTest({
-    title: 'CBSE Class 6: Ratio and Proportion – Sample Test 1',
+    title: 'CBSE Class 6: Ratio and Proportion – Test 1',
     class: 'Class 6',
     duration: 60,
     published: true,
@@ -2484,7 +2509,7 @@ export async function deleteAllAlgebraTests(): Promise<number> {
  */
 export async function createAlgebraTestPaper1(): Promise<Test> {
   const testObj = await createTest({
-    title: 'CBSE Class 6: Algebra – Sample Test 1',
+    title: 'CBSE Class 6: Algebra – Test 1',
     class: 'Class 6',
     duration: 60,
     published: true,
@@ -2860,7 +2885,7 @@ export async function deleteAllDecimalsTests(): Promise<number> {
  */
 export async function createDecimalsTestPaper1(): Promise<Test> {
   const testObj = await createTest({
-    title: 'CBSE Class 6: Decimals – Sample Test 1',
+    title: 'CBSE Class 6: Decimals – Test 1',
     class: 'Class 6',
     duration: 60,
     published: true,
@@ -3236,7 +3261,7 @@ export async function deleteAllFractionsTests(): Promise<number> {
  */
 export async function createFractionsTestPaper1(): Promise<Test> {
   const testObj = await createTest({
-    title: 'CBSE Class 6: Fractions – Sample Test 1',
+    title: 'CBSE Class 6: Fractions – Test 1',
     class: 'Class 6',
     duration: 60,
     published: true,
@@ -3621,7 +3646,7 @@ export async function deleteAllIntegersTests(): Promise<number> {
  */
 export async function createIntegersTestPaper1(): Promise<Test> {
   const testObj = await createTest({
-    title: 'CBSE Class 6: Integers – Sample Test 1',
+    title: 'CBSE Class 6: Integers – Test 1',
     class: 'Class 6',
     duration: 25,
     published: true,
@@ -3845,7 +3870,7 @@ export async function createIntegersTestPaper1(): Promise<Test> {
  */
 export async function createIntegersTestPaper2(): Promise<Test> {
   const testObj = await createTest({
-    title: 'CBSE Class 6: Integers – Sample Test 2',
+    title: 'CBSE Class 6: Integers – Test 2',
     class: 'Class 6',
     duration: 25,
     published: true,
@@ -4464,10 +4489,10 @@ export async function cleanupAndDeduplicateTests(): Promise<number> {
         .trim();
 
       let sampleNum = 0;
-      const matchSample = cleanTitle.match(/sample\s*test\s*(\d+)/i);
+      const matchSample = cleanTitle.match(/(?:sample\s*)?test\s*(\d+)/i);
       if (matchSample) {
         sampleNum = parseInt(matchSample[1], 10);
-        cleanTitle = cleanTitle.replace(/sample\s*test\s*\d+/i, '').trim();
+        cleanTitle = cleanTitle.replace(/(?:sample\s*)?test\s*\d+/i, '').trim();
       }
 
       cleanTitle = cleanTitle.replace(/^[\:\-\s]+|[\:\-\s]+$/g, '').trim();
@@ -4548,10 +4573,10 @@ export async function seedSampleDataIfEmpty(): Promise<void> {
       return;
     }
 
-    // Check if Whole Numbers Sample Test 1 exists and has sufficient questions
+    // Check if Whole Numbers Test 1 exists and has sufficient questions
     const sample1Docs = snap.docs.filter((d) => {
       const title = (d.data().title || '').toLowerCase();
-      return title.includes('sample test 1') && title.includes('whole numbers');
+      return (title.includes('test 1') || title.includes('sample test 1')) && title.includes('whole numbers');
     });
 
     if (sample1Docs.length === 0) {

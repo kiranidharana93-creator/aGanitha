@@ -87,11 +87,16 @@ export const QuestionModal: React.FC<QuestionModalProps> = ({
               className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
               required
             >
-              {testList.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.title} ({t.class})
-                </option>
-              ))}
+              {testList.map((t) => {
+                const displayTitle = t.title.replace(/\s*\(\s*Class\s*\d+\s*\)/gi, '').trim();
+                const hasClassInTitle = /class\s*\d+/i.test(displayTitle);
+                const showClassSuffix = !hasClassInTitle && t.class && t.class !== 'All';
+                return (
+                  <option key={t.id} value={t.id}>
+                    {displayTitle}{showClassSuffix ? ` (${t.class})` : ''}
+                  </option>
+                );
+              })}
             </select>
           </div>
 

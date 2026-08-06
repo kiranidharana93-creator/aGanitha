@@ -60,6 +60,7 @@ export function extractTopicFromTitle(title: string): string {
     .replace(/cbse\s*class\s*\d+\s*:?/gi, '')
     .replace(/class\s*\d+\s*:?/gi, '')
     .replace(/sample\s*test\s*\d+/gi, '')
+    .replace(/sample\s*test/gi, '')
     .replace(/test\s*paper\s*\d+/gi, '')
     .replace(/chapter\s*\d+\s*:?/gi, '')
     .replace(/[\–\—\-]/g, ' ')
@@ -103,7 +104,7 @@ export function getRecommendationsForTopic(topic: string, status: string, scoreP
     actions.push('Revise divisibility rules for 2, 3, 4, 5, 6, 8, 9, 10, and 11.');
     actions.push('Practice HCF and LCM word problems.');
     actions.push('Improve speed in prime factorisation questions.');
-    actions.push('Attempt Sample Test 2 for additional practice.');
+    actions.push('Attempt Test 2 for additional practice.');
   } else if (lower.includes('whole number')) {
     actions.push('Revise commutative, associative, and distributive properties.');
     actions.push('Practice mental math calculations using distributive property patterns.');
@@ -141,7 +142,7 @@ export function getRecommendationsForTopic(topic: string, status: string, scoreP
   } else {
     actions.push('Re-read NCERT textbook theory and solve key solved examples.');
     actions.push('Review recorded test answers to rectify conceptual mistakes.');
-    actions.push('Attempt additional chapter sample tests to build speed and accuracy.');
+    actions.push('Attempt additional chapter tests to build speed and accuracy.');
   }
 
   if (scorePct < 50 || status === 'Critical Improvement Required') {
@@ -186,7 +187,7 @@ export function generateTeacherRemarks(
 
   return `${studentName} requires urgent attention and guided practice in ${
     weak.length > 0 ? weak.join(', ') : 'CBSE Mathematics chapters'
-  }. Regular daily practice of sample tests and formula revision is strongly advised.`;
+  }. Regular daily practice of chapter tests and formula revision is strongly advised.`;
 }
 
 export function calculateStudentAnalytics(
@@ -240,7 +241,7 @@ export function calculateStudentAnalytics(
       lessonBarChartData: emptyLessonData,
       improvementTrend: [],
       weakTopics: [],
-      teacherRemarks: 'No test attempts recorded yet. Please complete a sample test to generate analytics.',
+      teacherRemarks: 'No test attempts recorded yet. Please complete a test to generate analytics.',
     };
   }
 
@@ -265,7 +266,7 @@ export function calculateStudentAnalytics(
   const lastTestScorePercentage = Math.round(
     ((lastAttempt?.score || 0) / (lastAttempt?.totalQuestions || 1)) * 100
   );
-  const lastTestTitle = lastAttempt?.testTitle || 'Sample Test';
+  const lastTestTitle = lastAttempt?.testTitle || 'Test 1';
 
   const improvementTrend = sortedAttempts.map((att, index) => {
     const totalQ = att.totalQuestions || 1;

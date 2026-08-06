@@ -110,7 +110,7 @@ export const AdminDashboard: React.FC = () => {
       if (removed > 0) {
         alert(`Successfully removed ${removed} duplicate test paper(s).`);
       } else {
-        alert('No duplicate test papers found. All test topics are clean with Sample Test 1 & Sample Test 2!');
+        alert('No duplicate test papers found. All test topics are clean with Test 1 & Test 2!');
       }
     } catch (err) {
       console.error('Error cleaning duplicates:', err);
@@ -668,7 +668,7 @@ export const AdminDashboard: React.FC = () => {
               <button
                 onClick={handleCleanDuplicates}
                 className="bg-amber-600 hover:bg-amber-500 text-white font-bold px-3.5 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow-lg cursor-pointer transition-all"
-                title="Remove duplicate sample test papers and keep only Sample Test 1 & 2 per topic"
+                title="Remove duplicate test papers and keep only Test 1 & 2 per topic"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 <span>Clean Duplicates</span>
@@ -791,11 +791,16 @@ export const AdminDashboard: React.FC = () => {
                 onChange={(e) => setSelectedTestId(e.target.value)}
                 className="w-full sm:max-w-md bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
               >
-                {tests.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.title} ({t.class}) — {t.questionCount || 0} Questions
-                  </option>
-                ))}
+                {tests.map((t) => {
+                  const displayTitle = t.title.replace(/\s*\(\s*Class\s*\d+\s*\)/gi, '').trim();
+                  const hasClassInTitle = /class\s*\d+/i.test(displayTitle);
+                  const showClassSuffix = !hasClassInTitle && t.class && t.class !== 'All';
+                  return (
+                    <option key={t.id} value={t.id}>
+                      {displayTitle}{showClassSuffix ? ` (${t.class})` : ''} — {t.questionCount || 0} Questions
+                    </option>
+                  );
+                })}
               </select>
             </div>
 
