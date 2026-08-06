@@ -24,8 +24,9 @@ import {
   Download,
   Share2,
 } from 'lucide-react';
-import { ProgressAnalytics } from './ProgressAnalytics';
-import { ParentProgressCardModal } from './ParentProgressCardModal';
+
+const ProgressAnalytics = React.lazy(() => import('./ProgressAnalytics').then(m => ({ default: m.ProgressAnalytics })));
+const ParentProgressCardModal = React.lazy(() => import('./ParentProgressCardModal').then(m => ({ default: m.ParentProgressCardModal })));
 
 interface StudentDashboardProps {
   student: Student;
@@ -515,20 +516,24 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
             </button>
           </div>
 
-          <ProgressAnalytics
-            student={student}
-            attempts={allStudentAttempts}
-            onViewAttemptReview={onViewAttemptReview}
-          />
+          <React.Suspense fallback={<div className="p-6 text-center text-slate-400 font-medium animate-pulse">Loading analytics...</div>}>
+            <ProgressAnalytics
+              student={student}
+              attempts={allStudentAttempts}
+              onViewAttemptReview={onViewAttemptReview}
+            />
+          </React.Suspense>
         </div>
       )}
 
       {/* Parent Progress Card Modal */}
       {showParentModal && (
-        <ParentProgressCardModal
-          analytics={analytics}
-          onClose={() => setShowParentModal(false)}
-        />
+        <React.Suspense fallback={<div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center text-white">Loading report card...</div>}>
+          <ParentProgressCardModal
+            analytics={analytics}
+            onClose={() => setShowParentModal(false)}
+          />
+        </React.Suspense>
       )}
     </div>
   );

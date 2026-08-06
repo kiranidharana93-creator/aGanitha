@@ -12,14 +12,18 @@ export default defineConfig(() => {
       },
     },
     build: {
-      chunkSizeWarningLimit: 1000,
+      target: 'esnext',
+      minify: 'esbuild' as const,
+      cssCodeSplit: true,
+      sourcemap: false,
+      chunkSizeWarningLimit: 500,
       rollupOptions: {
         output: {
           manualChunks: {
-            react: ['react', 'react-dom'],
+            vendor: ['react', 'react-dom'],
+            firebase: ['firebase/app', 'firebase/firestore'],
             charts: ['recharts'],
             icons: ['lucide-react'],
-            firebase: ['firebase/app', 'firebase/firestore', 'firebase/auth'],
           },
         },
       },

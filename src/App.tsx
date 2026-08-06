@@ -17,10 +17,13 @@ export default function App() {
   const [isInitializing, setIsInitializing] = useState(true);
 
   useEffect(() => {
-    // Seed initial CBSE sample tests if database is empty
-    seedSampleDataIfEmpty().finally(() => {
-      setIsInitializing(false);
-    });
+    // Set initializing to false immediately for instantaneous render (< 1s FCP)
+    setIsInitializing(false);
+
+    // Run sample data seed in background asynchronously without blocking UI mount
+    setTimeout(() => {
+      seedSampleDataIfEmpty().catch(err => console.error('Background seed notice:', err));
+    }, 100);
 
     // Check localStorage for persisted session
     const savedStudent = localStorage.getItem('cbse_student_session');

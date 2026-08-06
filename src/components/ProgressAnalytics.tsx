@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Attempt, Student } from '../types';
 import { calculateStudentAnalytics } from '../utils/analytics';
-import { ParentProgressCardModal } from './ParentProgressCardModal';
+const ParentProgressCardModal = React.lazy(() => import('./ParentProgressCardModal').then(m => ({ default: m.ParentProgressCardModal })));
 import {
   PieChart,
   Pie,
@@ -791,10 +791,12 @@ export const ProgressAnalytics: React.FC<ProgressAnalyticsProps> = ({
 
       {/* Progress Card Modal */}
       {showProgressCardModal && (
-        <ParentProgressCardModal
-          analytics={analytics}
-          onClose={() => setShowProgressCardModal(false)}
-        />
+        <React.Suspense fallback={<div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center text-white">Loading...</div>}>
+          <ParentProgressCardModal
+            analytics={analytics}
+            onClose={() => setShowProgressCardModal(false)}
+          />
+        </React.Suspense>
       )}
     </div>
   );

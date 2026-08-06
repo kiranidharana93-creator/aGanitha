@@ -16,11 +16,12 @@ import {
   publishClass6To10DefaultTests,
   cleanupAndDeduplicateTests,
 } from '../services/db';
-import { TestModal } from './TestModal';
-import { QuestionModal } from './QuestionModal';
-import { ResultDetailsModal } from './ResultDetailsModal';
-import { AdminAnalyticsDashboard } from './AdminAnalyticsDashboard';
-import { StudentManagement } from './StudentManagement';
+
+const TestModal = React.lazy(() => import('./TestModal').then(m => ({ default: m.TestModal })));
+const QuestionModal = React.lazy(() => import('./QuestionModal').then(m => ({ default: m.QuestionModal })));
+const ResultDetailsModal = React.lazy(() => import('./ResultDetailsModal').then(m => ({ default: m.ResultDetailsModal })));
+const AdminAnalyticsDashboard = React.lazy(() => import('./AdminAnalyticsDashboard').then(m => ({ default: m.AdminAnalyticsDashboard })));
+const StudentManagement = React.lazy(() => import('./StudentManagement').then(m => ({ default: m.StudentManagement })));
 import {
   FileText,
   Plus,
@@ -682,7 +683,11 @@ export const AdminDashboard: React.FC = () => {
       </div>
 
       {/* TAB: STUDENT MANAGEMENT */}
-      {activeTab === 'students' && <StudentManagement />}
+      {activeTab === 'students' && (
+        <React.Suspense fallback={<div className="p-8 text-center text-slate-400 font-medium animate-pulse">Loading Student Management...</div>}>
+          <StudentManagement />
+        </React.Suspense>
+      )}
 
       {/* TAB 4: SCHOOL ANALYTICS */}
       {activeTab === 'analytics' && (() => {
@@ -707,11 +712,13 @@ export const AdminDashboard: React.FC = () => {
         const studentList = Object.values(studentMap);
 
         return (
-          <AdminAnalyticsDashboard
-            students={studentList}
-            allAttempts={allAttempts}
-            allTests={tests}
-          />
+          <React.Suspense fallback={<div className="p-8 text-center text-slate-400 font-medium animate-pulse">Loading Analytics Dashboard...</div>}>
+            <AdminAnalyticsDashboard
+              students={studentList}
+              allAttempts={allAttempts}
+              allTests={tests}
+            />
+          </React.Suspense>
         );
       })()}
 
@@ -1148,27 +1155,33 @@ export const AdminDashboard: React.FC = () => {
 
       {/* Test Modal */}
       {showTestModal && (
-        <TestModal
-          testToEdit={editingTest}
-          onClose={() => setShowTestModal(false)}
-          onSave={handleSaveTest}
-        />
+        <React.Suspense fallback={<div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center text-white">Loading...</div>}>
+          <TestModal
+            testToEdit={editingTest}
+            onClose={() => setShowTestModal(false)}
+            onSave={handleSaveTest}
+          />
+        </React.Suspense>
       )}
 
       {/* Question Modal */}
       {showQuestionModal && (
-        <QuestionModal
-          testList={tests}
-          selectedTestId={selectedTestId}
-          questionToEdit={editingQuestion}
-          onClose={() => setShowQuestionModal(false)}
-          onSave={handleSaveQuestion}
-        />
+        <React.Suspense fallback={<div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center text-white">Loading...</div>}>
+          <QuestionModal
+            testList={tests}
+            selectedTestId={selectedTestId}
+            questionToEdit={editingQuestion}
+            onClose={() => setShowQuestionModal(false)}
+            onSave={handleSaveQuestion}
+          />
+        </React.Suspense>
       )}
 
       {/* Result Details Modal */}
       {viewingAttempt && (
-        <ResultDetailsModal attempt={viewingAttempt} onClose={() => setViewingAttempt(null)} />
+        <React.Suspense fallback={<div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center text-white">Loading...</div>}>
+          <ResultDetailsModal attempt={viewingAttempt} onClose={() => setViewingAttempt(null)} />
+        </React.Suspense>
       )}
 
       {/* Delete Confirmation Modal */}
