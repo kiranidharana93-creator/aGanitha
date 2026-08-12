@@ -39,11 +39,11 @@ export interface Question {
   id: string;
   testId: string;
   question: string;
-  optionA: string;
-  optionB: string;
-  optionC: string;
-  optionD: string;
-  correctAnswer: 'A' | 'B' | 'C' | 'D' | 'optionA' | 'optionB' | 'optionC' | 'optionD';
+  optionA?: string;
+  optionB?: string;
+  optionC?: string;
+  optionD?: string;
+  correctAnswer: string;
   hint?: string;
   orderIndex?: number;
 }

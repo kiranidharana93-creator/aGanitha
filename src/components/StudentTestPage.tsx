@@ -2,7 +2,50 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Student, Test, Question, Attempt } from '../types';
 import { getQuestionsByTestId, saveAttempt, normalizeAnswerKey, saveDraftAttempt, clearDraftAttempt, getAttemptsForStudent } from '../services/db';
 import { extractTopicFromTitle, getRecommendationsForTopic, calculateStudentAnalytics, cleanStudentTestTitle } from '../utils/analytics';
-import { Clock, CheckCircle, CheckCircle2, XCircle, AlertTriangle, ChevronLeft, ChevronRight, Send, ArrowLeft, RefreshCw, Award, Lightbulb, Share2, Copy, Check, MessageSquare, Phone } from 'lucide-react';
+import { Clock, CheckCircle, CheckCircle2, XCircle, AlertTriangle, ChevronLeft, ChevronRight, Send, ArrowLeft, RefreshCw, Award, Lightbulb, Share2, Copy, Check, MessageSquare, Phone, FileText, HelpCircle, ChevronDown, ChevronUp } from 'lucide-react';
+
+/**
+ * Intelligent evaluation for student short answers / fill-in-the-blank questions
+ */
+export function evaluateShortAnswer(userAns: string, correctAns: string): boolean {
+  if (!userAns) return false;
+  const user = userAns.trim().toLowerCase();
+  const correct = correctAns.trim().toLowerCase();
+
+  if (user === correct) return true;
+
+  // 1. Alphanumeric normalized equality
+  const normUser = user.replace(/[^a-z0-9]/g, '');
+  const normCorr = correct.replace(/[^a-z0-9]/g, '');
+  if (normUser && normCorr && normUser === normCorr) return true;
+
+  // 2. Number sets comparison (e.g., factors "1, 2, 3, 4, 6, 8, 12, 24" or multiples "5, 10, 15, 20, 25")
+  const corrNums = correct.match(/\d+/g);
+  const userNums = user.match(/\d+/g);
+
+  if (corrNums && corrNums.length > 0 && userNums && userNums.length > 0) {
+    if (corrNums.length === userNums.length) {
+      const sortedCorr = [...corrNums].map(Number).sort((a, b) => a - b).join(',');
+      const sortedUser = [...userNums].map(Number).sort((a, b) => a - b).join(',');
+      if (sortedCorr === sortedUser) return true;
+    }
+  }
+
+  // 3. True / False normalization
+  if (correct === 'true' || correct === 'false') {
+    if (user === 't' || user === 'true' || user === 'yes') return correct === 'true';
+    if (user === 'f' || user === 'false' || user === 'no') return correct === 'false';
+  }
+
+  // 4. Substring containment if normalized match
+  if (normUser && normCorr && (normUser.includes(normCorr) || normCorr.includes(normUser))) {
+    if (Math.abs(normUser.length - normCorr.length) < 12) {
+      return true;
+    }
+  }
+
+  return false;
+}
 
 interface StudentTestPageProps {
   student: Student;
@@ -25,6 +68,7 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [completedAttempt, setCompletedAttempt] = useState<Attempt | null>(null);
   const [copiedAlert, setCopiedAlert] = useState(false);
+  const [showInstructions, setShowInstructions] = useState(true);
 
   // Per-Question Timer state (60 seconds per question)
   const [questionTimeLeft, setQuestionTimeLeft] = useState<number>(60);
@@ -150,10 +194,18 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
   const calculateScore = () => {
     let score = 0;
     questions.forEach((q) => {
-      const selected = selectedAnswers[q.id];
-      const correct = normalizeAnswerKey(q.correctAnswer);
-      if (selected && normalizeAnswerKey(selected) === correct) {
-        score++;
+      const selected = (selectedAnswers[q.id] || '').trim();
+      const isMcq = Boolean(q.optionA || q.optionB) && (!((test.title || '').toLowerCase().includes('grand test') || (test.title || '').toLowerCase().includes('playing with')));
+
+      if (isMcq) {
+        const correct = normalizeAnswerKey(q.correctAnswer);
+        if (selected && normalizeAnswerKey(selected.toLowerCase()) === correct) {
+          score++;
+        }
+      } else {
+        if (evaluateShortAnswer(selected, q.correctAnswer || '')) {
+          score++;
+        }
       }
     });
     return score;
@@ -439,6 +491,56 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
         </div>
       </div>
 
+      {/* Test Instructions Card */}
+      <div className="bg-slate-900 border border-blue-500/30 rounded-2xl p-5 shadow-xl space-y-3">
+        <div className="flex items-center justify-between border-b border-slate-800 pb-2.5">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-blue-600/20 border border-blue-500/40 text-blue-400 flex items-center justify-center font-bold">
+              <FileText className="w-4 h-4" />
+            </div>
+            <div>
+              <h3 className="text-sm font-extrabold text-white tracking-wide uppercase">Test Instructions</h3>
+              <p className="text-[11px] text-blue-300 font-medium">Please read carefully before entering answers in the blank</p>
+            </div>
+          </div>
+          <button
+            onClick={() => setShowInstructions((prev) => !prev)}
+            className="text-xs font-bold text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg border border-slate-700 transition-colors flex items-center gap-1 cursor-pointer"
+          >
+            <span>{showInstructions ? 'Hide Instructions' : 'Show Instructions'}</span>
+            <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showInstructions ? 'rotate-180' : ''}`} />
+          </button>
+        </div>
+
+        {showInstructions && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1 text-xs text-slate-300">
+            <div className="bg-slate-950/80 border border-slate-800/80 rounded-xl p-3.5 space-y-2">
+              <div className="flex items-center gap-2 text-blue-400 font-bold text-xs">
+                <CheckCircle2 className="w-4 h-4 text-blue-400 shrink-0" />
+                <span>Writing Multiple Answers (Factors, Multiples & Lists)</span>
+              </div>
+              <ul className="list-disc list-inside space-y-1 text-slate-300 text-[11px] pl-1 leading-relaxed">
+                <li>Separate numbers with commas or spaces (e.g. <strong className="text-emerald-300">1, 2, 3, 4, 6, 8, 12, 24</strong> or <strong className="text-emerald-300">5 10 15 20 25</strong>).</li>
+                <li>Number order does not matter (e.g. <strong className="text-emerald-300">24, 12, 8, 6, 4, 3, 2, 1</strong> is accepted).</li>
+                <li>For prime number pairs or list answers, write clearly like <strong className="text-emerald-300">(13, 31), (17, 71)</strong> or <strong className="text-emerald-300">17, 19</strong>.</li>
+              </ul>
+            </div>
+
+            <div className="bg-slate-950/80 border border-slate-800/80 rounded-xl p-3.5 space-y-2">
+              <div className="flex items-center gap-2 text-amber-400 font-bold text-xs">
+                <Clock className="w-4 h-4 text-amber-400 shrink-0" />
+                <span>Timer & Test Navigation</span>
+              </div>
+              <ul className="list-disc list-inside space-y-1 text-slate-300 text-[11px] pl-1 leading-relaxed">
+                <li>For True / False questions, write <strong className="text-emerald-300">True</strong> or <strong className="text-emerald-300">False</strong>.</li>
+                <li>You have <strong className="text-amber-300">60 seconds per question</strong>. The test auto-advances when time expires.</li>
+                <li>Click any question number on the left <strong className="text-blue-300">Question Palette</strong> to review or update your answer anytime.</li>
+              </ul>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Main Examination Layout */}
       {questions.length === 0 ? (
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-12 text-center">
@@ -524,57 +626,81 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
               {/* Question Text */}
               <h3 className="text-lg font-bold text-white leading-relaxed">{currentQ.question}</h3>
 
-              {/* Multiple Choice Options */}
-              <div className="space-y-3">
-                {[
-                  { key: 'optionA', label: 'Option A', text: currentQ.optionA },
-                  { key: 'optionB', label: 'Option B', text: currentQ.optionB },
-                  { key: 'optionC', label: 'Option C', text: currentQ.optionC },
-                  { key: 'optionD', label: 'Option D', text: currentQ.optionD },
-                ].map((opt) => {
-                  const isSelected = selectedAnswers[currentQ.id] === opt.key;
+              {/* Options or Short Answer Field */}
+              {(!((test.title || '').toLowerCase().includes('grand test') || (test.title || '').toLowerCase().includes('playing with'))) && Boolean(currentQ.optionA && currentQ.optionA.trim() !== '') ? (
+                <div className="space-y-3">
+                  {[
+                    { key: 'optionA', label: 'Option A', text: currentQ.optionA },
+                    { key: 'optionB', label: 'Option B', text: currentQ.optionB },
+                    { key: 'optionC', label: 'Option C', text: currentQ.optionC },
+                    { key: 'optionD', label: 'Option D', text: currentQ.optionD },
+                  ].map((opt) => {
+                    const isSelected = selectedAnswers[currentQ.id] === opt.key;
 
-                  return (
-                    <button
-                      key={opt.key}
-                      onClick={() => handleOptionSelect(currentQ.id, opt.key)}
-                      className={`w-full text-left p-4 rounded-xl border transition-all flex items-center justify-between cursor-pointer ${
-                        isSelected
-                          ? isSelectedCorrect
-                            ? 'bg-emerald-600/15 border-emerald-500 text-white shadow-md ring-1 ring-emerald-500'
-                            : 'bg-amber-600/15 border-amber-500 text-white shadow-md ring-1 ring-amber-500'
-                          : 'bg-slate-800/50 border-slate-700/80 text-slate-300 hover:bg-slate-800 hover:border-slate-600'
-                      }`}
-                    >
-                      <div className="flex items-center space-x-3">
-                        <div
-                          className={`w-6 h-6 rounded-full border text-xs font-bold flex items-center justify-center transition-colors ${
-                            isSelected
-                              ? isSelectedCorrect
-                                ? 'bg-emerald-600 border-emerald-500 text-white'
-                                : 'bg-amber-600 border-amber-500 text-white'
-                              : 'border-slate-600 text-slate-400 bg-slate-900'
-                          }`}
-                        >
-                          {opt.label.replace('Option ', '')}
+                    return (
+                      <button
+                        key={opt.key}
+                        onClick={() => handleOptionSelect(currentQ.id, opt.key)}
+                        className={`w-full text-left p-4 rounded-xl border transition-all flex items-center justify-between cursor-pointer ${
+                          isSelected
+                            ? isSelectedCorrect
+                              ? 'bg-emerald-600/15 border-emerald-500 text-white shadow-md ring-1 ring-emerald-500'
+                              : 'bg-amber-600/15 border-amber-500 text-white shadow-md ring-1 ring-amber-500'
+                            : 'bg-slate-800/50 border-slate-700/80 text-slate-300 hover:bg-slate-800 hover:border-slate-600'
+                        }`}
+                      >
+                        <div className="flex items-center space-x-3">
+                          <div
+                            className={`w-6 h-6 rounded-full border text-xs font-bold flex items-center justify-center transition-colors ${
+                              isSelected
+                                ? isSelectedCorrect
+                                  ? 'bg-emerald-600 border-emerald-500 text-white'
+                                  : 'bg-amber-600 border-amber-500 text-white'
+                                : 'border-slate-600 text-slate-400 bg-slate-900'
+                            }`}
+                          >
+                            {opt.label.replace('Option ', '')}
+                          </div>
+                          <span className="text-sm font-medium">{opt.text}</span>
                         </div>
-                        <span className="text-sm font-medium">{opt.text}</span>
-                      </div>
 
-                      {isSelected && (
-                        isSelectedCorrect ? (
-                          <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
-                        ) : (
-                          <XCircle className="w-5 h-5 text-amber-400 shrink-0" />
-                        )
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
+                        {isSelected && (
+                          isSelectedCorrect ? (
+                            <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+                          ) : (
+                            <XCircle className="w-5 h-5 text-amber-400 shrink-0" />
+                          )
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="space-y-3 pt-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
+                    <label className="block text-xs font-extrabold text-blue-300 uppercase tracking-wider">
+                      Write your answer in the space given:
+                    </label>
+                    <span className="text-[11px] text-emerald-400 font-semibold bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-md">
+                      Separate multiple numbers with commas (e.g. 1, 2, 3, 4, 6, 8, 12, 24)
+                    </span>
+                  </div>
+                  <textarea
+                    rows={3}
+                    value={selectedAnswers[currentQ.id] || ''}
+                    onChange={(e) => handleOptionSelect(currentQ.id, e.target.value)}
+                    placeholder="Type your answer here... e.g. 1, 2, 3, 4, 6, 8, 12, 24"
+                    className="w-full bg-slate-950 border border-slate-700 rounded-2xl p-4 text-white text-sm font-medium focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/50 shadow-inner resize-y"
+                  />
+                  <div className="text-xs text-slate-400 font-semibold pt-1 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <span>Answer: __________________________________________________</span>
+                    <span className="text-[11px] text-slate-500 font-medium italic">Evaluated automatically upon submission</span>
+                  </div>
+                </div>
+              )}
 
-              {/* Educational Feedback / Hint Box */}
-              {selectedOpt && (
+              {/* Educational Feedback / Hint Box (MCQ only) */}
+              {Boolean(currentQ.optionA || currentQ.optionB) && selectedOpt && (
                 isSelectedCorrect ? (
                   <div className="p-3.5 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-400 text-xs flex items-center gap-2.5 font-bold shadow-sm">
                     <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />

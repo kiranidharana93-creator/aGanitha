@@ -22,7 +22,7 @@ const QuestionModal = React.lazy(() => import('./QuestionModal').then(m => ({ de
 const ResultDetailsModal = React.lazy(() => import('./ResultDetailsModal').then(m => ({ default: m.ResultDetailsModal })));
 const AdminAnalyticsDashboard = React.lazy(() => import('./AdminAnalyticsDashboard').then(m => ({ default: m.AdminAnalyticsDashboard })));
 const StudentManagement = React.lazy(() => import('./StudentManagement').then(m => ({ default: m.StudentManagement })));
-import { printCBSEQuestionPaper } from '../utils/paperPrinter';
+import { printCBSEQuestionPaper, downloadAdminAnswerKeyPDF, downloadAdminAnswerKeyDOCX } from '../utils/paperPrinter';
 import {
   FileText,
   Plus,
@@ -322,6 +322,32 @@ export const AdminDashboard: React.FC = () => {
     } catch (error) {
       console.error('PDF download failed', error);
       await printCBSEQuestionPaper(test);
+    }
+  };
+
+  const handleDownloadAnswerKeyPDF = async (test: Test) => {
+    try {
+      let qList = questions;
+      if (selectedTestId !== test.id) {
+        qList = await getQuestionsByTestId(test.id);
+      }
+      await downloadAdminAnswerKeyPDF(test, qList);
+    } catch (err) {
+      console.error('Error downloading Answer Key PDF:', err);
+      alert('Failed to generate Answer Key PDF.');
+    }
+  };
+
+  const handleDownloadAnswerKeyDOCX = async (test: Test) => {
+    try {
+      let qList = questions;
+      if (selectedTestId !== test.id) {
+        qList = await getQuestionsByTestId(test.id);
+      }
+      await downloadAdminAnswerKeyDOCX(test, qList);
+    } catch (err) {
+      console.error('Error downloading Answer Key DOCX:', err);
+      alert('Failed to generate Answer Key DOCX.');
     }
   };
 
@@ -734,42 +760,63 @@ export const AdminDashboard: React.FC = () => {
                           <span>{t.published ? 'Published' : 'Unpublished (Draft)'}</span>
                         </button>
                       </td>
-                      <td className="px-6 py-4 text-right space-x-2">
-                        <button
-                          onClick={() => downloadQuestionPaper(t)}
-                          className="px-2.5 py-1.5 bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/30 border border-emerald-500/30 rounded-lg text-xs font-bold inline-flex items-center gap-1 cursor-pointer transition-colors"
-                          title="Print / Download CBSE Question Paper PDF"
-                        >
-                          <Printer className="w-3.5 h-3.5" />
-                          <span>📄 Download PDF</span>
-                        </button>
-                        <button
-                          onClick={() => {
-                            setSelectedTestId(t.id);
-                            setActiveTab('questions');
-                          }}
-                          className="text-blue-400 hover:text-blue-300 font-semibold cursor-pointer"
-                          title="Manage Questions"
-                        >
-                          Questions
-                        </button>
-                        <button
-                          onClick={() => {
-                            setEditingTest(t);
-                            setShowTestModal(true);
-                          }}
-                          className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg cursor-pointer"
-                          title="Edit Test"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteTest(t.id)}
-                          className="p-1.5 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg cursor-pointer"
-                          title="Delete Test"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex items-center justify-end gap-1.5 flex-wrap">
+                          <button
+                            onClick={() => downloadQuestionPaper(t)}
+                            className="px-2.5 py-1.5 bg-slate-800 text-slate-200 hover:bg-slate-700 border border-slate-700 rounded-lg text-xs font-bold inline-flex items-center gap-1 cursor-pointer transition-colors"
+                            title="Print / Download CBSE Question Paper PDF"
+                          >
+                            <Printer className="w-3 h-3" />
+                            <span>Paper PDF</span>
+                          </button>
+
+                          <button
+                            onClick={() => handleDownloadAnswerKeyPDF(t)}
+                            className="px-2.5 py-1.5 bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/30 border border-emerald-500/30 rounded-lg text-xs font-bold inline-flex items-center gap-1 cursor-pointer transition-colors"
+                            title="Download Admin Answer Key PDF with Explanations"
+                          >
+                            <Download className="w-3 h-3" />
+                            <span>Key PDF</span>
+                          </button>
+
+                          <button
+                            onClick={() => handleDownloadAnswerKeyDOCX(t)}
+                            className="px-2.5 py-1.5 bg-blue-600/20 text-blue-300 hover:bg-blue-600/30 border border-blue-500/30 rounded-lg text-xs font-bold inline-flex items-center gap-1 cursor-pointer transition-colors"
+                            title="Download Admin Answer Key DOCX Word Document"
+                          >
+                            <FileText className="w-3 h-3" />
+                            <span>DOCX Key</span>
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              setSelectedTestId(t.id);
+                              setActiveTab('questions');
+                            }}
+                            className="px-2.5 py-1.5 text-blue-400 hover:text-blue-300 font-semibold cursor-pointer"
+                            title="Manage Questions"
+                          >
+                            Questions
+                          </button>
+                          <button
+                            onClick={() => {
+                              setEditingTest(t);
+                              setShowTestModal(true);
+                            }}
+                            className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg cursor-pointer"
+                            title="Edit Test"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteTest(t.id)}
+                            className="p-1.5 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg cursor-pointer"
+                            title="Delete Test"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}

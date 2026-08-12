@@ -39,14 +39,22 @@ export async function printCBSEQuestionPaper(test: Test, existingQuestions?: Que
   let sectionD: Question[] = [];
   let sectionE: Question[] = [];
 
+  const isGrandTest = test.title.toLowerCase().includes('grand test') || sortedQuestions.length === 40;
+
   if (is30Q) {
     sectionA = sortedQuestions.slice(0, 10);
     sectionB = sortedQuestions.slice(10, 18);
     sectionC = sortedQuestions.slice(18, 24);
     sectionD = sortedQuestions.slice(24, 28);
     sectionE = sortedQuestions.slice(28, 30);
+  } else if (isGrandTest) {
+    sectionA = sortedQuestions.slice(0, 8);   // FACTORS AND MULTIPLES
+    sectionB = sortedQuestions.slice(8, 18);  // ODD, EVEN AND PRIME NUMBERS
+    sectionC = sortedQuestions.slice(18, 33); // DIVISIBILITY TESTS
+    sectionD = sortedQuestions.slice(33, 38); // COMMON FACTORS AND MULTIPLES
+    sectionE = sortedQuestions.slice(38, 40); // PRIME FACTORISATION AND HCF
   } else {
-    // Standard division if not 30 questions
+    // Standard division if not 30 or 40 questions
     sectionA = sortedQuestions;
   }
 
@@ -67,6 +75,9 @@ export async function printCBSEQuestionPaper(test: Test, existingQuestions?: Que
     subTitle = 'Chapter 8 – Decimals';
   } else if (isFractions) {
     subTitle = 'Chapter 7 – Fractions';
+  } else if (isGrandTest) {
+    subTitle = 'Chapter – Playing With the Numbers';
+    sampleTestTitle = 'Grand Test';
   } else {
     subTitle = test.title.replace(/sample\s*/gi, '');
   }
@@ -75,21 +86,36 @@ export async function printCBSEQuestionPaper(test: Test, existingQuestions?: Que
     // Strip leading numbers if present in question string to avoid double numbering
     const cleanQ = q.question.replace(/^\d+[\.\)]\s*/, '').replace(/\n/g, '<br/>');
     const num = idx + 1;
+    const isMcq = Boolean(q.optionA || q.optionB);
 
-    return `
-      <div class="question-item">
-        <div class="question-header">
-          <span class="q-num">${num}.</span>
-          <span class="q-text">${cleanQ}</span>
+    if (isMcq) {
+      return `
+        <div class="question-item">
+          <div class="question-header">
+            <span class="q-num">${num}.</span>
+            <span class="q-text">${cleanQ}</span>
+          </div>
+          <div class="options-grid">
+            <div class="option-item"><span class="opt-label">a)</span> ${q.optionA || ''}</div>
+            <div class="option-item"><span class="opt-label">b)</span> ${q.optionB || ''}</div>
+            <div class="option-item"><span class="opt-label">c)</span> ${q.optionC || ''}</div>
+            <div class="option-item"><span class="opt-label">d)</span> ${q.optionD || ''}</div>
+          </div>
         </div>
-        <div class="options-grid">
-          <div class="option-item"><span class="opt-label">a)</span> ${q.optionA}</div>
-          <div class="option-item"><span class="opt-label">b)</span> ${q.optionB}</div>
-          <div class="option-item"><span class="opt-label">c)</span> ${q.optionC}</div>
-          <div class="option-item"><span class="opt-label">d)</span> ${q.optionD}</div>
+      `;
+    } else {
+      return `
+        <div class="question-item">
+          <div class="question-header">
+            <span class="q-num">${num}.</span>
+            <span class="q-text">${cleanQ}</span>
+          </div>
+          <div style="margin-top: 10px; margin-left: 24px; font-weight: bold; color: #1e293b; font-size: 13px;">
+            Answer: __________________________________________________
+          </div>
         </div>
-      </div>
-    `;
+      `;
+    }
   };
 
   const getAnswerLetter = (correct: string): string => {
@@ -112,13 +138,21 @@ export async function printCBSEQuestionPaper(test: Test, existingQuestions?: Que
 
   const renderAnswerKeyRow = (q: Question, idx: number) => {
     const num = idx + 1;
-    const letter = getAnswerLetter(q.correctAnswer);
-    const text = getAnswerText(q);
+    const isMcq = Boolean(q.optionA || q.optionB);
+    let ansDisplay = '';
+
+    if (isMcq) {
+      const letter = getAnswerLetter(q.correctAnswer);
+      const text = getAnswerText(q);
+      ansDisplay = `<strong>(${letter})</strong> ${text ? text : ''}`;
+    } else {
+      ansDisplay = `<strong>${q.correctAnswer}</strong>`;
+    }
 
     return `
       <tr>
         <td class="ak-num">${num}</td>
-        <td class="ak-ans"><strong>${letter}</strong> ${text ? `(${text})` : ''}</td>
+        <td class="ak-ans">${ansDisplay}</td>
         <td class="ak-hint">${q.hint || 'No additional explanation.'}</td>
       </tr>
     `;
@@ -422,6 +456,222 @@ export async function printCBSEQuestionPaper(test: Test, existingQuestions?: Que
               ${sortedQuestions.map((q, i) => renderAnswerKeyRow(q, i)).join('')}
             </tbody>
           </table>
+        </div>
+      </body>
+    </html>
+  `;
+
+  printWindow.document.write(htmlContent);
+  printWindow.document.close();
+}
+
+/**
+ * Helper function to download Admin Answer Key as DOCX document.
+ */
+export async function downloadAdminAnswerKeyDOCX(test: Test, existingQuestions?: Question[]): Promise<void> {
+  const sortedQuestions = existingQuestions && existingQuestions.length > 0
+    ? [...existingQuestions].sort((a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0))
+    : await getQuestionsByTestId(test.id);
+
+  const cleanTitle = (test.title || 'Grand_Test').replace(/[^a-zA-Z0-9]/g, '_');
+  const fileName = `${cleanTitle}_Admin_Answer_Key.doc`;
+
+  const getOptionText = (q: Question, optKey: string) => {
+    switch (optKey) {
+      case 'optionA': return q.optionA;
+      case 'optionB': return q.optionB;
+      case 'optionC': return q.optionC;
+      case 'optionD': return q.optionD;
+      default: return optKey;
+    }
+  };
+
+  const rows = sortedQuestions.map((q, idx) => {
+    const isMcq = Boolean(q.optionA || q.optionB);
+    let ansText = '';
+    if (isMcq) {
+      const optLabel = q.correctAnswer.replace('option', 'Option ');
+      const optValue = getOptionText(q, q.correctAnswer) || '';
+      ansText = `${optLabel}: ${optValue}`;
+    } else {
+      ansText = q.correctAnswer;
+    }
+
+    return `
+      <tr style="border-bottom: 1px solid #cbd5e1;">
+        <td style="padding: 8px; font-weight: bold; text-align: center; border: 1px solid #cbd5e1;">Q${idx + 1}</td>
+        <td style="padding: 8px; border: 1px solid #cbd5e1;">${q.question}</td>
+        <td style="padding: 8px; border: 1px solid #cbd5e1; font-weight: bold; color: #15803d;">${ansText}</td>
+        <td style="padding: 8px; border: 1px solid #cbd5e1; color: #334155; font-style: italic;">${q.hint || 'Standard NCERT Solution'}</td>
+      </tr>
+    `;
+  }).join('');
+
+  const docHtml = `
+    <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+    <head>
+      <meta charset='utf-8'>
+      <title>${test.title} - Admin Answer Key</title>
+      <style>
+        body { font-family: 'Calibri', 'Segoe UI', Arial, sans-serif; font-size: 11pt; line-height: 1.5; color: #0f172a; margin: 20pt; }
+        .header { text-align: center; border-bottom: 2pt solid #1e3a8a; padding-bottom: 8pt; margin-bottom: 16pt; }
+        .title { font-size: 16pt; font-weight: bold; color: #1e3a8a; text-transform: uppercase; }
+        .subtitle { font-size: 13pt; font-weight: bold; color: #334155; margin-top: 4pt; }
+        .meta { font-size: 10.5pt; color: #475569; margin-top: 6pt; font-weight: bold; }
+        table { width: 100%; border-collapse: collapse; margin-top: 16pt; font-size: 10.5pt; }
+        th { background-color: #f1f5f9; color: #0f172a; font-weight: bold; border: 1px solid #cbd5e1; padding: 8px; text-align: left; text-transform: uppercase; }
+        .footer { margin-top: 30pt; border-top: 1pt solid #cbd5e1; padding-top: 8pt; text-align: center; font-size: 9.5pt; font-weight: bold; color: #64748b; }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <div class="title">CBSE ${test.class || 'Class 6'} Mathematics</div>
+        <div class="subtitle">${test.title}</div>
+        <div class="subtitle" style="font-size: 11pt; color: #166534;">ADMIN OFFICIAL ANSWER KEY & SOLUTIONS</div>
+        <div class="meta">Total Questions: ${sortedQuestions.length} | Total Marks: ${sortedQuestions.length} | Duration: ${test.duration || 60} Minutes</div>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 8%; text-align: center;">Q.No</th>
+            <th style="width: 38%;">Question Text</th>
+            <th style="width: 24%;">Correct Answer</th>
+            <th style="width: 30%;">Explanation / Working</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows}
+        </tbody>
+      </table>
+
+      <div class="footer">
+        CBSE Maths Portal – Admin Use Only
+      </div>
+    </body>
+    </html>
+  `;
+
+  const blob = new Blob(['\ufeff' + docHtml], { type: 'application/msword' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = fileName;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
+/**
+ * Opens Admin Answer Key formatted view for PDF download or Printing.
+ */
+export async function downloadAdminAnswerKeyPDF(test: Test, existingQuestions?: Question[]): Promise<void> {
+  const sortedQuestions = existingQuestions && existingQuestions.length > 0
+    ? [...existingQuestions].sort((a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0))
+    : await getQuestionsByTestId(test.id);
+
+  const cleanTitle = (test.title || 'Grand_Test').replace(/[^a-zA-Z0-9]/g, '_');
+
+  const printWindow = window.open('', '_blank');
+  if (!printWindow) {
+    alert('Please allow popups to download or print the Admin Answer Key PDF.');
+    return;
+  }
+
+  const getOptionText = (q: Question, optKey: string) => {
+    switch (optKey) {
+      case 'optionA': return q.optionA;
+      case 'optionB': return q.optionB;
+      case 'optionC': return q.optionC;
+      case 'optionD': return q.optionD;
+      default: return optKey;
+    }
+  };
+
+  const rows = sortedQuestions.map((q, idx) => {
+    const isMcq = Boolean(q.optionA || q.optionB);
+    let ansText = '';
+    if (isMcq) {
+      const optLabel = q.correctAnswer.replace('option', 'Option ');
+      const optValue = getOptionText(q, q.correctAnswer) || '';
+      ansText = `${optLabel}: ${optValue}`;
+    } else {
+      ansText = q.correctAnswer;
+    }
+
+    return `
+      <tr>
+        <td style="text-align: center; font-weight: bold;">Q${idx + 1}</td>
+        <td>${q.question}</td>
+        <td style="font-weight: bold; color: #166534;">${ansText}</td>
+        <td style="color: #334155;">${q.hint || 'Standard NCERT Solution'}</td>
+      </tr>
+    `;
+  }).join('');
+
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>${cleanTitle}_Admin_Answer_Key</title>
+        <style>
+          @page { size: A4 portrait; margin: 12mm; }
+          body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 10.5pt; color: #0f172a; margin: 0; padding: 20px; }
+          .no-print-bar { position: fixed; top: 0; left: 0; right: 0; background: #0f172a; color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 9999; font-family: system-ui; }
+          .btn-action { background: #2563eb; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+          .btn-close { background: #475569; color: white; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; }
+          .header { text-align: center; border-bottom: 2px solid #1e3a8a; padding-bottom: 10px; margin-top: 40px; margin-bottom: 16px; }
+          .title { font-size: 16pt; font-weight: bold; color: #1e3a8a; text-transform: uppercase; }
+          .subtitle { font-size: 13pt; font-weight: bold; color: #334155; margin-top: 4px; }
+          .admin-tag { font-size: 11pt; font-weight: bold; color: #15803d; margin-top: 4px; }
+          .meta { font-size: 10.5pt; font-weight: bold; color: #475569; margin-top: 6px; }
+          table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 10pt; }
+          th, td { border: 1px solid #cbd5e1; padding: 8px; text-align: left; vertical-align: top; }
+          th { background: #f1f5f9; font-weight: bold; text-transform: uppercase; }
+          .footer { margin-top: 24px; border-top: 1px solid #cbd5e1; padding-top: 8px; text-align: center; font-size: 9.5pt; font-weight: bold; color: #64748b; }
+          @media print {
+            .no-print-bar { display: none !important; }
+            body { padding: 0 !important; }
+            .header { margin-top: 0 !important; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="no-print-bar">
+          <div>
+            <strong>Admin Answer Key & Solutions PDF</strong>
+            <div style="font-size: 12px; color: #94a3b8;">Title: ${cleanTitle}_Admin_Answer_Key</div>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn-action" onclick="window.print()">🖨️ Save as PDF / Print</button>
+            <button class="btn-close" onclick="window.close()">Close</button>
+          </div>
+        </div>
+
+        <div class="header">
+          <div class="title">CBSE ${test.class || 'Class 6'} Mathematics</div>
+          <div class="subtitle">${test.title}</div>
+          <div class="admin-tag">ADMIN ANSWER KEY & STEP-BY-STEP EXPLANATIONS</div>
+          <div class="meta">Total Questions: ${sortedQuestions.length} | Marks: ${sortedQuestions.length} | Duration: ${test.duration || 60} Mins</div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 8%; text-align: center;">Q.No</th>
+              <th style="width: 38%;">Question Text</th>
+              <th style="width: 24%;">Correct Answer</th>
+              <th style="width: 30%;">Short Explanation / Working</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows}
+          </tbody>
+        </table>
+
+        <div class="footer">
+          CBSE Maths Portal – Admin Use Only
         </div>
       </body>
     </html>

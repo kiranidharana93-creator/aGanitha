@@ -37,8 +37,9 @@ export const QuestionModal: React.FC<QuestionModalProps> = ({
       setError('Please enter question text');
       return;
     }
-    if (!optionA.trim() || !optionB.trim() || !optionC.trim() || !optionD.trim()) {
-      setError('All 4 options (A, B, C, D) are required');
+    const isMcq = Boolean(optionA.trim() || optionB.trim() || optionC.trim() || optionD.trim());
+    if (isMcq && (!optionA.trim() || !optionB.trim() || !optionC.trim() || !optionD.trim())) {
+      setError('If creating an MCQ, all 4 options (A, B, C, D) are required. Leave options blank for short-answer format.');
       return;
     }
 
@@ -48,11 +49,13 @@ export const QuestionModal: React.FC<QuestionModalProps> = ({
       await onSave({
         testId,
         question: questionText.trim(),
-        optionA: optionA.trim(),
-        optionB: optionB.trim(),
-        optionC: optionC.trim(),
-        optionD: optionD.trim(),
-        correctAnswer: correctAnswer as any,
+        ...(isMcq ? {
+          optionA: optionA.trim(),
+          optionB: optionB.trim(),
+          optionC: optionC.trim(),
+          optionD: optionD.trim(),
+        } : {}),
+        correctAnswer: correctAnswer.trim(),
         hint: hint.trim() || undefined,
       });
       onClose();

@@ -67,24 +67,29 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onStudentLogin, onAdminL
 
   const handleAdminSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!adminEmail.trim()) {
-      setAdminError('Please enter admin email');
-      return;
-    }
-    if (!adminPassword.trim()) {
-      setAdminError('Please enter password');
-      return;
-    }
+    try {
+      if (!adminEmail.trim()) {
+        setAdminError('Please enter admin email');
+        return;
+      }
+      if (!adminPassword.trim()) {
+        setAdminError('Please enter password');
+        return;
+      }
 
-    const targetEmail = adminEmail.trim().toLowerCase();
-    const encodedTarget = typeof btoa !== 'undefined' ? btoa(targetEmail) : '';
-    
-    if (encodedTarget === 'a2lyYW5pZGhhcmFuYTkzQGdtYWlsLmNvbQ==' && adminPassword.trim().length > 0) {
-      setAdminError('');
-      onAdminLogin(adminEmail.trim());
-    } else {
-      setAdminError('Invalid admin email or password');
-      setAdminPassword('');
+      const targetEmail = adminEmail.trim().toLowerCase();
+      const encodedTarget = typeof btoa !== 'undefined' ? btoa(targetEmail) : '';
+      
+      if (encodedTarget === 'a2lyYW5pZGhhcmFuYTkzQGdtYWlsLmNvbQ==' && adminPassword.trim().length > 0) {
+        setAdminError('');
+        onAdminLogin(adminEmail.trim());
+      } else {
+        setAdminError('Invalid admin email or password');
+        setAdminPassword('');
+      }
+    } catch (err) {
+      console.error('Admin authentication error:', err);
+      setAdminError('Authentication error occurred. Please try logging in again.');
     }
   };
 
