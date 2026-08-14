@@ -2,13 +2,20 @@
   "entities": {
     "students": {
       "title": "Students",
-      "description": "Registered students taking tests",
+      "description": "Registered students taking tests via Google Auth",
       "type": "object",
       "properties": {
+        "uid": { "type": "string" },
         "name": { "type": "string" },
-        "class": { "type": "string" }
+        "email": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "class": { "type": "string" },
+        "section": { "type": "string" },
+        "status": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "lastLoginAt": { "type": "string" }
       },
-      "required": ["name", "class"]
+      "required": ["uid", "name", "email"]
     },
     "tests": {
       "title": "Tests",

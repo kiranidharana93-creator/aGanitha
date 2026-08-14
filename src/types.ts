@@ -1,15 +1,17 @@
 export interface Student {
   id: string;
-  studentId?: string; // Generated ID e.g., "c6-2026-0012"
+  uid?: string;
+  email?: string;
+  photoURL?: string;
   name: string;
-  class: string; // e.g., "Class 6", "Class 7", "Class 8", "Class 9", "Class 10"
-  section?: string; // e.g., "A", "B"
+  class: string | null; // e.g., "Class 6", "Class 7", "Class 8", "Class 9", "Class 10"
+  section?: string | null; // e.g., "A", "B"
   rollNumber?: string | number; // e.g., 23
   parentMobile?: string; // Required for parent notifications
-  password?: string; // Temporary or updated password
-  isPasswordChanged?: boolean; // Force change on first login
   status?: 'ACTIVE' | 'INACTIVE';
   createdAt?: string;
+  lastLoginAt?: string;
+  studentId?: string; // Backwards-compatible ID if needed
 }
 
 export interface DraftAttempt {

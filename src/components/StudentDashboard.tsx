@@ -148,7 +148,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
             Practice • Tests • Progress
           </p>
           <p className="text-xs text-[#16449B]/80 font-medium">
-            Welcome, <strong className="text-[#16449B]">{student.name}</strong> • Student ID: <span className="font-mono">{student.studentId || student.id}</span> • Enrolled Class: <strong>{student.class}</strong> ({student.section || 'A'})
+            Welcome, <strong className="text-[#16449B]">{student.name}</strong> {student.email ? `(${student.email})` : ''} • Enrolled Class: <strong>{student.class || 'Class 6'}</strong> ({student.section || 'A'})
           </p>
         </div>
 

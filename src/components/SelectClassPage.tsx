@@ -29,9 +29,11 @@ export const SelectClassPage: React.FC<SelectClassPageProps> = ({
           Welcome, <span className="text-[#16449B] underline">{student.name}</span>
         </h2>
 
-        <p className="text-sm text-[#16449B] max-w-lg mx-auto font-medium">
-          Student ID: <strong className="text-[#16449B] font-mono">{student.studentId || student.id}</strong>
-        </p>
+        {student.email && (
+          <p className="text-sm text-[#16449B] max-w-lg mx-auto font-bold">
+            {student.email}
+          </p>
+        )}
 
         <p className="text-xs text-[#16449B]/80 font-medium">
           Select your class below to view available test papers.

@@ -5,6 +5,7 @@ import { Navbar } from './components/Navbar';
 import LoadingScreen from './components/LoadingScreen';
 
 const LoginModal = React.lazy(() => import('./components/LoginModal').then(m => ({ default: m.LoginModal })));
+const CompleteProfilePage = React.lazy(() => import('./components/CompleteProfilePage').then(m => ({ default: m.CompleteProfilePage })));
 const StudentDashboard = React.lazy(() => import('./components/StudentDashboard').then(m => ({ default: m.StudentDashboard })));
 const StudentTestPage = React.lazy(() => import('./components/StudentTestPage').then(m => ({ default: m.StudentTestPage })));
 const AdminDashboard = React.lazy(() => import('./components/AdminDashboard').then(m => ({ default: m.AdminDashboard })));
@@ -108,6 +109,11 @@ export default function App() {
               test={activeTest.test}
               attemptNumber={activeTest.attemptNumber}
               onFinishTest={handleFinishTest}
+            />
+          ) : currentUser.student && (!currentUser.student.class || currentUser.student.class.trim() === '') ? (
+            <CompleteProfilePage
+              student={currentUser.student}
+              onProfileCompleted={handleStudentLogin}
             />
           ) : currentUser.student ? (
             <StudentDashboard

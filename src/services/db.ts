@@ -3,6 +3,7 @@ import {
   doc,
   getDocs,
   getDoc,
+  setDoc,
   addDoc,
   updateDoc,
   deleteDoc,
@@ -11,7 +12,8 @@ import {
   orderBy,
   serverTimestamp,
 } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { db, auth } from '../lib/firebase';
 import { Student, Test, Question, Attempt, DraftAttempt } from '../types';
 
 // Collections references
@@ -73,18 +75,17 @@ export function formatParentPhone(mobile: string): string {
   return digits || mobile.trim();
 }
 
-// Default initial registered students for seamless testing (Only Kiran)
+// Default initial registered student for testing (Kiran)
 export const INITIAL_REGISTERED_STUDENTS: Student[] = [
   {
     id: 'std_kiran_6',
-    studentId: 'c6-2026-0012',
-    name: 'kiran',
+    uid: 'std_kiran_6',
+    name: 'Kiran',
+    email: 'kiran@gmail.com',
     class: 'Class 6',
     section: 'A',
     rollNumber: 12,
     parentMobile: '919353913218',
-    password: 'KR6421',
-    isPasswordChanged: false,
     status: 'ACTIVE',
     createdAt: new Date().toISOString(),
   },
@@ -155,9 +156,106 @@ export function generateTempPassword(name: string): string {
   return `${initials}${randomDigits}`;
 }
 
+export async function signInStudentWithGoogle(): Promise<{ student: Student; needsProfileCompletion: boolean }> {
+  const provider = new GoogleAuthProvider();
+  const result = await signInWithPopup(auth, provider);
+  const user = result.user;
+
+  const userUid = user.uid;
+  const userEmail = user.email || '';
+  const userName = user.displayName || 'Student';
+  const userPhoto = user.photoURL || '';
+
+  const studentRef = doc(db, STUDENTS_COL, userUid);
+  const docSnap = await getDoc(studentRef);
+
+  if (docSnap.exists()) {
+    const data = docSnap.data();
+    const student: Student = {
+      id: userUid,
+      uid: userUid,
+      name: data.name || userName,
+      email: data.email || userEmail,
+      photoURL: data.photoURL || userPhoto,
+      class: data.class || null,
+      section: data.section || null,
+      rollNumber: data.rollNumber || '',
+      parentMobile: data.parentMobile || '',
+      status: data.status || 'ACTIVE',
+      createdAt: data.createdAt || new Date().toISOString(),
+      lastLoginAt: new Date().toISOString(),
+      studentId: data.studentId || userUid,
+    };
+
+    if (student.status === 'INACTIVE') {
+      throw new Error('Your account access has been disabled by the administrator.');
+    }
+
+    await updateDoc(studentRef, {
+      lastLoginAt: student.lastLoginAt,
+      photoURL: student.photoURL,
+      email: student.email,
+      name: student.name,
+    }).catch(() => {});
+
+    const needsProfileCompletion = !student.class || student.class.trim() === '';
+    return { student, needsProfileCompletion };
+  } else {
+    const newStudent: Student = {
+      id: userUid,
+      uid: userUid,
+      name: userName,
+      email: userEmail,
+      photoURL: userPhoto,
+      class: null,
+      section: null,
+      status: 'ACTIVE',
+      createdAt: new Date().toISOString(),
+      lastLoginAt: new Date().toISOString(),
+      studentId: userUid,
+    };
+
+    await setDoc(studentRef, newStudent);
+    return { student: newStudent, needsProfileCompletion: true };
+  }
+}
+
+export async function updateStudentProfile(uid: string, studentClass: string, section?: string): Promise<Student> {
+  const studentRef = doc(db, STUDENTS_COL, uid);
+  const docSnap = await getDoc(studentRef);
+  let currentData: any = {};
+  if (docSnap.exists()) {
+    currentData = docSnap.data();
+  }
+  const updatedStudent: Student = {
+    ...currentData,
+    id: uid,
+    uid,
+    class: studentClass.trim(),
+    section: section?.trim() || 'A',
+    lastLoginAt: new Date().toISOString(),
+  };
+
+  await setDoc(studentRef, updatedStudent, { merge: true });
+  return updatedStudent;
+}
+
+export async function updateStudentStatus(uid: string, status: 'ACTIVE' | 'INACTIVE'): Promise<void> {
+  const studentRef = doc(db, STUDENTS_COL, uid);
+  await updateDoc(studentRef, { status }).catch(async () => {
+    await setDoc(studentRef, { status }, { merge: true });
+  });
+}
+
+export async function updateStudentClassAndSection(uid: string, studentClass: string, section: string): Promise<void> {
+  const studentRef = doc(db, STUDENTS_COL, uid);
+  await updateDoc(studentRef, { class: studentClass, section }).catch(async () => {
+    await setDoc(studentRef, { class: studentClass, section }, { merge: true });
+  });
+}
+
 export async function getAllRegisteredStudents(): Promise<Student[]> {
   const mapByKey = new Map<string, Student>();
-  const docsToDelete: string[] = [];
 
   // Fetch from Firestore
   try {
@@ -165,203 +263,47 @@ export async function getAllRegisteredStudents(): Promise<Student[]> {
     snap.docs.forEach((docSnap) => {
       const data = docSnap.data();
       const docId = docSnap.id;
-      const rawStudentId = (data.studentId || '').trim();
-      const name = (data.name || '').trim();
-
-      const isJunkDoc =
-        UNWANTED_STUDENT_IDS.has(docId.toLowerCase()) ||
-        UNWANTED_STUDENT_IDS.has(rawStudentId.toLowerCase()) ||
-        UNWANTED_STUDENT_NAMES.has(name.toLowerCase()) ||
-        (name.toLowerCase() === 'kiran' && rawStudentId.toLowerCase() !== 'c6-2026-0012') ||
-        (rawStudentId.length > 15 && !rawStudentId.includes('-'));
-
-      if (isJunkDoc) {
-        docsToDelete.push(docId);
-      } else {
-        const student: Student = {
-          id: docId,
-          studentId: rawStudentId || docId,
-          name: name || 'Student',
-          class: data.class || 'Class 6',
-          section: data.section || 'A',
-          rollNumber: data.rollNumber || '',
-          parentMobile: formatParentPhone(data.parentMobile || ''),
-          password: data.password || 'KR6421',
-          isPasswordChanged: Boolean(data.isPasswordChanged),
-          status: data.status || 'ACTIVE',
-          createdAt: data.createdAt || new Date().toISOString(),
-        };
-        const key = (student.studentId || student.id).toLowerCase();
-        mapByKey.set(key, student);
-      }
+      const student: Student = {
+        id: docId,
+        uid: data.uid || docId,
+        name: data.name || 'Student',
+        email: data.email || '',
+        photoURL: data.photoURL || '',
+        class: data.class || null,
+        section: data.section || 'A',
+        rollNumber: data.rollNumber || '',
+        parentMobile: formatParentPhone(data.parentMobile || ''),
+        status: data.status || 'ACTIVE',
+        createdAt: data.createdAt || new Date().toISOString(),
+        lastLoginAt: data.lastLoginAt || '',
+        studentId: data.studentId || docId,
+      };
+      mapByKey.set(docId, student);
     });
   } catch (err) {
     console.error('Error fetching registered students from Firestore:', err);
   }
 
-  // Asynchronously clean up junk docs from Firestore
-  if (docsToDelete.length > 0) {
-    Promise.all(docsToDelete.map((id) => deleteDoc(doc(db, STUDENTS_COL, id)).catch(() => {}))).catch(
-      () => {}
-    );
-  }
-
-  // Read from localStorage
-  try {
-    const localRaw = localStorage.getItem('cbse_registered_students');
-    if (localRaw) {
-      const localList: Student[] = JSON.parse(localRaw);
-      localList.forEach((s) => {
-        const sId = (s.studentId || s.id || '').toLowerCase();
-        const sName = (s.name || '').toLowerCase();
-        const isJunk =
-          UNWANTED_STUDENT_IDS.has(sId) ||
-          UNWANTED_STUDENT_IDS.has((s.id || '').toLowerCase()) ||
-          UNWANTED_STUDENT_NAMES.has(sName) ||
-          (sName === 'kiran' && sId !== 'c6-2026-0012');
-
-        if (!isJunk && !mapByKey.has(sId)) {
-          mapByKey.set(sId, s);
-        }
-      });
-    }
-  } catch (e) {
-    // ignore
-  }
-
-  let students = Array.from(mapByKey.values());
-
-  // Always ensure Kiran (c6-2026-0012) exists as the primary student
-  const kiranExists = students.some(
-    (s) => s.studentId && s.studentId.toLowerCase() === 'c6-2026-0012'
-  );
-
-  if (!kiranExists) {
-    students.unshift(INITIAL_REGISTERED_STUDENTS[0]);
-  }
-
-  // Save clean list back to localStorage
-  try {
-    localStorage.setItem('cbse_registered_students', JSON.stringify(students));
-  } catch (e) {
-    console.error('Error saving registered students to localStorage:', e);
-  }
-
-  return students;
+  return Array.from(mapByKey.values());
 }
 
 export async function seedDefaultStudents(): Promise<void> {
   try {
     for (const student of INITIAL_REGISTERED_STUDENTS) {
-      await addDoc(collection(db, STUDENTS_COL), {
-        studentId: student.studentId,
+      await setDoc(doc(db, STUDENTS_COL, student.id), {
+        uid: student.uid,
         name: student.name,
+        email: student.email,
         class: student.class,
         section: student.section,
         rollNumber: student.rollNumber,
         parentMobile: student.parentMobile,
-        password: student.password,
-        isPasswordChanged: student.isPasswordChanged,
         status: student.status,
         createdAt: student.createdAt,
       });
     }
   } catch (err) {
     console.error('Error seeding default students:', err);
-  }
-}
-
-export async function createRegisteredStudent(input: {
-  name: string;
-  class: string;
-  section?: string;
-  rollNumber?: string | number;
-  parentMobile: string;
-}): Promise<Student> {
-  const allStudents = await getAllRegisteredStudents();
-  const sameClassCount = allStudents.filter((s) => s.class === input.class).length;
-  const newStudentId = generateStudentId(input.class, sameClassCount + 1);
-  const tempPassword = generateTempPassword(input.name);
-
-  const newStudentData = {
-    studentId: newStudentId,
-    name: input.name.trim(),
-    class: input.class.trim(),
-    section: input.section?.trim() || 'A',
-    rollNumber: input.rollNumber || '',
-    parentMobile: formatParentPhone(input.parentMobile),
-    password: tempPassword,
-    isPasswordChanged: false,
-    status: 'ACTIVE' as const,
-    createdAt: new Date().toISOString(),
-  };
-
-  try {
-    const docRef = await addDoc(collection(db, STUDENTS_COL), newStudentData);
-    const createdStudent = {
-      id: docRef.id,
-      ...newStudentData,
-    };
-    const updatedList = [...allStudents, createdStudent];
-    localStorage.setItem('cbse_registered_students', JSON.stringify(updatedList));
-    return createdStudent;
-  } catch (err) {
-    console.error('Error creating student in Firestore:', err);
-    const createdStudent = {
-      id: 'std_' + Date.now(),
-      ...newStudentData,
-    };
-    const updatedList = [...allStudents, createdStudent];
-    localStorage.setItem('cbse_registered_students', JSON.stringify(updatedList));
-    return createdStudent;
-  }
-}
-
-export async function authenticateStudent(
-  studentIdInput: string,
-  passwordInput: string
-): Promise<{ student: Student | null; errorReason?: 'not_found' | 'invalid_password' }> {
-  const cleanId = studentIdInput.trim().toLowerCase();
-  const cleanPass = passwordInput.trim();
-
-  const allStudents = await getAllRegisteredStudents();
-  
-  const student = allStudents.find(
-    (s) =>
-      (s.studentId && s.studentId.toLowerCase() === cleanId) ||
-      (s.id && s.id.toLowerCase() === cleanId) ||
-      (s.name && s.name.toLowerCase() === cleanId)
-  );
-
-  if (!student) {
-    return { student: null, errorReason: 'not_found' };
-  }
-
-  if (student.password && student.password !== cleanPass) {
-    return { student: null, errorReason: 'invalid_password' };
-  }
-
-  return { student };
-}
-
-export async function updateStudentPassword(studentId: string, newPassword: string): Promise<void> {
-  try {
-    const allStudents = await getAllRegisteredStudents();
-    const student = allStudents.find((s) => s.id === studentId || s.studentId === studentId);
-    if (student) {
-      student.password = newPassword;
-      student.isPasswordChanged = true;
-      if (student.id) {
-        const docRef = doc(db, STUDENTS_COL, student.id);
-        await updateDoc(docRef, {
-          password: newPassword,
-          isPasswordChanged: true,
-        });
-      }
-      localStorage.setItem('cbse_registered_students', JSON.stringify(allStudents));
-    }
-  } catch (err) {
-    console.error('Error updating student password:', err);
   }
 }
 
