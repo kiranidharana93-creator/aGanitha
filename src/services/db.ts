@@ -173,7 +173,7 @@ export async function loginStudentWithCredentials(
   const password = passwordInput.trim();
 
   if (!queryTerm) {
-    throw new Error('Please enter your Student ID or Name.');
+    throw new Error('Please enter your Student ID.');
   }
   if (!password) {
     throw new Error('Please enter your password.');
@@ -243,7 +243,7 @@ export async function loginStudentWithCredentials(
   }
 
   if (!matchedStudent) {
-    throw new Error('Student ID or Name not found. Please check your credentials or contact your teacher/admin.');
+    throw new Error('Student ID not found. Please check your credentials or contact your teacher/admin.');
   }
 
   if (matchedStudent.status === 'INACTIVE') {

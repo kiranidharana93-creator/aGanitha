@@ -45,7 +45,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onStudentLogin, onAdminL
     const cleanPass = studentPassword.trim();
 
     if (!cleanId) {
-      setStudentError('Please enter your Student ID or Name.');
+      setStudentError('Please enter your Student ID.');
       return;
     }
     if (!cleanPass) {
@@ -175,17 +175,17 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onStudentLogin, onAdminL
                 </div>
               )}
 
-              {/* Student ID / Username Input */}
+              {/* Student ID Input */}
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-[#16449B] block">
-                  Student ID or Name <span className="text-[#DC2626]">*</span>
+                  Student ID <span className="text-[#DC2626]">*</span>
                 </label>
                 <div className="relative">
                   <input
                     type="text"
                     value={studentId}
                     onChange={(e) => setStudentId(e.target.value)}
-                    placeholder="e.g. STD-1001 or Kiran"
+                    placeholder="e.g. STD-1001"
                     autoComplete="username"
                     className="w-full bg-white border-2 border-[#16449B] rounded-xl pl-4 pr-10 py-3 text-sm text-[#16449B] font-bold placeholder-[#16449B]/40 focus:outline-none focus:ring-2 focus:ring-[#16449B]"
                     required
