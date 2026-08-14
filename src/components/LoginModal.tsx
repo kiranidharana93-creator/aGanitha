@@ -36,7 +36,16 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onStudentLogin, onAdminL
       }
     } catch (err: any) {
       console.error('Google Sign-in error:', err);
-      setStudentError(err?.message || 'Unable to sign in with Google. Please try again.');
+      const rawMsg = err?.message || '';
+      if (
+        rawMsg.includes('unauthorized-domain') ||
+        rawMsg.includes('auth/unauthorized-domain') ||
+        rawMsg.includes('Firebase: Error')
+      ) {
+        setStudentError('Google Sign-In is temporarily unavailable. Please try again after refreshing the page.');
+      } else {
+        setStudentError(rawMsg || 'Google Sign-In is temporarily unavailable. Please try again after refreshing the page.');
+      }
     } finally {
       setIsStudentLoading(false);
     }

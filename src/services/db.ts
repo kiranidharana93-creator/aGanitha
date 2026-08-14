@@ -12,7 +12,13 @@ import {
   orderBy,
   serverTimestamp,
 } from 'firebase/firestore';
-import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import {
+  GoogleAuthProvider,
+  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
+  User,
+} from 'firebase/auth';
 import { db, auth } from '../lib/firebase';
 import { Student, Test, Question, Attempt, DraftAttempt } from '../types';
 
@@ -156,11 +162,7 @@ export function generateTempPassword(name: string): string {
   return `${initials}${randomDigits}`;
 }
 
-export async function signInStudentWithGoogle(): Promise<{ student: Student; needsProfileCompletion: boolean }> {
-  const provider = new GoogleAuthProvider();
-  const result = await signInWithPopup(auth, provider);
-  const user = result.user;
-
+export async function processGoogleUser(user: User): Promise<{ student: Student; needsProfileCompletion: boolean }> {
   const userUid = user.uid;
   const userEmail = user.email || '';
   const userName = user.displayName || 'Student';
@@ -217,6 +219,58 @@ export async function signInStudentWithGoogle(): Promise<{ student: Student; nee
 
     await setDoc(studentRef, newStudent);
     return { student: newStudent, needsProfileCompletion: true };
+  }
+}
+
+export async function checkGoogleRedirectResult(): Promise<{ student: Student; needsProfileCompletion: boolean } | null> {
+  try {
+    const result = await getRedirectResult(auth);
+    if (result && result.user) {
+      return await processGoogleUser(result.user);
+    }
+  } catch (err) {
+    console.error('Error checking Google redirect result:', err);
+  }
+  return null;
+}
+
+export async function signInStudentWithGoogle(): Promise<{ student: Student; needsProfileCompletion: boolean }> {
+  const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({
+    prompt: 'select_account',
+  });
+
+  try {
+    const result = await signInWithPopup(auth, provider);
+    return await processGoogleUser(result.user);
+  } catch (err: any) {
+    console.error('Google Sign-in error:', err);
+
+    if (err?.code === 'auth/popup-blocked') {
+      try {
+        await signInWithRedirect(auth, provider);
+        return new Promise(() => {});
+      } catch (redirectErr: any) {
+        throw new Error('Google Sign-In is temporarily unavailable. Please try again after refreshing the page.');
+      }
+    }
+
+    if (err?.code === 'auth/popup-closed-by-user' || err?.code === 'auth/cancelled-popup-request') {
+      throw new Error('Sign-In was cancelled. Please try again.');
+    }
+
+    if (
+      err?.code === 'auth/unauthorized-domain' ||
+      err?.message?.includes('unauthorized-domain')
+    ) {
+      throw new Error('Google Sign-In is temporarily unavailable. Please try again after refreshing the page.');
+    }
+
+    if (err?.message && !err?.code?.startsWith('auth/')) {
+      throw err;
+    }
+
+    throw new Error('Google Sign-In is temporarily unavailable. Please try again after refreshing the page.');
   }
 }
 
