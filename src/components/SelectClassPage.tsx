@@ -40,19 +40,19 @@ export const SelectClassPage: React.FC<SelectClassPageProps> = ({
       </div>
 
       {/* Select Your Class Card Section */}
-      <div className="bg-white border-2 border-[#0052CC] rounded-3xl p-8 shadow-md space-y-6 text-[#0052CC]">
-        <div className="flex items-center justify-between border-b-2 border-[#0052CC]/20 pb-4">
+      <div className="bg-[#FFFFFF] border border-[#D6E4FF] border-t-4 border-t-[#2563EB] rounded-[14px] p-6 shadow-[0_2px_8px_rgba(11,61,145,0.08)] space-y-6 text-[#0B3D91]">
+        <div className="flex items-center justify-between border-b border-[#D6E4FF] pb-4">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-[#0052CC] text-white rounded-2xl">
+            <div className="p-3 bg-[#0B3D91] text-[#FFFFFF] rounded-[10px]">
               <BookOpen className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h3 className="text-xl font-extrabold text-[#0052CC]">Select Your Class</h3>
-              <p className="text-xs text-[#0052CC]/80 font-medium">Choose a class to access subject test papers and practice sets</p>
+              <h3 className="text-xl font-extrabold text-[#0B3D91]">Select Your Class</h3>
+              <p className="text-xs text-[#0B3D91]/80 font-medium">Choose a class to access subject test papers and practice sets</p>
             </div>
           </div>
 
-          <span className="text-xs bg-[#0052CC] text-white px-3 py-1.5 rounded-xl font-bold hidden sm:inline-block">
+          <span className="text-xs bg-[#2563EB] text-white px-3 py-1.5 rounded-[8px] font-bold hidden sm:inline-block">
             Enrolled: {student.class || 'Class 6'}
           </span>
         </div>
@@ -66,22 +66,20 @@ export const SelectClassPage: React.FC<SelectClassPageProps> = ({
               <button
                 key={cls}
                 onClick={() => handleSelect(cls)}
-                className={`class-card p-6 rounded-2xl border-2 font-bold text-center flex flex-col items-center justify-center gap-2 transition-all cursor-pointer relative hover:scale-[1.03] ${
-                  isEnrolled
-                    ? 'bg-[#0052CC] border-[#0052CC] text-white shadow-md'
-                    : 'bg-white border-[#0052CC] text-[#0052CC] hover:bg-[#0052CC] hover:text-white shadow-sm'
-                }`}
+                className={`class-card p-5 rounded-[14px] border border-[#D6E4FF] border-t-4 ${
+                  isEnrolled ? 'border-t-[#DC2626] bg-[#0B3D91] text-white' : 'border-t-[#2563EB] bg-[#FFFFFF] text-[#0B3D91] hover:bg-[#F8FBFF]'
+                } font-bold text-center flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer relative shadow-[0_2px_8px_rgba(11,61,145,0.08)] hover:scale-[1.03]`}
               >
                 {isEnrolled && (
-                  <span className="absolute -top-2.5 right-3 bg-white text-[#0052CC] border border-[#0052CC] text-[9px] font-black px-2 py-0.5 rounded-full uppercase flex items-center gap-1 shadow-sm">
-                    <CheckCircle2 className="w-2.5 h-2.5 text-[#0052CC]" /> Enrolled
+                  <span className="absolute -top-2.5 right-2 bg-[#DC2626] text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase flex items-center gap-1 shadow-sm">
+                    <CheckCircle2 className="w-2.5 h-2.5 text-white" /> Enrolled
                   </span>
                 )}
 
                 <span className="text-2xl font-black tracking-tight">
                   Class {cls}
                 </span>
-                <span className="text-[11px] font-medium">CBSE Maths</span>
+                <span className="text-[11px] font-medium opacity-90">CBSE Maths</span>
               </button>
             );
           })}

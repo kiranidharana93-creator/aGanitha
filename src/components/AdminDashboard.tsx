@@ -518,129 +518,137 @@ export const AdminDashboard: React.FC = () => {
   const publishedCount = tests.filter((t) => t.published).length;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6 bg-white text-[#0052CC]">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6 bg-[#FFFFFF] text-[#0B3D91]">
       {/* Top Admin Header */}
-      <div className="bg-white border-2 border-[#0052CC] rounded-2xl p-6 shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4 text-[#0052CC]">
+      <div className="bg-[#FFFFFF] border border-[#D6E4FF] border-t-4 border-t-[#2563EB] rounded-[14px] p-6 shadow-[0_2px_8px_rgba(11,61,145,0.08)] flex flex-col md:flex-row md:items-center justify-between gap-4 text-[#0B3D91]">
         <div>
-          <span className="bg-[#0052CC] text-white text-xs px-3.5 py-1 rounded-full font-extrabold shadow-sm">
+          <span className="bg-[#0B3D91] text-white text-xs px-3.5 py-1 rounded-full font-extrabold shadow-sm">
             Admin Management Console
           </span>
-          <h1 className="text-2xl font-extrabold text-[#0052CC] mt-2">CBSE Maths Examination Control Center</h1>
-          <p className="text-xs text-[#0052CC]/80 mt-1 font-semibold">
+          <h1 className="text-2xl font-extrabold text-[#0B3D91] mt-2">CBSE Maths Examination Control Center</h1>
+          <p className="text-xs text-[#0B3D91]/80 mt-1 font-semibold">
             Manage upcoming tests, add/edit MCQ questions, publish exams, and export student performance reports.
           </p>
         </div>
 
         <button
           onClick={loadData}
-          className="self-start md:self-auto flex items-center gap-2 bg-[#0052CC] hover:bg-[#0052CC]/90 text-white px-4 py-2.5 rounded-xl text-xs font-extrabold shadow-md transition-all cursor-pointer"
+          className="self-start md:self-auto flex items-center gap-2 btn-primary text-xs shadow-md cursor-pointer"
         >
           <RefreshCw className={`w-3.5 h-3.5 text-white ${isLoading ? 'animate-spin' : ''}`} />
           <span>Refresh Data</span>
         </button>
       </div>
 
-      {/* Metrics Overview Bar */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white border-2 border-[#0052CC] p-4 rounded-xl shadow-md text-[#0052CC]">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-extrabold text-[#0052CC] uppercase tracking-wider">Total Tests</span>
-            <FileText className="w-5 h-5 text-[#0052CC]" />
+      {/* Two Column Layout: Sidebar (240px) + Main Content Area */}
+      <div className="flex flex-col md:flex-row gap-6">
+        {/* Admin Sidebar */}
+        <aside className="w-full md:w-[240px] shrink-0 bg-[#0B3D91] text-white rounded-[14px] p-4 shadow-[0_2px_8px_rgba(11,61,145,0.08)] space-y-2">
+          <div className="px-3 py-2 border-b border-white/20 mb-2">
+            <h2 className="text-xs font-black uppercase tracking-wider text-blue-200">Admin Menu</h2>
           </div>
-          <p className="text-2xl font-extrabold text-[#0052CC] mt-2">{tests.length}</p>
-          <p className="text-[11px] text-[#0052CC]/80 font-bold mt-0.5">{publishedCount} Published Live</p>
-        </div>
 
-        <div className="bg-white border-2 border-[#0052CC] p-4 rounded-xl shadow-md text-[#0052CC]">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-extrabold text-[#0052CC] uppercase tracking-wider">Total Questions</span>
-            <HelpCircle className="w-5 h-5 text-[#0052CC]" />
+          <button
+            onClick={() => setActiveTab('tests')}
+            className={`w-full text-left px-4 py-3 rounded-[8px] text-xs font-extrabold flex items-center gap-2.5 transition-all cursor-pointer ${
+              activeTab === 'tests'
+                ? 'bg-[#2563EB] text-white border-l-4 border-l-[#DC2626] shadow-sm'
+                : 'text-white/80 hover:bg-white/10 hover:text-white'
+            }`}
+          >
+            <FileText className="w-4 h-4 text-white" />
+            <span>Dashboard & Tests</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('questions')}
+            className={`w-full text-left px-4 py-3 rounded-[8px] text-xs font-extrabold flex items-center gap-2.5 transition-all cursor-pointer ${
+              activeTab === 'questions'
+                ? 'bg-[#2563EB] text-white border-l-4 border-l-[#DC2626] shadow-sm'
+                : 'text-white/80 hover:bg-white/10 hover:text-white'
+            }`}
+          >
+            <HelpCircle className="w-4 h-4 text-white" />
+            <span>Questions & Keys</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('students')}
+            className={`w-full text-left px-4 py-3 rounded-[8px] text-xs font-extrabold flex items-center gap-2.5 transition-all cursor-pointer ${
+              activeTab === 'students'
+                ? 'bg-[#2563EB] text-white border-l-4 border-l-[#DC2626] shadow-sm'
+                : 'text-white/80 hover:bg-white/10 hover:text-white'
+            }`}
+          >
+            <Users className="w-4 h-4 text-white" />
+            <span>Students & Logins</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('results')}
+            className={`w-full text-left px-4 py-3 rounded-[8px] text-xs font-extrabold flex items-center gap-2.5 transition-all cursor-pointer ${
+              activeTab === 'results'
+                ? 'bg-[#2563EB] text-white border-l-4 border-l-[#DC2626] shadow-sm'
+                : 'text-white/80 hover:bg-white/10 hover:text-white'
+            }`}
+          >
+            <Award className="w-4 h-4 text-white" />
+            <span>Results & Downloads</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('analytics')}
+            className={`w-full text-left px-4 py-3 rounded-[8px] text-xs font-extrabold flex items-center gap-2.5 transition-all cursor-pointer ${
+              activeTab === 'analytics'
+                ? 'bg-[#2563EB] text-white border-l-4 border-l-[#DC2626] shadow-sm'
+                : 'text-white/80 hover:bg-white/10 hover:text-white'
+            }`}
+          >
+            <BarChart2 className="w-4 h-4 text-white" />
+            <span>School Analytics</span>
+          </button>
+        </aside>
+
+        {/* Main Content View */}
+        <div className="flex-1 space-y-6">
+          {/* Metrics Overview Bar */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="bg-[#FFFFFF] border border-[#D6E4FF] border-t-4 border-t-[#2563EB] p-4 rounded-[14px] shadow-[0_2px_8px_rgba(11,61,145,0.08)] text-[#0B3D91]">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-extrabold text-[#0B3D91] uppercase tracking-wider">Total Tests</span>
+                <FileText className="w-5 h-5 text-[#2563EB]" />
+              </div>
+              <p className="text-2xl font-extrabold text-[#0B3D91] mt-2">{tests.length}</p>
+              <p className="text-[11px] text-[#0B3D91]/80 font-bold mt-0.5">{publishedCount} Published Live</p>
+            </div>
+
+            <div className="bg-[#FFFFFF] border border-[#D6E4FF] border-t-4 border-t-[#2563EB] p-4 rounded-[14px] shadow-[0_2px_8px_rgba(11,61,145,0.08)] text-[#0B3D91]">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-extrabold text-[#0B3D91] uppercase tracking-wider">Total Questions</span>
+                <HelpCircle className="w-5 h-5 text-[#2563EB]" />
+              </div>
+              <p className="text-2xl font-extrabold text-[#0B3D91] mt-2">{totalQuestionsCount}</p>
+              <p className="text-[11px] text-[#0B3D91]/80 font-bold mt-0.5">MCQs in database</p>
+            </div>
+
+            <div className="bg-[#FFFFFF] border border-[#D6E4FF] border-t-4 border-t-[#2563EB] p-4 rounded-[14px] shadow-[0_2px_8px_rgba(11,61,145,0.08)] text-[#0B3D91]">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-extrabold text-[#0B3D91] uppercase tracking-wider">Student Submissions</span>
+                <Award className="w-5 h-5 text-[#2563EB]" />
+              </div>
+              <p className="text-2xl font-extrabold text-[#0B3D91] mt-2">{allAttempts.length}</p>
+              <p className="text-[11px] text-[#0B3D91]/80 font-bold mt-0.5">Completed attempts</p>
+            </div>
+
+            <div className="bg-[#FFFFFF] border border-[#D6E4FF] border-t-4 border-t-[#2563EB] p-4 rounded-[14px] shadow-[0_2px_8px_rgba(11,61,145,0.08)] text-[#0B3D91]">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-extrabold text-[#0B3D91] uppercase tracking-wider">Classes Covered</span>
+                <Layers className="w-5 h-5 text-[#2563EB]" />
+              </div>
+              <p className="text-2xl font-extrabold text-[#0B3D91] mt-2">Class 6 - 10</p>
+              <p className="text-[11px] text-[#0B3D91]/80 font-bold mt-0.5">CBSE Mathematics</p>
+            </div>
           </div>
-          <p className="text-2xl font-extrabold text-[#0052CC] mt-2">{totalQuestionsCount}</p>
-          <p className="text-[11px] text-[#0052CC]/80 font-bold mt-0.5">MCQs in database</p>
-        </div>
-
-        <div className="bg-white border-2 border-[#0052CC] p-4 rounded-xl shadow-md text-[#0052CC]">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-extrabold text-[#0052CC] uppercase tracking-wider">Student Submissions</span>
-            <Award className="w-5 h-5 text-[#0052CC]" />
-          </div>
-          <p className="text-2xl font-extrabold text-[#0052CC] mt-2">{allAttempts.length}</p>
-          <p className="text-[11px] text-[#0052CC]/80 font-bold mt-0.5">Completed attempts</p>
-        </div>
-
-        <div className="bg-white border-2 border-[#0052CC] p-4 rounded-xl shadow-md text-[#0052CC]">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-extrabold text-[#0052CC] uppercase tracking-wider">Classes Covered</span>
-            <Layers className="w-5 h-5 text-[#0052CC]" />
-          </div>
-          <p className="text-2xl font-extrabold text-[#0052CC] mt-2">Class 6 - 10</p>
-          <p className="text-[11px] text-[#0052CC]/80 font-bold mt-0.5">CBSE Mathematics</p>
-        </div>
-      </div>
-
-      {/* Navigation Tabs */}
-      <div className="flex border-b-2 border-[#0052CC]/20 space-x-1 overflow-x-auto pb-1">
-        <button
-          onClick={() => setActiveTab('tests')}
-          className={`flex items-center gap-2 px-5 py-3 text-xs font-extrabold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
-            activeTab === 'tests'
-              ? 'border-[#0052CC] text-[#0052CC] bg-[#0052CC]/10'
-              : 'border-transparent text-[#0052CC]/70 hover:text-[#0052CC]'
-          }`}
-        >
-          <FileText className="w-4 h-4 text-[#0052CC]" />
-          <span>Create & Manage Tests ({tests.length})</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('questions')}
-          className={`flex items-center gap-2 px-5 py-3 text-xs font-extrabold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
-            activeTab === 'questions'
-              ? 'border-[#0052CC] text-[#0052CC] bg-[#0052CC]/10'
-              : 'border-transparent text-[#0052CC]/70 hover:text-[#0052CC]'
-          }`}
-        >
-          <HelpCircle className="w-4 h-4 text-[#0052CC]" />
-          <span>Manage MCQ Questions</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('students')}
-          className={`flex items-center gap-2 px-5 py-3 text-xs font-extrabold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
-            activeTab === 'students'
-              ? 'border-[#0052CC] text-[#0052CC] bg-[#0052CC]/10'
-              : 'border-transparent text-[#0052CC]/70 hover:text-[#0052CC]'
-          }`}
-        >
-          <Users className="w-4 h-4 text-[#0052CC]" />
-          <span>Student Management & Credentials</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('results')}
-          className={`flex items-center gap-2 px-5 py-3 text-xs font-extrabold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
-            activeTab === 'results'
-              ? 'border-[#0052CC] text-[#0052CC] bg-[#0052CC]/10'
-              : 'border-transparent text-[#0052CC]/70 hover:text-[#0052CC]'
-          }`}
-        >
-          <Award className="w-4 h-4 text-[#0052CC]" />
-          <span>Student Results & Reports ({allAttempts.length})</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('analytics')}
-          className={`flex items-center gap-2 px-5 py-3 text-xs font-extrabold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
-            activeTab === 'analytics'
-              ? 'border-[#0052CC] text-[#0052CC] bg-[#0052CC]/10'
-              : 'border-transparent text-[#0052CC]/70 hover:text-[#0052CC]'
-          }`}
-        >
-          <BarChart2 className="w-4 h-4 text-[#0052CC]" />
-          <span>School Analytics & Progress Cards</span>
-        </button>
-      </div>
 
       {/* TAB: STUDENT MANAGEMENT */}
       {activeTab === 'students' && (
@@ -1221,6 +1229,8 @@ export const AdminDashboard: React.FC = () => {
           </div>
         </div>
       )}
+        </div>
+      </div>
     </div>
   );
 };

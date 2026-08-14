@@ -88,42 +88,10 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
       }
       setStudentAttemptsMap(map);
 
-      // 4. Check for unfinished/draft exam for this student
-      let activeDraft = getDraftAttempt(student.id);
-
-      if (activeDraft) {
-        if (activeDraft.submitted === true || activeDraft.status === 'completed') {
-          clearDraftAttempt(student.id);
-          activeDraft = null;
-        } else {
-          const testAttempts = userAttempts.filter((a) => a.testId === activeDraft?.testId);
-          if (testAttempts.length > 0) {
-            const draftTime = activeDraft.updatedAt ? new Date(activeDraft.updatedAt).getTime() : 0;
-            const hasRecentAttempt = testAttempts.some((a) => {
-              const subTime = a.submittedAt ? new Date(a.submittedAt).getTime() : 0;
-              return subTime >= draftTime - 120000;
-            });
-
-            if (hasRecentAttempt) {
-              clearDraftAttempt(student.id);
-              activeDraft = null;
-            }
-          }
-        }
-      }
-
-      setDraftExam(activeDraft);
-
-      if (activeDraft) {
-        const foundTest = availableTests.find((t) => t.id === activeDraft.testId);
-        if (foundTest) {
-          setDraftTestObject(foundTest);
-        } else {
-          setDraftTestObject(null);
-        }
-      } else {
-        setDraftTestObject(null);
-      }
+      // 4. Clean up any leftover drafts for this student
+      clearDraftAttempt(student.id);
+      setDraftExam(null);
+      setDraftTestObject(null);
     } catch (err) {
       console.error('Error loading student dashboard data:', err);
     } finally {
@@ -169,51 +137,60 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
   const currentClassNum = selectedClass.replace(/\D/g, '') || '6';
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 bg-white text-[#0052CC]">
-      {/* Welcome Banner */}
-      <div className="bg-white border-2 border-[#0052CC] rounded-3xl p-6 shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <div className="inline-flex items-center gap-2 bg-[#0052CC] text-white text-xs px-3 py-1 rounded-full font-bold mb-2">
-            <GraduationCap className="w-3.5 h-3.5 text-white" />
-            <span>Official Student Examination Portal</span>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 bg-[#FFFFFF] text-[#0B3D91]">
+      {/* Hero Section */}
+      <div className="bg-[#FFFFFF] border border-[#D6E4FF] border-top-4 border-t-[#2563EB] rounded-[14px] p-6 sm:p-8 shadow-[0_2px_8px_rgba(11,61,145,0.08)] flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="space-y-2">
+          <div className="inline-flex items-center gap-2 bg-[#0B3D91] text-[#FFFFFF] text-xs px-3 py-1 rounded-full font-bold">
+            <GraduationCap className="w-3.5 h-3.5 text-[#FFFFFF]" />
+            <span>CBSE Mathematics Assessment Portal</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#0052CC] tracking-tight">
-            Welcome, <span className="text-[#0052CC] underline">{student.name}</span>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#0B3D91] tracking-tight">
+            Master CBSE Mathematics
           </h1>
-          <p className="text-xs sm:text-sm text-[#0052CC]/80 font-medium mt-1">
-            Student ID: <strong className="text-[#0052CC] font-mono">{student.studentId || student.id}</strong> • Enrolled Class:{' '}
-            <strong className="text-[#0052CC] font-bold">{student.class}</strong> ({student.section || 'A'}) • Active View Class:{' '}
-            <strong className="text-[#0052CC] font-extrabold">{selectedClass}</strong>
+          <p className="text-sm font-semibold text-[#2563EB]">
+            Practice • Grand Tests • Progress Tracking
+          </p>
+          <p className="text-xs text-[#0B3D91]/80 font-medium">
+            Welcome, <strong className="text-[#0B3D91]">{student.name}</strong> • Student ID: <span className="font-mono">{student.studentId || student.id}</span> • Enrolled Class: <strong>{student.class}</strong> ({student.section || 'A'})
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-3">
           <button
-            onClick={() => setShowParentModal(true)}
-            className="flex items-center gap-2 bg-[#0052CC] hover:bg-[#0052CC]/90 text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow-md transition-all cursor-pointer"
+            onClick={() => setActiveTab('select-class')}
+            className="btn-primary flex items-center gap-2 cursor-pointer shadow-sm"
           >
-            <Download className="w-4 h-4 text-white" />
-            <span>Download Progress Card</span>
+            <BookOpen className="w-4 h-4 text-white" />
+            <span>Start Test</span>
           </button>
 
           <button
-            onClick={loadDashboardData}
-            className="flex items-center gap-2 bg-white text-[#0052CC] hover:bg-[#0052CC]/10 border-2 border-[#0052CC] px-3.5 py-2.5 rounded-xl text-xs font-bold transition-colors cursor-pointer"
+            onClick={() => setActiveTab('progress')}
+            className="btn-danger flex items-center gap-2 cursor-pointer shadow-sm"
           >
-            <RefreshCw className={`w-3.5 h-3.5 text-[#0052CC] ${isLoading ? 'animate-spin' : ''}`} />
-            <span>Refresh</span>
+            <BarChart2 className="w-4 h-4 text-white" />
+            <span>View Progress</span>
+          </button>
+
+          <button
+            onClick={() => setShowParentModal(true)}
+            className="bg-[#FFFFFF] text-[#0B3D91] hover:bg-[#F8FBFF] border-2 border-[#0B3D91] font-bold px-4 py-2.5 rounded-[10px] text-xs flex items-center gap-2 shadow-sm transition-all cursor-pointer"
+          >
+            <Download className="w-4 h-4 text-[#0B3D91]" />
+            <span>Progress Card</span>
           </button>
         </div>
       </div>
 
       {/* Top Navigation Bar / Quick Tabs */}
-      <div className="flex border-b-2 border-[#0052CC] overflow-x-auto gap-2 no-scrollbar">
+      <div className="flex border-b border-[#D6E4FF] overflow-x-auto gap-2 no-scrollbar">
         <button
           onClick={() => setActiveTab('select-class')}
-          className={`flex items-center gap-2 px-5 py-3 text-xs font-bold transition-all cursor-pointer whitespace-nowrap rounded-t-xl ${
+          className={`flex items-center gap-2 px-5 py-3 text-xs font-bold transition-all cursor-pointer whitespace-nowrap rounded-t-[10px] ${
             activeTab === 'select-class'
-              ? 'bg-[#0052CC] text-white'
-              : 'border border-[#0052CC] text-[#0052CC] hover:bg-[#0052CC]/10'
+              ? 'bg-[#0B3D91] text-[#FFFFFF] border-b-2 border-b-[#DC2626]'
+              : 'border border-[#D6E4FF] text-[#0B3D91] hover:bg-[#F8FBFF]'
           }`}
         >
           <BookOpen className="w-4 h-4" />
@@ -222,10 +199,10 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
 
         <button
           onClick={() => setActiveTab('tests')}
-          className={`flex items-center gap-2 px-5 py-3 text-xs font-bold transition-all cursor-pointer whitespace-nowrap rounded-t-xl ${
+          className={`flex items-center gap-2 px-5 py-3 text-xs font-bold transition-all cursor-pointer whitespace-nowrap rounded-t-[10px] ${
             activeTab === 'tests'
-              ? 'bg-[#0052CC] text-white'
-              : 'border border-[#0052CC] text-[#0052CC] hover:bg-[#0052CC]/10'
+              ? 'bg-[#0B3D91] text-[#FFFFFF] border-b-2 border-b-[#DC2626]'
+              : 'border border-[#D6E4FF] text-[#0B3D91] hover:bg-[#F8FBFF]'
           }`}
         >
           <FileText className="w-4 h-4" />
@@ -234,10 +211,10 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
 
         <button
           onClick={() => setActiveTab('results')}
-          className={`flex items-center gap-2 px-5 py-3 text-xs font-bold transition-all cursor-pointer whitespace-nowrap rounded-t-xl ${
+          className={`flex items-center gap-2 px-5 py-3 text-xs font-bold transition-all cursor-pointer whitespace-nowrap rounded-t-[10px] ${
             activeTab === 'results'
-              ? 'bg-[#0052CC] text-white'
-              : 'border border-[#0052CC] text-[#0052CC] hover:bg-[#0052CC]/10'
+              ? 'bg-[#0B3D91] text-[#FFFFFF] border-b-2 border-b-[#DC2626]'
+              : 'border border-[#D6E4FF] text-[#0B3D91] hover:bg-[#F8FBFF]'
           }`}
         >
           <History className="w-4 h-4" />
@@ -246,10 +223,10 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
 
         <button
           onClick={() => setActiveTab('progress')}
-          className={`flex items-center gap-2 px-5 py-3 text-xs font-bold transition-all cursor-pointer whitespace-nowrap rounded-t-xl ${
+          className={`flex items-center gap-2 px-5 py-3 text-xs font-bold transition-all cursor-pointer whitespace-nowrap rounded-t-[10px] ${
             activeTab === 'progress'
-              ? 'bg-[#0052CC] text-white'
-              : 'border border-[#0052CC] text-[#0052CC] hover:bg-[#0052CC]/10'
+              ? 'bg-[#0B3D91] text-[#FFFFFF] border-b-2 border-b-[#DC2626]'
+              : 'border border-[#D6E4FF] text-[#0B3D91] hover:bg-[#F8FBFF]'
           }`}
         >
           <BarChart2 className="w-4 h-4" />
@@ -268,52 +245,15 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
       {/* VIEW 2: AVAILABLE TESTS PAGE */}
       {activeTab === 'tests' && (
         <div className="space-y-6">
-          {/* Active / Unfinished Exam Draft Banner */}
-          {draftExam && (
-            <div className="bg-white border-2 border-[#D32F2F] rounded-3xl p-6 shadow-md flex flex-col md:flex-row md:items-center justify-between gap-5 text-[#D32F2F]">
-              <div className="space-y-2">
-                <span className="bg-[#D32F2F] text-white text-[11px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">
-                  Unfinished Exam Found
-                </span>
-                <h3 className="text-xl font-extrabold text-[#D32F2F] mt-1">
-                  {cleanStudentTestTitle(draftExam.testTitle || 'Mathematics Test')}
-                </h3>
-                <div className="flex flex-wrap items-center gap-4 text-xs font-bold">
-                  <span>Class: {draftExam.testClass}</span>
-                  <span>Progress: Question {draftExam.currentIndex + 1}</span>
-                  <span>Time Left: {Math.ceil(draftExam.timeLeft / 60)} Minutes</span>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={handleDiscardDraft}
-                  className="px-4 py-3 rounded-xl border-2 border-[#D32F2F] text-[#D32F2F] hover:bg-[#D32F2F] hover:text-white text-xs font-bold transition-all cursor-pointer"
-                >
-                  Discard
-                </button>
-                <button
-                  onClick={handleContinueDraft}
-                  className="bg-[#0052CC] hover:bg-[#0052CC]/90 text-white font-extrabold px-6 py-3 rounded-xl shadow-md transition-all text-xs flex items-center gap-2 cursor-pointer"
-                >
-                  <Play className="w-4 h-4 fill-white" />
-                  <span>Continue Exam</span>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          )}
-
           {/* Available Tests List Component */}
           <ClassTestsPage
             classId={currentClassNum}
             tests={tests}
             studentAttemptsMap={studentAttemptsMap}
-            draftExam={draftExam}
+            draftExam={null}
             isLoading={isLoading}
             onChangeClass={() => setActiveTab('select-class')}
             onStartTest={onStartTest}
-            onContinueDraft={handleContinueDraft}
           />
         </div>
       )}

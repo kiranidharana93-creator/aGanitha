@@ -154,13 +154,13 @@ export const StudentManagement: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header Banner */}
-      <div className="bg-white border-2 border-[#0052CC] rounded-2xl p-6 shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-[#FFFFFF] border border-[#D6E4FF] border-t-4 border-t-[#2563EB] rounded-[14px] p-6 shadow-[0_2px_8px_rgba(11,61,145,0.08)] flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <span className="bg-[#0052CC] text-white text-xs px-3 py-1 rounded-full font-bold">
+          <span className="bg-[#0B3D91] text-white text-xs px-3 py-1 rounded-full font-bold">
             Admin Management
           </span>
-          <h2 className="text-xl font-extrabold text-[#0052CC] mt-2">Student Registration & Credentials</h2>
-          <p className="text-xs font-semibold text-[#0052CC] mt-1">
+          <h2 className="text-xl font-extrabold text-[#0B3D91] mt-2">Student Registration & Credentials</h2>
+          <p className="text-xs font-semibold text-[#0B3D91]/80 mt-1">
             Register students, generate temporary access credentials, and store parent mobile numbers for automated performance card alerts.
           </p>
         </div>
@@ -169,7 +169,7 @@ export const StudentManagement: React.FC = () => {
           <button
             onClick={handleDeleteAllExceptKiran}
             title="Delete all students except c6-2026-0012 ID"
-            className="flex items-center gap-2 bg-[#D32F2F] hover:bg-[#b71c1c] text-white px-3.5 py-2 rounded-xl text-xs font-bold cursor-pointer transition-colors"
+            className="btn-danger text-xs flex items-center gap-2 cursor-pointer shadow-md"
           >
             <Trash2 className="w-3.5 h-3.5 text-white" />
             <span>Delete All Except c6-2026-0012</span>
@@ -177,41 +177,41 @@ export const StudentManagement: React.FC = () => {
 
           <button
             onClick={loadStudents}
-            className="flex items-center gap-2 bg-white border-2 border-[#0052CC] hover:bg-[#0052CC] text-[#0052CC] hover:text-white px-3.5 py-2 rounded-xl text-xs font-bold cursor-pointer transition-colors"
+            className="flex items-center gap-2 bg-white border border-[#D6E4FF] hover:bg-[#F8FBFF] text-[#0B3D91] px-3.5 py-2 rounded-[8px] text-xs font-bold cursor-pointer transition-colors"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 text-[#0B3D91] ${isLoading ? 'animate-spin' : ''}`} />
             <span>Refresh</span>
           </button>
 
           <button
             onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-2 bg-[#0052CC] hover:bg-[#003d99] text-white px-4 py-2.5 rounded-xl text-xs font-bold shadow-md cursor-pointer transition-all"
+            className="btn-primary text-xs flex items-center gap-2 shadow-md cursor-pointer"
           >
-            <UserPlus className="w-4 h-4" />
+            <UserPlus className="w-4 h-4 text-white" />
             <span>Add New Student</span>
           </button>
         </div>
       </div>
 
       {/* Filters Bar */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-4 border-2 border-[#0052CC] rounded-2xl">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-[#FFFFFF] p-4 border border-[#D6E4FF] rounded-[14px] shadow-[0_2px_8px_rgba(11,61,145,0.08)]">
         <div className="relative flex-1 w-full">
-          <Search className="w-4 h-4 text-[#0052CC] absolute left-3.5 top-3" />
+          <Search className="w-4 h-4 text-[#0B3D91] absolute left-3.5 top-3" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search by Student Name, ID, or Parent Mobile..."
-            className="w-full bg-white border border-[#0052CC] rounded-xl pl-9 pr-4 py-2 text-xs text-[#0052CC] font-medium placeholder-[#0052CC]/50 focus:outline-none focus:ring-2 focus:ring-[#0052CC]"
+            className="w-full bg-white border border-[#D6E4FF] rounded-[8px] pl-9 pr-4 py-2 text-xs text-[#0B3D91] font-medium placeholder-[#0B3D91]/50 focus:outline-none focus:border-[#2563EB]"
           />
         </div>
 
         <div className="flex items-center gap-2 w-full sm:w-auto">
-          <Filter className="w-4 h-4 text-[#0052CC]" />
+          <Filter className="w-4 h-4 text-[#0B3D91]" />
           <select
             value={classFilter}
             onChange={(e) => setClassFilter(e.target.value)}
-            className="bg-white border border-[#0052CC] rounded-xl px-3 py-2 text-xs text-[#0052CC] font-bold focus:outline-none focus:ring-2 focus:ring-[#0052CC] cursor-pointer w-full sm:w-auto"
+            className="bg-white border border-[#D6E4FF] rounded-[8px] px-3 py-2 text-xs text-[#0B3D91] font-bold focus:outline-none focus:border-[#2563EB] cursor-pointer w-full sm:w-auto"
           >
             <option value="All">All Classes</option>
             <option value="Class 6">Class 6</option>
@@ -225,18 +225,18 @@ export const StudentManagement: React.FC = () => {
 
       {/* Student Table */}
       {filteredStudents.length === 0 ? (
-        <div className="bg-white border-2 border-[#0052CC] rounded-2xl p-12 text-center space-y-3">
-          <GraduationCap className="w-12 h-12 text-[#0052CC] mx-auto" />
-          <h3 className="text-lg font-bold text-[#0052CC]">No Registered Students Found</h3>
-          <p className="text-xs font-semibold text-[#0052CC]">
+        <div className="bg-[#FFFFFF] border border-[#D6E4FF] rounded-[14px] p-12 text-center space-y-3 shadow-[0_2px_8px_rgba(11,61,145,0.08)]">
+          <GraduationCap className="w-12 h-12 text-[#2563EB] mx-auto" />
+          <h3 className="text-lg font-bold text-[#0B3D91]">No Registered Students Found</h3>
+          <p className="text-xs font-semibold text-[#0B3D91]/80">
             Click "Add New Student" above to generate credentials for students.
           </p>
         </div>
       ) : (
-        <div className="bg-white border-2 border-[#0052CC] rounded-2xl overflow-hidden shadow-md">
+        <div className="bg-[#FFFFFF] border border-[#D6E4FF] rounded-[14px] overflow-hidden shadow-[0_2px_8px_rgba(11,61,145,0.08)]">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-[#0052CC] text-white uppercase font-bold border-b border-[#0052CC]">
+            <table className="w-full text-left text-xs text-[#0B3D91]">
+              <thead className="bg-[#0B3D91] text-white uppercase font-bold border-b border-[#D6E4FF]">
                 <tr>
                   <th className="px-6 py-3.5">Student ID</th>
                   <th className="px-6 py-3.5">Student Name</th>
@@ -247,34 +247,34 @@ export const StudentManagement: React.FC = () => {
                   <th className="px-6 py-3.5 text-right">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#0052CC]/20 text-[#0052CC]">
+              <tbody className="divide-y divide-[#D6E4FF] text-[#0B3D91]">
                 {filteredStudents.map((s) => {
                   const isProtected = s.studentId?.toLowerCase() === 'c6-2026-0012';
 
                   return (
-                    <tr key={s.id} className="hover:bg-[#0052CC]/5 transition-colors">
-                      <td className="px-6 py-4 font-mono font-bold text-[#0052CC]">
+                    <tr key={s.id} className="hover:bg-[#F8FBFF] transition-colors">
+                      <td className="px-6 py-4 font-mono font-bold text-[#0B3D91]">
                         {s.studentId || s.id}
                       </td>
-                      <td className="px-6 py-4 font-bold text-[#0052CC]">{s.name}</td>
+                      <td className="px-6 py-4 font-bold text-[#0B3D91]">{s.name}</td>
                       <td className="px-6 py-4">
-                        <span className="bg-white border border-[#0052CC] text-[#0052CC] px-2.5 py-1 rounded-lg font-bold">
+                        <span className="bg-white border border-[#D6E4FF] text-[#0B3D91] px-2.5 py-1 rounded-[6px] font-bold">
                           {s.class} {s.section ? `(${s.section})` : ''}
                         </span>
                       </td>
-                      <td className="px-6 py-4 font-bold text-[#0052CC]">{s.rollNumber || '-'}</td>
-                      <td className="px-6 py-4 font-mono text-[#0052CC] font-bold flex items-center gap-1.5 pt-4">
-                        <Phone className="w-3.5 h-3.5 text-[#0052CC] shrink-0" />
+                      <td className="px-6 py-4 font-bold text-[#0B3D91]">{s.rollNumber || '-'}</td>
+                      <td className="px-6 py-4 font-mono text-[#0B3D91] font-bold flex items-center gap-1.5 pt-4">
+                        <Phone className="w-3.5 h-3.5 text-[#2563EB] shrink-0" />
                         <span>{s.parentMobile || 'Not provided'}</span>
                       </td>
                       <td className="px-6 py-4">
                         {s.isPasswordChanged ? (
-                          <span className="bg-[#0052CC] text-white border border-[#0052CC] text-[11px] px-2.5 py-1 rounded-full font-bold">
+                          <span className="bg-[#2563EB] text-white border border-[#2563EB] text-[11px] px-2.5 py-1 rounded-full font-bold">
                             Custom Set
                           </span>
                         ) : (
-                          <span className="bg-white text-[#0052CC] border border-[#0052CC] text-[11px] px-2.5 py-1 rounded-full font-bold flex items-center gap-1 w-max">
-                            <Key className="w-3 h-3 text-[#0052CC]" />
+                          <span className="bg-white text-[#0B3D91] border border-[#D6E4FF] text-[11px] px-2.5 py-1 rounded-full font-bold flex items-center gap-1 w-max">
+                            <Key className="w-3 h-3 text-[#2563EB]" />
                             Temp ({s.password})
                           </span>
                         )}
@@ -286,7 +286,7 @@ export const StudentManagement: React.FC = () => {
                           className={
                             isProtected
                               ? 'p-1.5 text-slate-400 opacity-40 cursor-not-allowed rounded-lg'
-                              : 'p-1.5 text-[#D32F2F] hover:bg-[#D32F2F] hover:text-white border border-[#D32F2F] rounded-lg cursor-pointer transition-colors'
+                              : 'p-1.5 text-[#DC2626] hover:bg-[#DC2626] hover:text-white border border-[#DC2626] rounded-[6px] cursor-pointer transition-colors'
                           }
                           title={isProtected ? 'Primary registered student cannot be deleted' : 'Delete Student'}
                         >

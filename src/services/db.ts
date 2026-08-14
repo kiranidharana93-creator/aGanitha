@@ -456,14 +456,16 @@ export async function deleteAllStudentsExceptKiran(): Promise<Student[]> {
 
 export function saveDraftAttempt(draft: DraftAttempt): void {
   try {
+    if (!draft || draft.submitted === true || draft.status === 'completed') {
+      clearDraftAttempt(draft?.studentId);
+      return;
+    }
     const payload: DraftAttempt = {
       ...draft,
-      status: draft.status || 'in-progress',
-      submitted: draft.submitted || false,
+      status: 'in-progress',
+      submitted: false,
     };
     localStorage.setItem(`cbse_draft_exam_${draft.studentId}`, JSON.stringify(payload));
-    localStorage.setItem('unfinishedExam', JSON.stringify(payload));
-    localStorage.setItem('examDraft', JSON.stringify(payload));
   } catch (err) {
     console.error('Error saving draft exam:', err);
   }
@@ -498,9 +500,11 @@ export function hasValidUnfinishedExam(studentId: string): boolean {
   return Boolean(draft && draft.status === 'in-progress' && !draft.submitted);
 }
 
-export function clearDraftAttempt(studentId: string): void {
+export function clearDraftAttempt(studentId?: string): void {
   try {
-    localStorage.removeItem(`cbse_draft_exam_${studentId}`);
+    if (studentId) {
+      localStorage.removeItem(`cbse_draft_exam_${studentId}`);
+    }
     localStorage.removeItem('unfinishedExam');
     localStorage.removeItem('examDraft');
     localStorage.removeItem('currentTest');
@@ -508,11 +512,17 @@ export function clearDraftAttempt(studentId: string): void {
     localStorage.removeItem('remainingTime');
     localStorage.removeItem('currentQuestionIndex');
 
-    // Remove any lesson-specific or student-specific keys
+    // Remove any lesson-specific or student-specific draft keys
     const keysToRemove: string[] = [];
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      if (key && (key.startsWith('draft_') || key.startsWith('cbse_draft_') || key.includes('unfinishedExam') || key.includes('examDraft'))) {
+      if (key && (
+        key.startsWith('draft_') ||
+        key.startsWith('cbse_draft_') ||
+        key.includes('unfinished') ||
+        key.includes('examDraft') ||
+        key.includes('Unfinished')
+      )) {
         keysToRemove.push(key);
       }
     }

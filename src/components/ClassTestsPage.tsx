@@ -98,9 +98,7 @@ export const ClassTestsPage: React.FC<ClassTestsPageProps> = ({
                 key={test.id}
                 test={test}
                 attemptsCount={attempts.length}
-                draftExam={draftExam}
                 onStartTest={onStartTest}
-                onContinueDraft={onContinueDraft}
               />
             );
           })}

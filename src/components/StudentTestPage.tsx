@@ -438,13 +438,19 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
             <button
-              onClick={onFinishTest}
+              onClick={() => {
+                clearDraftAttempt(student.id);
+                onFinishTest();
+              }}
               className="w-full bg-[#0052CC] hover:bg-[#0052CC]/90 text-white font-extrabold py-3.5 px-4 rounded-xl shadow-md transition-all text-xs cursor-pointer"
             >
               Return to Dashboard
             </button>
             <button
-              onClick={onFinishTest}
+              onClick={() => {
+                clearDraftAttempt(student.id);
+                onFinishTest();
+              }}
               className="w-full bg-white text-[#0052CC] hover:bg-[#0052CC]/10 border-2 border-[#0052CC] font-extrabold py-3.5 px-4 rounded-xl transition-all text-xs cursor-pointer"
             >
               View My Progress
@@ -604,143 +610,145 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
           </div>
 
           {/* Active Question Display */}
-          <div className="lg:col-span-3 bg-white border-2 border-[#0052CC] rounded-2xl p-6 shadow-md flex flex-col justify-between space-y-6 text-[#0052CC]">
-            <div className="space-y-6">
-              {/* Question Header with Per-Question Timer */}
-              <div className="flex items-center justify-between border-b-2 border-[#0052CC]/20 pb-3 gap-2">
-                <span className="text-xs font-extrabold text-[#0052CC] uppercase tracking-wider">
-                  Question {currentIndex + 1} of {questions.length}
-                </span>
-
-                {/* Per-Question Timer (60s countdown) */}
-                <div className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl border-2 transition-colors ${timerStyle}`}>
-                  <Clock className="w-4 h-4 shrink-0" />
-                  <span className="text-xs font-mono font-bold">
-                    Time left: <strong className="text-sm">{questionTimeLeft}s</strong>
+          <div className="lg:col-span-3 space-y-6 text-[#0B3D91]">
+            <div className="question-box shadow-[0_2px_8px_rgba(11,61,145,0.08)] flex flex-col justify-between space-y-6">
+              <div className="space-y-6">
+                {/* Question Header with Per-Question Timer */}
+                <div className="flex items-center justify-between border-b border-[#D6E4FF] pb-3 gap-2">
+                  <span className="text-xs font-extrabold text-[#0B3D91] uppercase tracking-wider">
+                    Question {currentIndex + 1} of {questions.length}
                   </span>
-                </div>
-              </div>
 
-              {/* Question Text */}
-              <h3 className="text-lg font-extrabold text-[#0052CC] leading-relaxed">{currentQ.question}</h3>
-
-              {/* Options or Short Answer Field */}
-              {(!((test.title || '').toLowerCase().includes('grand test') || (test.title || '').toLowerCase().includes('playing with'))) && Boolean(currentQ.optionA && currentQ.optionA.trim() !== '') ? (
-                <div className="space-y-3">
-                  {[
-                    { key: 'optionA', label: 'Option A', text: currentQ.optionA },
-                    { key: 'optionB', label: 'Option B', text: currentQ.optionB },
-                    { key: 'optionC', label: 'Option C', text: currentQ.optionC },
-                    { key: 'optionD', label: 'Option D', text: currentQ.optionD },
-                  ].map((opt) => {
-                    const isSelected = selectedAnswers[currentQ.id] === opt.key;
-
-                    return (
-                      <button
-                        key={opt.key}
-                        onClick={() => handleOptionSelect(currentQ.id, opt.key)}
-                        className={`w-full text-left p-4 rounded-xl border-2 transition-all flex items-center justify-between cursor-pointer ${
-                          isSelected
-                            ? 'bg-[#0052CC] text-white border-[#0052CC] shadow-md'
-                            : 'bg-white border-[#0052CC] text-[#0052CC] hover:bg-[#0052CC]/10'
-                        }`}
-                      >
-                        <div className="flex items-center space-x-3">
-                          <div
-                            className={`w-6 h-6 rounded-full border-2 text-xs font-bold flex items-center justify-center transition-colors ${
-                              isSelected
-                                ? 'bg-white border-white text-[#0052CC]'
-                                : 'border-[#0052CC] text-[#0052CC] bg-white'
-                            }`}
-                          >
-                            {opt.label.replace('Option ', '')}
-                          </div>
-                          <span className="text-sm font-bold">{opt.text}</span>
-                        </div>
-
-                        {isSelected && (
-                          <CheckCircle2 className="w-5 h-5 text-white shrink-0" />
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="space-y-3 pt-2">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
-                    <label className="block text-xs font-extrabold text-[#0052CC] uppercase tracking-wider">
-                      Write your answer in the space given:
-                    </label>
-                    <span className="text-[11px] text-[#0052CC] font-extrabold bg-white border-2 border-[#0052CC] px-2.5 py-1 rounded-md">
-                      Separate multiple numbers with commas (e.g. 1, 2, 3, 4, 6, 8, 12, 24)
+                  {/* Per-Question Timer (60s countdown) */}
+                  <div className={`flex items-center gap-2 px-3.5 py-1.5 rounded-[8px] border-2 transition-colors ${timerStyle}`}>
+                    <Clock className="w-4 h-4 shrink-0" />
+                    <span className="text-xs font-mono font-bold">
+                      Time left: <strong className="text-sm">{questionTimeLeft}s</strong>
                     </span>
                   </div>
-                  <textarea
-                    rows={3}
-                    value={selectedAnswers[currentQ.id] || ''}
-                    onChange={(e) => handleOptionSelect(currentQ.id, e.target.value)}
-                    placeholder="Type your answer here... e.g. 1, 2, 3, 4, 6, 8, 12, 24"
-                    className="w-full bg-white border-2 border-[#0052CC] rounded-2xl p-4 text-[#0052CC] text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#0052CC] shadow-inner resize-y"
-                  />
-                  <div className="text-xs text-[#0052CC] font-bold pt-1 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <span>Answer: __________________________________________________</span>
-                    <span className="text-[11px] text-[#0052CC] font-semibold italic">Evaluated automatically upon submission</span>
-                  </div>
                 </div>
-              )}
 
-              {/* Educational Feedback / Hint Box (MCQ only) */}
-              {Boolean(currentQ.optionA || currentQ.optionB) && selectedOpt && (
-                isSelectedCorrect ? (
-                  <div className="p-3.5 bg-white border-2 border-[#0052CC] text-[#0052CC] text-xs flex items-center gap-2.5 font-extrabold shadow-sm">
-                    <CheckCircle2 className="w-5 h-5 text-[#0052CC] shrink-0" />
-                    <span>Correct! Well done.</span>
+                {/* Question Text */}
+                <h3 className="text-lg font-extrabold text-[#0B3D91] leading-relaxed">{currentQ.question}</h3>
+
+                {/* Options or Short Answer Field */}
+                {(!((test.title || '').toLowerCase().includes('grand test') || (test.title || '').toLowerCase().includes('playing with'))) && Boolean(currentQ.optionA && currentQ.optionA.trim() !== '') ? (
+                  <div className="space-y-3">
+                    {[
+                      { key: 'optionA', label: 'Option A', text: currentQ.optionA },
+                      { key: 'optionB', label: 'Option B', text: currentQ.optionB },
+                      { key: 'optionC', label: 'Option C', text: currentQ.optionC },
+                      { key: 'optionD', label: 'Option D', text: currentQ.optionD },
+                    ].map((opt) => {
+                      const isSelected = selectedAnswers[currentQ.id] === opt.key;
+
+                      return (
+                        <button
+                          key={opt.key}
+                          onClick={() => handleOptionSelect(currentQ.id, opt.key)}
+                          className={`w-full text-left p-4 rounded-[10px] border-2 transition-all flex items-center justify-between cursor-pointer ${
+                            isSelected
+                              ? 'bg-[#2563EB] text-white border-[#2563EB] shadow-md'
+                              : 'bg-white border-[#2563EB] text-[#0B3D91] hover:bg-[#F8FBFF]'
+                          }`}
+                        >
+                          <div className="flex items-center space-x-3">
+                            <div
+                              className={`w-6 h-6 rounded-full border-2 text-xs font-bold flex items-center justify-center transition-colors ${
+                                isSelected
+                                  ? 'bg-white border-white text-[#2563EB]'
+                                  : 'border-[#2563EB] text-[#2563EB] bg-white'
+                              }`}
+                            >
+                              {opt.label.replace('Option ', '')}
+                            </div>
+                            <span className="text-sm font-bold">{opt.text}</span>
+                          </div>
+
+                          {isSelected && (
+                            <CheckCircle2 className="w-5 h-5 text-white shrink-0" />
+                          )}
+                        </button>
+                      );
+                    })}
                   </div>
                 ) : (
-                  <div className="p-4 bg-white border-2 border-[#0052CC] text-[#0052CC] text-xs space-y-1.5 shadow-sm">
-                    <div className="flex items-center gap-2 font-extrabold text-[#0052CC] text-sm">
-                      <Lightbulb className="w-4 h-4 text-[#0052CC] shrink-0" />
-                      <span>Hint</span>
+                  <div className="space-y-3 pt-2">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
+                      <label className="block text-xs font-extrabold text-[#0B3D91] uppercase tracking-wider">
+                        Write your answer in the space given:
+                      </label>
+                      <span className="text-[11px] text-[#2563EB] font-extrabold bg-[#FFFFFF] border border-[#D6E4FF] px-2.5 py-1 rounded-[6px]">
+                        Separate multiple numbers with commas (e.g. 1, 2, 3, 4, 6, 8, 12, 24)
+                      </span>
                     </div>
-                    <p className="italic text-[#0052CC] leading-relaxed pl-6 font-semibold">
-                      {currentQ.hint || 'Think about the mathematical concept used in this question.'}
-                    </p>
-                    <p className="text-[11px] text-[#0052CC]/80 pl-6 pt-1 font-bold">
-                      You can select another option while time remains for this question.
-                    </p>
+                    <textarea
+                      rows={3}
+                      value={selectedAnswers[currentQ.id] || ''}
+                      onChange={(e) => handleOptionSelect(currentQ.id, e.target.value)}
+                      placeholder="Type your answer here... e.g. 1, 2, 3, 4, 6, 8, 12, 24"
+                      className="answer-input w-full text-sm font-bold shadow-inner resize-y"
+                    />
+                    <div className="text-xs text-[#0B3D91] font-bold pt-1 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <span>Answer: __________________________________________________</span>
+                      <span className="text-[11px] text-[#0B3D91]/70 font-semibold italic">Evaluated automatically upon submission</span>
+                    </div>
                   </div>
-                )
-              )}
-            </div>
+                )}
 
-            {/* Navigation Controls */}
-            <div className="flex items-center justify-between border-t-2 border-[#0052CC]/20 pt-4">
-              <button
-                onClick={() => setCurrentIndex((prev) => Math.max(0, prev - 1))}
-                disabled={currentIndex === 0}
-                className="flex items-center gap-1.5 bg-white text-[#0052CC] hover:bg-[#0052CC]/10 border-2 border-[#0052CC] font-extrabold px-4 py-2.5 rounded-xl text-xs transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                <ChevronLeft className="w-4 h-4 text-[#0052CC]" />
-                <span>Previous</span>
-              </button>
+                {/* Educational Feedback / Hint Box (MCQ only) */}
+                {Boolean(currentQ.optionA || currentQ.optionB) && selectedOpt && (
+                  isSelectedCorrect ? (
+                    <div className="p-3.5 bg-[#FFFFFF] border border-[#2563EB] text-[#0B3D91] text-xs flex items-center gap-2.5 font-extrabold rounded-[8px] shadow-sm">
+                      <CheckCircle2 className="w-5 h-5 text-[#2563EB] shrink-0" />
+                      <span>Correct! Well done.</span>
+                    </div>
+                  ) : (
+                    <div className="p-4 bg-[#FFFFFF] border border-[#2563EB] text-[#0B3D91] text-xs space-y-1.5 rounded-[8px] shadow-sm">
+                      <div className="flex items-center gap-2 font-extrabold text-[#2563EB] text-sm">
+                        <Lightbulb className="w-4 h-4 text-[#2563EB] shrink-0" />
+                        <span>Hint</span>
+                      </div>
+                      <p className="italic text-[#0B3D91] leading-relaxed pl-6 font-semibold">
+                        {currentQ.hint || 'Think about the mathematical concept used in this question.'}
+                      </p>
+                      <p className="text-[11px] text-[#0B3D91]/80 pl-6 pt-1 font-bold">
+                        You can select another option while time remains for this question.
+                      </p>
+                    </div>
+                  )
+                )}
+              </div>
 
-              {currentIndex < questions.length - 1 ? (
+              {/* Navigation Controls */}
+              <div className="flex items-center justify-between border-t border-[#D6E4FF] pt-4 mt-6">
                 <button
-                  onClick={() => setCurrentIndex((prev) => Math.min(questions.length - 1, prev + 1))}
-                  className="flex items-center gap-1.5 bg-[#0052CC] hover:bg-[#0052CC]/90 text-white font-extrabold px-5 py-2.5 rounded-xl text-xs shadow-md transition-colors cursor-pointer"
+                  onClick={() => setCurrentIndex((prev) => Math.max(0, prev - 1))}
+                  disabled={currentIndex === 0}
+                  className="flex items-center gap-1.5 bg-white text-[#0B3D91] hover:bg-[#F8FBFF] border border-[#D6E4FF] font-extrabold px-4 py-2.5 rounded-[10px] text-xs transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                 >
-                  <span>Next Question</span>
-                  <ChevronRight className="w-4 h-4 text-white" />
+                  <ChevronLeft className="w-4 h-4 text-[#0B3D91]" />
+                  <span>Previous</span>
                 </button>
-              ) : (
-                <button
-                  onClick={() => setShowSubmitModal(true)}
-                  className="flex items-center gap-1.5 bg-[#0052CC] hover:bg-[#0052CC]/90 text-white font-extrabold px-5 py-2.5 rounded-xl text-xs shadow-md transition-colors cursor-pointer"
-                >
-                  <Send className="w-4 h-4 text-white" />
-                  <span>Review & Submit</span>
-                </button>
-              )}
+
+                {currentIndex < questions.length - 1 ? (
+                  <button
+                    onClick={() => setCurrentIndex((prev) => Math.min(questions.length - 1, prev + 1))}
+                    className="flex items-center gap-1.5 btn-primary text-xs shadow-md cursor-pointer"
+                  >
+                    <span>Next Question</span>
+                    <ChevronRight className="w-4 h-4 text-white" />
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => setShowSubmitModal(true)}
+                    className="flex items-center gap-1.5 btn-primary text-xs shadow-md cursor-pointer"
+                  >
+                    <Send className="w-4 h-4 text-white" />
+                    <span>Review & Submit</span>
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>
