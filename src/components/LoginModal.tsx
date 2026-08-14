@@ -7,12 +7,9 @@ import {
   AlertTriangle,
   Eye,
   EyeOff,
-  Lock,
   ArrowRight,
   RefreshCw,
   GraduationCap,
-  KeyRound,
-  Sparkles,
 } from 'lucide-react';
 
 interface LoginModalProps {
@@ -105,12 +102,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onStudentLogin, onAdminL
     } finally {
       setIsAdminLoggingIn(false);
     }
-  };
-
-  const handleFillDemo = (id: string, pass: string) => {
-    setStudentId(id);
-    setStudentPassword(pass);
-    setStudentError('');
   };
 
   return (
@@ -238,48 +229,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onStudentLogin, onAdminL
                   </>
                 )}
               </button>
-
-              {/* Quick Demo Credentials */}
-              <div className="pt-2 border-t border-[#16449B]/20">
-                <p className="text-[11px] font-bold text-[#16449B]/70 mb-2 flex items-center gap-1">
-                  <Sparkles className="w-3.5 h-3.5 text-[#16449B]" />
-                  <span>Quick Demo Accounts (Click to fill):</span>
-                </p>
-                <div className="grid grid-cols-2 gap-1.5">
-                  <button
-                    type="button"
-                    onClick={() => handleFillDemo('STD-1001', 'password123')}
-                    className="text-left bg-[#16449B]/5 hover:bg-[#16449B]/10 border border-[#16449B]/30 rounded-lg p-2 transition-colors cursor-pointer"
-                  >
-                    <p className="text-xs font-bold text-[#16449B]">STD-1001 (Kiran)</p>
-                    <p className="text-[10px] text-[#16449B]/70 font-semibold">Class 6 • password123</p>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleFillDemo('STD-1002', 'password123')}
-                    className="text-left bg-[#16449B]/5 hover:bg-[#16449B]/10 border border-[#16449B]/30 rounded-lg p-2 transition-colors cursor-pointer"
-                  >
-                    <p className="text-xs font-bold text-[#16449B]">STD-1002 (Ananya)</p>
-                    <p className="text-[10px] text-[#16449B]/70 font-semibold">Class 7 • password123</p>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleFillDemo('STD-1003', 'password123')}
-                    className="text-left bg-[#16449B]/5 hover:bg-[#16449B]/10 border border-[#16449B]/30 rounded-lg p-2 transition-colors cursor-pointer"
-                  >
-                    <p className="text-xs font-bold text-[#16449B]">STD-1003 (Rahul)</p>
-                    <p className="text-[10px] text-[#16449B]/70 font-semibold">Class 8 • password123</p>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleFillDemo('STD-1004', 'password123')}
-                    className="text-left bg-[#16449B]/5 hover:bg-[#16449B]/10 border border-[#16449B]/30 rounded-lg p-2 transition-colors cursor-pointer"
-                  >
-                    <p className="text-xs font-bold text-[#16449B]">STD-1004 (Priya)</p>
-                    <p className="text-[10px] text-[#16449B]/70 font-semibold">Class 9 • password123</p>
-                  </button>
-                </div>
-              </div>
             </form>
           ) : (
             /* Admin Login Tab */
