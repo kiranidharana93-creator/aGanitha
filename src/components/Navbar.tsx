@@ -23,7 +23,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
           <div>
             <h1 className="logo-title font-['Segoe_UI',Arial,sans-serif] text-lg sm:text-xl font-bold text-white leading-tight tracking-normal">
-              CBSE Maths PORTAL
+              CBSE Maths Portal
             </h1>
             <p className="logo-subtitle font-['Segoe_UI',Arial,sans-serif] text-[11px] sm:text-xs font-semibold text-white/90">
               Classes 6–10 | Tests | Progress | Admin
