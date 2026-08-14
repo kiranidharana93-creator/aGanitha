@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --blue-dark: #0B3D91;
-  --blue: #2563EB;
+  --blue-dark: #16449B;
+  --blue: #16449B;
   --red: #DC2626;
   --white: #FFFFFF;
   --border: #D6E4FF;
@@ -11,45 +11,104 @@
 
 body {
   margin: 0;
-  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-family: 'Segoe UI', Arial, sans-serif;
   background-color: var(--white);
-  color: var(--blue-dark);
+  color: #16449B;
 }
 
-/* Custom Portal Utility Styles matching specification */
+/* Header & Logo CSS */
+.header {
+  background: #16449B;
+  color: #FFFFFF;
+  height: 92px;
+  display: flex;
+  align-items: center;
+  padding: 16px 28px;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.logo-icon {
+  width: 64px;
+  height: 64px;
+  background: #FFFFFF;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-title {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  font-size: 38px;
+  font-weight: 700;
+  color: #FFFFFF;
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+.logo-subtitle {
+  margin-top: 6px;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: #FFFFFF;
+  opacity: 0.95;
+}
+
+.nav-links {
+  color: #FFFFFF;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.nav-links a {
+  color: #FFFFFF;
+  text-decoration: none;
+}
+
+.nav-links a:hover {
+  text-decoration: underline;
+}
+
+/* Custom Portal Utility Styles */
 .cbse-card {
   background-color: #FFFFFF;
   border: 1px solid #D6E4FF;
-  border-top: 4px solid #2563EB;
+  border-top: 4px solid #16449B;
   border-radius: 14px;
   padding: 20px;
-  box-shadow: 0 2px 8px rgba(11, 61, 145, 0.08);
+  box-shadow: 0 2px 8px rgba(22, 68, 155, 0.08);
 }
 
 .question-box {
   background-color: #FFFFFF;
   border: 1px solid #D6E4FF;
-  border-left: 5px solid #2563EB;
+  border-left: 5px solid #16449B;
   border-radius: 10px;
   padding: 18px;
   margin-bottom: 16px;
 }
 
 .answer-input {
-  border: 2px solid #2563EB;
+  border: 2px solid #16449B;
   border-radius: 8px;
   padding: 10px 12px;
   background-color: #FFFFFF;
-  color: #0B3D91;
+  color: #16449B;
 }
 
 .answer-input:focus {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
+  box-shadow: 0 0 0 3px rgba(22, 68, 155, 0.25);
 }
 
 .btn-primary {
-  background-color: #2563EB;
+  background-color: #16449B;
   color: #FFFFFF;
   border-radius: 10px;
   padding: 12px 20px;
@@ -58,7 +117,7 @@ body {
 }
 
 .btn-primary:hover {
-  background-color: #1D4ED8;
+  background-color: #0F3378;
 }
 
 .btn-danger {
@@ -75,7 +134,7 @@ body {
 }
 
 .cbse-table th {
-  background-color: #0B3D91;
+  background-color: #16449B;
   color: #FFFFFF;
 }
 
@@ -87,4 +146,5 @@ body {
 .cbse-table tr:hover {
   background-color: #F8FBFF;
 }
+
 

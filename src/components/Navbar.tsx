@@ -1,6 +1,6 @@
 import React from 'react';
 import { CurrentUser } from '../types';
-import { LogOut, ShieldCheck, UserCheck, GraduationCap, Calculator } from 'lucide-react';
+import { LogOut, ShieldCheck, GraduationCap, Calculator } from 'lucide-react';
 
 interface NavbarProps {
   currentUser: CurrentUser;
@@ -14,30 +14,32 @@ export const Navbar: React.FC<NavbarProps> = ({
   onLogout,
 }) => {
   return (
-    <header className="bg-[#0B3D91] text-white shadow-md sticky top-0 z-40 h-[72px] flex items-center border-b border-[#2563EB]/40">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex items-center justify-between">
+    <header className="bg-[#16449B] text-white shadow-md sticky top-0 z-40 min-h-[92px] flex items-center px-[28px] py-4 border-b border-[#16449B]">
+      <div className="max-w-7xl mx-auto w-full flex flex-col md:flex-row md:items-center justify-between gap-4">
         {/* Brand */}
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center text-[#0B3D91] shadow-inner font-bold">
-            <Calculator className="w-6 h-6 text-[#0B3D91]" />
+        <div className="logo-container flex items-center gap-[18px]">
+          <div className="logo-icon w-[64px] h-[64px] bg-white rounded-[14px] flex items-center justify-center flex-shrink-0 shadow-sm">
+            <Calculator className="w-9 h-9 text-[#16449B]" />
           </div>
           <div>
-            <h1 className="text-lg font-bold tracking-tight text-white flex items-center gap-2">
-              CBSE Maths <span className="bg-[#2563EB] text-white text-xs px-2 py-0.5 rounded font-extrabold tracking-wide">PORTAL</span>
+            <h1 className="logo-title font-['Segoe_UI',Arial,sans-serif] text-[28px] sm:text-[38px] font-bold text-white leading-none tracking-normal">
+              CBSE Maths PORTAL
             </h1>
-            <p className="text-xs text-blue-100 font-medium">Classes 6–10 | Tests | Progress | Admin</p>
+            <p className="logo-subtitle mt-[6px] font-['Segoe_UI',Arial,sans-serif] text-[13px] sm:text-[15px] font-semibold text-white opacity-95">
+              Classes 6–10 | Tests | Progress | Admin
+            </p>
           </div>
         </div>
 
         {/* User Badge & Actions */}
         {currentUser.role && (
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-4 self-end md:self-auto">
             {currentUser.role === 'student' && currentUser.student && (
               <div className="hidden sm:flex items-center space-x-2 bg-white/10 border border-white/20 rounded-full px-3.5 py-1.5 text-xs text-white">
                 <GraduationCap className="w-4 h-4 text-white" />
                 <span className="font-bold text-white">{currentUser.student.name}</span>
                 <span className="text-white/60">•</span>
-                <span className="bg-[#2563EB] text-white font-extrabold px-2.5 py-0.5 rounded-full">
+                <span className="bg-white/20 text-white font-extrabold px-2.5 py-0.5 rounded-full">
                   {currentUser.student.class}
                 </span>
               </div>
@@ -64,3 +66,4 @@ export const Navbar: React.FC<NavbarProps> = ({
     </header>
   );
 };
+

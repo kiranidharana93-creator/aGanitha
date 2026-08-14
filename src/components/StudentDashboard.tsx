@@ -137,22 +137,22 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
   const currentClassNum = selectedClass.replace(/\D/g, '') || '6';
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 bg-[#FFFFFF] text-[#0B3D91]">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 bg-[#FFFFFF] text-[#16449B]">
       {/* Hero Section */}
-      <div className="bg-[#FFFFFF] border border-[#D6E4FF] border-top-4 border-t-[#2563EB] rounded-[14px] p-6 sm:p-8 shadow-[0_2px_8px_rgba(11,61,145,0.08)] flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="bg-[#FFFFFF] border border-[#D6E4FF] border-top-4 border-t-[#16449B] rounded-[14px] p-6 sm:p-8 shadow-[0_2px_8px_rgba(22,68,155,0.08)] flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="space-y-2">
-          <div className="inline-flex items-center gap-2 bg-[#0B3D91] text-[#FFFFFF] text-xs px-3 py-1 rounded-full font-bold">
+          <div className="inline-flex items-center gap-2 bg-[#16449B] text-[#FFFFFF] text-xs px-3 py-1 rounded-full font-bold">
             <GraduationCap className="w-3.5 h-3.5 text-[#FFFFFF]" />
             <span>CBSE Mathematics Assessment Portal</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#0B3D91] tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#16449B] tracking-tight">
             Master CBSE Mathematics
           </h1>
-          <p className="text-sm font-semibold text-[#2563EB]">
+          <p className="text-sm font-semibold text-[#16449B]">
             Practice • Grand Tests • Progress Tracking
           </p>
-          <p className="text-xs text-[#0B3D91]/80 font-medium">
-            Welcome, <strong className="text-[#0B3D91]">{student.name}</strong> • Student ID: <span className="font-mono">{student.studentId || student.id}</span> • Enrolled Class: <strong>{student.class}</strong> ({student.section || 'A'})
+          <p className="text-xs text-[#16449B]/80 font-medium">
+            Welcome, <strong className="text-[#16449B]">{student.name}</strong> • Student ID: <span className="font-mono">{student.studentId || student.id}</span> • Enrolled Class: <strong>{student.class}</strong> ({student.section || 'A'})
           </p>
         </div>
 
@@ -175,9 +175,9 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
 
           <button
             onClick={() => setShowParentModal(true)}
-            className="bg-[#FFFFFF] text-[#0B3D91] hover:bg-[#F8FBFF] border-2 border-[#0B3D91] font-bold px-4 py-2.5 rounded-[10px] text-xs flex items-center gap-2 shadow-sm transition-all cursor-pointer"
+            className="bg-[#FFFFFF] text-[#16449B] hover:bg-[#F8FBFF] border-2 border-[#16449B] font-bold px-4 py-2.5 rounded-[10px] text-xs flex items-center gap-2 shadow-sm transition-all cursor-pointer"
           >
-            <Download className="w-4 h-4 text-[#0B3D91]" />
+            <Download className="w-4 h-4 text-[#16449B]" />
             <span>Progress Card</span>
           </button>
         </div>
@@ -189,8 +189,8 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
           onClick={() => setActiveTab('select-class')}
           className={`flex items-center gap-2 px-5 py-3 text-xs font-bold transition-all cursor-pointer whitespace-nowrap rounded-t-[10px] ${
             activeTab === 'select-class'
-              ? 'bg-[#0B3D91] text-[#FFFFFF] border-b-2 border-b-[#DC2626]'
-              : 'border border-[#D6E4FF] text-[#0B3D91] hover:bg-[#F8FBFF]'
+              ? 'bg-[#16449B] text-[#FFFFFF] border-b-2 border-b-[#DC2626]'
+              : 'border border-[#D6E4FF] text-[#16449B] hover:bg-[#F8FBFF]'
           }`}
         >
           <BookOpen className="w-4 h-4" />
@@ -201,8 +201,8 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
           onClick={() => setActiveTab('tests')}
           className={`flex items-center gap-2 px-5 py-3 text-xs font-bold transition-all cursor-pointer whitespace-nowrap rounded-t-[10px] ${
             activeTab === 'tests'
-              ? 'bg-[#0B3D91] text-[#FFFFFF] border-b-2 border-b-[#DC2626]'
-              : 'border border-[#D6E4FF] text-[#0B3D91] hover:bg-[#F8FBFF]'
+              ? 'bg-[#16449B] text-[#FFFFFF] border-b-2 border-b-[#DC2626]'
+              : 'border border-[#D6E4FF] text-[#16449B] hover:bg-[#F8FBFF]'
           }`}
         >
           <FileText className="w-4 h-4" />
@@ -213,8 +213,8 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
           onClick={() => setActiveTab('results')}
           className={`flex items-center gap-2 px-5 py-3 text-xs font-bold transition-all cursor-pointer whitespace-nowrap rounded-t-[10px] ${
             activeTab === 'results'
-              ? 'bg-[#0B3D91] text-[#FFFFFF] border-b-2 border-b-[#DC2626]'
-              : 'border border-[#D6E4FF] text-[#0B3D91] hover:bg-[#F8FBFF]'
+              ? 'bg-[#16449B] text-[#FFFFFF] border-b-2 border-b-[#DC2626]'
+              : 'border border-[#D6E4FF] text-[#16449B] hover:bg-[#F8FBFF]'
           }`}
         >
           <History className="w-4 h-4" />
@@ -225,8 +225,8 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
           onClick={() => setActiveTab('progress')}
           className={`flex items-center gap-2 px-5 py-3 text-xs font-bold transition-all cursor-pointer whitespace-nowrap rounded-t-[10px] ${
             activeTab === 'progress'
-              ? 'bg-[#0B3D91] text-[#FFFFFF] border-b-2 border-b-[#DC2626]'
-              : 'border border-[#D6E4FF] text-[#0B3D91] hover:bg-[#F8FBFF]'
+              ? 'bg-[#16449B] text-[#FFFFFF] border-b-2 border-b-[#DC2626]'
+              : 'border border-[#D6E4FF] text-[#16449B] hover:bg-[#F8FBFF]'
           }`}
         >
           <BarChart2 className="w-4 h-4" />
@@ -262,30 +262,30 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
       {activeTab === 'results' && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-base font-extrabold text-[#0052CC] flex items-center gap-2">
-              <History className="w-4 h-4 text-[#0052CC]" />
+            <h2 className="text-base font-extrabold text-[#16449B] flex items-center gap-2">
+              <History className="w-4 h-4 text-[#16449B]" />
               <span>My Results ({allStudentAttempts.length})</span>
             </h2>
-            <span className="text-xs font-semibold text-[#0052CC]">History of submitted test attempts</span>
+            <span className="text-xs font-semibold text-[#16449B]">History of submitted test attempts</span>
           </div>
 
           {allStudentAttempts.length === 0 ? (
-            <div className="bg-white border-2 border-[#0052CC] rounded-3xl p-12 text-center space-y-2 text-[#0052CC]">
-              <Award className="w-12 h-12 text-[#0052CC] mx-auto" />
-              <h3 className="text-base font-extrabold text-[#0052CC]">No Test Results Recorded Yet</h3>
-              <p className="text-xs font-medium text-[#0052CC]/80">Complete an available test paper to record test results.</p>
+            <div className="bg-white border-2 border-[#16449B] rounded-3xl p-12 text-center space-y-2 text-[#16449B]">
+              <Award className="w-12 h-12 text-[#16449B] mx-auto" />
+              <h3 className="text-base font-extrabold text-[#16449B]">No Test Results Recorded Yet</h3>
+              <p className="text-xs font-medium text-[#16449B]/80">Complete an available test paper to record test results.</p>
               <button
                 onClick={() => setActiveTab('select-class')}
-                className="mt-3 bg-[#0052CC] hover:bg-[#0052CC]/90 text-white font-extrabold px-5 py-2.5 rounded-xl text-xs shadow-md cursor-pointer"
+                className="mt-3 bg-[#16449B] hover:bg-[#16449B]/90 text-white font-extrabold px-5 py-2.5 rounded-xl text-xs shadow-md cursor-pointer"
               >
                 Start a Test Now
               </button>
             </div>
           ) : (
-            <div className="bg-white border-2 border-[#0052CC] rounded-3xl overflow-hidden shadow-md">
+            <div className="bg-white border-2 border-[#16449B] rounded-3xl overflow-hidden shadow-md">
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs text-[#0052CC]">
-                  <thead className="bg-[#0052CC] text-white uppercase font-bold">
+                <table className="w-full text-left text-xs text-[#16449B]">
+                  <thead className="bg-[#16449B] text-white uppercase font-bold">
                     <tr>
                       <th className="px-6 py-4">Lesson Test Name</th>
                       <th className="px-6 py-4">Attempt #</th>
@@ -295,41 +295,41 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
                       <th className="px-6 py-4 text-right">Action</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y border-[#0052CC]/20">
+                  <tbody className="divide-y border-[#16449B]/20">
                     {allStudentAttempts.map((att) => {
                       const percentage = Math.round((att.score / (att.totalQuestions || 1)) * 100);
                       const isPassed = percentage >= 40;
                       const cleanTitle = cleanStudentTestTitle(att.testTitle || 'Mathematics Test');
 
                       return (
-                        <tr key={att.id} className="hover:bg-[#0052CC]/5 transition-colors">
-                          <td className="px-6 py-4 font-bold text-[#0052CC]">{cleanTitle}</td>
+                        <tr key={att.id} className="hover:bg-[#16449B]/5 transition-colors">
+                          <td className="px-6 py-4 font-bold text-[#16449B]">{cleanTitle}</td>
                           <td className="px-6 py-4">
-                            <span className="bg-white border border-[#0052CC] text-[#0052CC] px-2.5 py-1 rounded-full font-extrabold">
+                            <span className="bg-white border border-[#16449B] text-[#16449B] px-2.5 py-1 rounded-full font-extrabold">
                               Attempt #{att.attemptNumber}
                             </span>
                           </td>
-                          <td className="px-6 py-4 font-extrabold text-[#0052CC]">
+                          <td className="px-6 py-4 font-extrabold text-[#16449B]">
                             {att.score} / {att.totalQuestions}
                           </td>
                           <td className="px-6 py-4">
                             <span
                               className={`inline-flex items-center gap-1 font-extrabold px-2.5 py-0.5 rounded-full ${
                                 isPassed
-                                  ? 'bg-white text-[#0052CC] border border-[#0052CC]'
-                                  : 'bg-white text-[#D32F2F] border border-[#D32F2F]'
+                                  ? 'bg-white text-[#16449B] border border-[#16449B]'
+                                  : 'bg-white text-[#DC2626] border border-[#DC2626]'
                               }`}
                             >
                               {percentage}%
                             </span>
                           </td>
-                          <td className="px-6 py-4 font-medium text-[#0052CC]">
+                          <td className="px-6 py-4 font-medium text-[#16449B]">
                             {att.submittedAt ? new Date(att.submittedAt).toLocaleString('en-IN') : 'N/A'}
                           </td>
                           <td className="px-6 py-4 text-right">
                             <button
                               onClick={() => onViewAttemptReview(att)}
-                              className="text-[#0052CC] hover:underline font-extrabold cursor-pointer"
+                              className="text-[#16449B] hover:underline font-extrabold cursor-pointer"
                             >
                               Review Answers →
                             </button>
@@ -349,21 +349,21 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
       {activeTab === 'progress' && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-base font-extrabold text-[#0052CC] flex items-center gap-2">
-              <BarChart2 className="w-4 h-4 text-[#0052CC]" />
+            <h2 className="text-base font-extrabold text-[#16449B] flex items-center gap-2">
+              <BarChart2 className="w-4 h-4 text-[#16449B]" />
               <span>My Progress Analytics & Lesson Bar Chart</span>
             </h2>
 
             <button
               onClick={() => setShowParentModal(true)}
-              className="bg-[#0052CC] hover:bg-[#0052CC]/90 text-white font-extrabold px-3.5 py-1.5 rounded-xl text-xs flex items-center gap-1.5 cursor-pointer shadow-md"
+              className="bg-[#16449B] hover:bg-[#16449B]/90 text-white font-extrabold px-3.5 py-1.5 rounded-xl text-xs flex items-center gap-1.5 cursor-pointer shadow-md"
             >
               <Download className="w-3.5 h-3.5 text-white" />
               <span>Parent Card Modal</span>
             </button>
           </div>
 
-          <React.Suspense fallback={<div className="p-6 text-center text-[#0052CC] font-bold animate-pulse">Loading analytics...</div>}>
+          <React.Suspense fallback={<div className="p-6 text-center text-[#16449B] font-bold animate-pulse">Loading analytics...</div>}>
             <ProgressAnalytics
               student={student}
               attempts={allStudentAttempts}
@@ -375,7 +375,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
 
       {/* Parent Progress Card Modal */}
       {showParentModal && (
-        <React.Suspense fallback={<div className="fixed inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center text-[#0052CC] font-bold">Loading report card...</div>}>
+        <React.Suspense fallback={<div className="fixed inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center text-[#16449B] font-bold">Loading report card...</div>}>
           <ParentProgressCardModal
             analytics={analytics}
             onClose={() => setShowParentModal(false)}

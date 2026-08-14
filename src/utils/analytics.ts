@@ -47,7 +47,7 @@ export interface StudentAnalytics {
 }
 
 export function getBarColor(pct: number): string {
-  if (pct >= 70) return '#0052CC'; // Primary Blue
+  if (pct >= 70) return '#16449B'; // Primary Blue
   return '#D32F2F';                  // Accent Red
 }
 

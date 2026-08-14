@@ -159,55 +159,55 @@ export const AdminAnalyticsDashboard: React.FC<AdminAnalyticsDashboardProps> = (
     <div className="space-y-6">
       {/* School Overview Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        <div className="bg-[#FFFFFF] border border-[#D6E4FF] border-t-4 border-t-[#2563EB] p-5 rounded-[14px] shadow-[0_2px_8px_rgba(11,61,145,0.08)] flex items-center gap-4">
-          <div className="w-12 h-12 rounded-[10px] bg-[#2563EB] flex items-center justify-center text-white shrink-0">
+        <div className="bg-[#FFFFFF] border border-[#D6E4FF] border-t-4 border-t-[#16449B] p-5 rounded-[14px] shadow-[0_2px_8px_rgba(11,61,145,0.08)] flex items-center gap-4">
+          <div className="w-12 h-12 rounded-[10px] bg-[#16449B] flex items-center justify-center text-white shrink-0">
             <Users className="w-6 h-6 text-white" />
           </div>
           <div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-[#0B3D91] block">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-[#16449B] block">
               Total Students
             </span>
-            <h3 className="text-2xl font-black text-[#0B3D91] mt-0.5">{schoolMetrics.totalStudents}</h3>
+            <h3 className="text-2xl font-black text-[#16449B] mt-0.5">{schoolMetrics.totalStudents}</h3>
           </div>
         </div>
 
-        <div className="bg-[#FFFFFF] border border-[#D6E4FF] border-t-4 border-t-[#2563EB] p-5 rounded-[14px] shadow-[0_2px_8px_rgba(11,61,145,0.08)] flex items-center gap-4">
-          <div className="w-12 h-12 rounded-[10px] bg-[#2563EB] flex items-center justify-center text-white shrink-0">
+        <div className="bg-[#FFFFFF] border border-[#D6E4FF] border-t-4 border-t-[#16449B] p-5 rounded-[14px] shadow-[0_2px_8px_rgba(11,61,145,0.08)] flex items-center gap-4">
+          <div className="w-12 h-12 rounded-[10px] bg-[#16449B] flex items-center justify-center text-white shrink-0">
             <FileCheck className="w-6 h-6 text-white" />
           </div>
           <div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-[#0B3D91] block">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-[#16449B] block">
               Tests Conducted
             </span>
-            <h3 className="text-2xl font-black text-[#0B3D91] mt-0.5">
+            <h3 className="text-2xl font-black text-[#16449B] mt-0.5">
               {schoolMetrics.totalTestsConducted}
             </h3>
           </div>
         </div>
 
-        <div className="bg-[#FFFFFF] border border-[#D6E4FF] border-t-4 border-t-[#2563EB] p-5 rounded-[14px] shadow-[0_2px_8px_rgba(11,61,145,0.08)] flex items-center gap-4">
-          <div className="w-12 h-12 rounded-[10px] bg-[#2563EB] flex items-center justify-center text-white shrink-0">
+        <div className="bg-[#FFFFFF] border border-[#D6E4FF] border-t-4 border-t-[#16449B] p-5 rounded-[14px] shadow-[0_2px_8px_rgba(11,61,145,0.08)] flex items-center gap-4">
+          <div className="w-12 h-12 rounded-[10px] bg-[#16449B] flex items-center justify-center text-white shrink-0">
             <Award className="w-6 h-6 text-white" />
           </div>
           <div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-[#0B3D91] block">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-[#16449B] block">
               School Avg Score
             </span>
-            <h3 className="text-2xl font-black text-[#0B3D91] mt-0.5">
+            <h3 className="text-2xl font-black text-[#16449B] mt-0.5">
               {schoolMetrics.avgSchoolScore}%
             </h3>
           </div>
         </div>
 
-        <div className="bg-[#FFFFFF] border border-[#D6E4FF] border-t-4 border-t-[#2563EB] p-5 rounded-[14px] shadow-[0_2px_8px_rgba(11,61,145,0.08)] flex items-center gap-4">
-          <div className="w-12 h-12 rounded-[10px] bg-[#2563EB] flex items-center justify-center text-white shrink-0">
+        <div className="bg-[#FFFFFF] border border-[#D6E4FF] border-t-4 border-t-[#16449B] p-5 rounded-[14px] shadow-[0_2px_8px_rgba(11,61,145,0.08)] flex items-center gap-4">
+          <div className="w-12 h-12 rounded-[10px] bg-[#16449B] flex items-center justify-center text-white shrink-0">
             <TrendingUp className="w-6 h-6 text-white" />
           </div>
           <div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-[#0B3D91] block">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-[#16449B] block">
               Top Topic
             </span>
-            <h3 className="text-sm font-bold text-[#0B3D91] mt-0.5 truncate max-w-[120px]">
+            <h3 className="text-sm font-bold text-[#16449B] mt-0.5 truncate max-w-[120px]">
               {schoolMetrics.topTopic}
             </h3>
           </div>
@@ -237,29 +237,29 @@ export const AdminAnalyticsDashboard: React.FC<AdminAnalyticsDashboardProps> = (
         {/* Top 5 Students Chart */}
         <div className="cbse-card p-6 space-y-4">
           <div>
-            <h3 className="text-base font-bold text-[#0B3D91] flex items-center gap-2">
-              <Award className="w-5 h-5 text-[#2563EB]" />
+            <h3 className="text-base font-bold text-[#16449B] flex items-center gap-2">
+              <Award className="w-5 h-5 text-[#16449B]" />
               <span>Top 5 Performing Students</span>
             </h3>
-            <p className="text-xs font-semibold text-[#0B3D91]/80 mt-1">
+            <p className="text-xs font-semibold text-[#16449B]/80 mt-1">
               Bar chart highlighting highest average percentages across all test submissions.
             </p>
           </div>
 
           {schoolMetrics.topStudentsData.length === 0 ? (
-            <p className="text-center text-xs font-semibold text-[#0B3D91]/70 py-12">No student scores recorded.</p>
+            <p className="text-center text-xs font-semibold text-[#16449B]/70 py-12">No student scores recorded.</p>
           ) : (
             <div className="w-full h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={schoolMetrics.topStudentsData} margin={{ top: 20, right: 30, left: 0, bottom: 20 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#D6E4FF" strokeOpacity={0.6} />
-                  <XAxis dataKey="name" stroke="#0B3D91" tick={{ fontSize: 11, fill: '#0B3D91' }} />
-                  <YAxis domain={[0, 100]} stroke="#0B3D91" tick={{ fontSize: 11, fill: '#0B3D91' }} />
+                  <XAxis dataKey="name" stroke="#16449B" tick={{ fontSize: 11, fill: '#16449B' }} />
+                  <YAxis domain={[0, 100]} stroke="#16449B" tick={{ fontSize: 11, fill: '#16449B' }} />
                   <Tooltip
-                    contentStyle={{ backgroundColor: '#FFFFFF', borderColor: '#2563EB', borderRadius: '8px', color: '#0B3D91' }}
+                    contentStyle={{ backgroundColor: '#FFFFFF', borderColor: '#16449B', borderRadius: '8px', color: '#16449B' }}
                     formatter={(val: any) => [`${val}%`, 'Average Score']}
                   />
-                  <Bar dataKey="Average" fill="#2563EB" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="Average" fill="#16449B" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -269,18 +269,18 @@ export const AdminAnalyticsDashboard: React.FC<AdminAnalyticsDashboardProps> = (
         {/* Topic Difficulty Analysis Table & Highlight */}
         <div className="cbse-card p-6 space-y-4">
           <div>
-            <h3 className="text-base font-bold text-[#0B3D91] flex items-center gap-2">
+            <h3 className="text-base font-bold text-[#16449B] flex items-center gap-2">
               <AlertTriangle className="w-5 h-5 text-[#DC2626]" />
               <span>Topic Difficulty Analysis</span>
             </h3>
-            <p className="text-xs font-semibold text-[#0B3D91]/80 mt-1">
+            <p className="text-xs font-semibold text-[#16449B]/80 mt-1">
               Chapter difficulty ranking based on overall student accuracy. Lowest scoring topic is highlighted in red.
             </p>
           </div>
 
           <div className="overflow-y-auto max-h-60 rounded-[10px] border border-[#D6E4FF]">
-            <table className="w-full text-left text-xs text-[#0B3D91]">
-              <thead className="bg-[#0B3D91] text-white uppercase font-bold sticky top-0 border-b border-[#D6E4FF]">
+            <table className="w-full text-left text-xs text-[#16449B]">
+              <thead className="bg-[#16449B] text-white uppercase font-bold sticky top-0 border-b border-[#D6E4FF]">
                 <tr>
                   <th className="px-4 py-3">Topic Chapter</th>
                   <th className="px-4 py-3 text-center">Attempts</th>
@@ -306,7 +306,7 @@ export const AdminAnalyticsDashboard: React.FC<AdminAnalyticsDashboardProps> = (
                       </td>
                       <td className="px-4 py-3 text-center">{t.count}</td>
                       <td className="px-4 py-3 text-right font-bold">
-                        <span className={isLowest ? 'text-[#DC2626] font-black' : 'text-[#0B3D91]'}>
+                        <span className={isLowest ? 'text-[#DC2626] font-black' : 'text-[#16449B]'}>
                           {t.avgScore}%
                         </span>
                       </td>
@@ -323,31 +323,31 @@ export const AdminAnalyticsDashboard: React.FC<AdminAnalyticsDashboardProps> = (
       <div className="cbse-card p-6 space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#D6E4FF] pb-4">
           <div>
-            <h3 className="text-base font-bold text-[#0B3D91] flex items-center gap-2">
-              <School className="w-5 h-5 text-[#2563EB]" />
+            <h3 className="text-base font-bold text-[#16449B] flex items-center gap-2">
+              <School className="w-5 h-5 text-[#16449B]" />
               <span>Student Performance Directory & Progress Cards</span>
             </h3>
-            <p className="text-xs font-semibold text-[#0B3D91]/80 mt-0.5">
+            <p className="text-xs font-semibold text-[#16449B]/80 mt-0.5">
               Select any student to generate and inspect their official Parent Progress Card.
             </p>
           </div>
 
           <div className="flex items-center gap-3">
             <div className="relative">
-              <Search className="w-4 h-4 text-[#0B3D91] absolute left-3 top-2.5" />
+              <Search className="w-4 h-4 text-[#16449B] absolute left-3 top-2.5" />
               <input
                 type="text"
                 placeholder="Search student..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="bg-white border border-[#D6E4FF] rounded-[8px] pl-9 pr-4 py-2 text-xs text-[#0B3D91] font-bold placeholder-[#0B3D91]/50 focus:outline-none focus:border-[#2563EB]"
+                className="bg-white border border-[#D6E4FF] rounded-[8px] pl-9 pr-4 py-2 text-xs text-[#16449B] font-bold placeholder-[#16449B]/50 focus:outline-none focus:border-[#16449B]"
               />
             </div>
 
             <select
               value={classFilter}
               onChange={(e) => setClassFilter(e.target.value)}
-              className="bg-white border border-[#D6E4FF] rounded-[8px] px-3 py-2 text-xs text-[#0B3D91] font-bold focus:outline-none focus:border-[#2563EB] cursor-pointer"
+              className="bg-white border border-[#D6E4FF] rounded-[8px] px-3 py-2 text-xs text-[#16449B] font-bold focus:outline-none focus:border-[#16449B] cursor-pointer"
             >
               <option value="All">All Classes</option>
               <option value="Class 6">Class 6</option>
@@ -360,8 +360,8 @@ export const AdminAnalyticsDashboard: React.FC<AdminAnalyticsDashboardProps> = (
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-[#0B3D91]">
-            <thead className="bg-[#0B3D91] text-white uppercase font-bold border-b border-[#D6E4FF]">
+          <table className="w-full text-left text-xs text-[#16449B]">
+            <thead className="bg-[#16449B] text-white uppercase font-bold border-b border-[#D6E4FF]">
               <tr>
                 <th className="px-6 py-3.5">Student Name</th>
                 <th className="px-6 py-3.5">Class</th>
@@ -378,23 +378,23 @@ export const AdminAnalyticsDashboard: React.FC<AdminAnalyticsDashboardProps> = (
 
                 return (
                   <tr key={s.id} className="hover:bg-[#F8FBFF] transition-colors">
-                    <td className="px-6 py-4 font-bold text-[#0B3D91]">{s.name}</td>
+                    <td className="px-6 py-4 font-bold text-[#16449B]">{s.name}</td>
                     <td className="px-6 py-4">
-                      <span className="bg-white border border-[#D6E4FF] text-[#0B3D91] px-2.5 py-1 rounded-[6px] font-semibold">
+                      <span className="bg-white border border-[#D6E4FF] text-[#16449B] px-2.5 py-1 rounded-[6px] font-semibold">
                         {s.class}
                       </span>
                     </td>
-                    <td className="px-6 py-4 font-bold text-[#0B3D91]">{sAnalytics.totalTestsAttempted} test(s)</td>
-                    <td className="px-6 py-4 font-bold text-[#0B3D91]">
+                    <td className="px-6 py-4 font-bold text-[#16449B]">{sAnalytics.totalTestsAttempted} test(s)</td>
+                    <td className="px-6 py-4 font-bold text-[#16449B]">
                       {sAnalytics.totalTestsAttempted > 0 ? `${sAnalytics.avgPercentage}%` : 'N/A'}
                     </td>
                     <td className="px-6 py-4">
                       {sAnalytics.totalTestsAttempted > 0 ? (
-                        <span className="bg-[#2563EB] text-white px-2.5 py-0.5 rounded-full font-bold">
+                        <span className="bg-[#16449B] text-white px-2.5 py-0.5 rounded-full font-bold">
                           Grade {sAnalytics.grade}
                         </span>
                       ) : (
-                        <span className="text-[#0B3D91]/60 italic font-medium">No Tests</span>
+                        <span className="text-[#16449B]/60 italic font-medium">No Tests</span>
                       )}
                     </td>
                     <td className="px-6 py-4 text-right">

@@ -50,9 +50,9 @@ export const ProgressAnalytics: React.FC<ProgressAnalyticsProps> = ({
 
   const analytics = calculateStudentAnalytics(student.name, student.class, attempts);
 
-  // Recharts Data Sets (Strict Palette: Blue #0B3D91, Academic Blue #2563EB, Red #DC2626, White #FFFFFF)
+  // Recharts Data Sets (Strict Palette: Blue #16449B, Academic Blue #16449B, Red #DC2626, White #FFFFFF)
   const pieData = [
-    { name: 'Correct Answers', value: analytics.totalCorrect, color: '#2563EB' },
+    { name: 'Correct Answers', value: analytics.totalCorrect, color: '#16449B' },
     { name: 'Wrong Answers', value: analytics.totalWrong, color: '#DC2626' },
     { name: 'Unanswered', value: analytics.totalUnanswered, color: '#DC2626' },
   ];
@@ -61,7 +61,7 @@ export const ProgressAnalytics: React.FC<ProgressAnalyticsProps> = ({
     lesson: item.lesson.length > 18 ? item.lesson.substring(0, 15) + '...' : item.lesson,
     fullLesson: item.lesson,
     Score: item.score,
-    color: item.score >= 70 ? '#2563EB' : '#DC2626',
+    color: item.score >= 70 ? '#16449B' : '#DC2626',
     status: item.status,
     attemptsCount: item.attemptsCount,
   }));
@@ -81,8 +81,8 @@ export const ProgressAnalytics: React.FC<ProgressAnalyticsProps> = ({
           onClick={() => setActiveTab('overview')}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-[10px] text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
             activeTab === 'overview'
-              ? 'bg-[#2563EB] text-white shadow-md'
-              : 'text-[#0B3D91] hover:bg-[#F8FBFF]'
+              ? 'bg-[#16449B] text-white shadow-md'
+              : 'text-[#16449B] hover:bg-[#F8FBFF]'
           }`}
         >
           <Award className="w-4 h-4" />
@@ -93,8 +93,8 @@ export const ProgressAnalytics: React.FC<ProgressAnalyticsProps> = ({
           onClick={() => setActiveTab('topic')}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-[10px] text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
             activeTab === 'topic'
-              ? 'bg-[#2563EB] text-white shadow-md'
-              : 'text-[#0B3D91] hover:bg-[#F8FBFF]'
+              ? 'bg-[#16449B] text-white shadow-md'
+              : 'text-[#16449B] hover:bg-[#F8FBFF]'
           }`}
         >
           <BarChart2 className="w-4 h-4" />
@@ -105,8 +105,8 @@ export const ProgressAnalytics: React.FC<ProgressAnalyticsProps> = ({
           onClick={() => setActiveTab('charts')}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-[10px] text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
             activeTab === 'charts'
-              ? 'bg-[#2563EB] text-white shadow-md'
-              : 'text-[#0B3D91] hover:bg-[#F8FBFF]'
+              ? 'bg-[#16449B] text-white shadow-md'
+              : 'text-[#16449B] hover:bg-[#F8FBFF]'
           }`}
         >
           <PieIcon className="w-4 h-4" />
@@ -117,8 +117,8 @@ export const ProgressAnalytics: React.FC<ProgressAnalyticsProps> = ({
           onClick={() => setActiveTab('improvement')}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-[10px] text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
             activeTab === 'improvement'
-              ? 'bg-[#2563EB] text-white shadow-md'
-              : 'text-[#0B3D91] hover:bg-[#F8FBFF]'
+              ? 'bg-[#16449B] text-white shadow-md'
+              : 'text-[#16449B] hover:bg-[#F8FBFF]'
           }`}
         >
           <AlertTriangle className="w-4 h-4" />
@@ -129,8 +129,8 @@ export const ProgressAnalytics: React.FC<ProgressAnalyticsProps> = ({
           onClick={() => setActiveTab('card')}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-[10px] text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
             activeTab === 'card'
-              ? 'bg-[#2563EB] text-white shadow-md'
-              : 'text-[#0B3D91] hover:bg-[#F8FBFF]'
+              ? 'bg-[#16449B] text-white shadow-md'
+              : 'text-[#16449B] hover:bg-[#F8FBFF]'
           }`}
         >
           <FileText className="w-4 h-4" />
@@ -141,8 +141,8 @@ export const ProgressAnalytics: React.FC<ProgressAnalyticsProps> = ({
           onClick={() => setActiveTab('parent')}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-[10px] text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
             activeTab === 'parent'
-              ? 'bg-[#2563EB] text-white shadow-md'
-              : 'text-[#0B3D91] hover:bg-[#F8FBFF]'
+              ? 'bg-[#16449B] text-white shadow-md'
+              : 'text-[#16449B] hover:bg-[#F8FBFF]'
           }`}
         >
           <Share2 className="w-4 h-4" />
@@ -157,25 +157,25 @@ export const ProgressAnalytics: React.FC<ProgressAnalyticsProps> = ({
           <div className="cbse-card p-6 space-y-5">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#D6E4FF] pb-4">
               <div>
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#0B3D91] text-white mb-2">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#16449B] text-white mb-2">
                   <Award className="w-3.5 h-3.5" />
                   <span>Student Progress Dashboard</span>
                 </div>
-                <h2 className="text-2xl font-black text-[#0B3D91]">{analytics.studentName}</h2>
-                <p className="text-xs text-[#0B3D91]/80 mt-1 font-semibold">
-                  Class: <strong className="text-[#0B3D91]">{analytics.studentClass}</strong> • CBSE Mathematics Learning Tracker
+                <h2 className="text-2xl font-black text-[#16449B]">{analytics.studentName}</h2>
+                <p className="text-xs text-[#16449B]/80 mt-1 font-semibold">
+                  Class: <strong className="text-[#16449B]">{analytics.studentClass}</strong> • CBSE Mathematics Learning Tracker
                 </p>
               </div>
 
               <div className="flex items-center gap-3">
                 <div className="bg-white border border-[#D6E4FF] px-4 py-2.5 rounded-[10px] text-center shadow-sm">
-                  <p className="text-[10px] uppercase font-bold text-[#0B3D91]">Last Test Score</p>
-                  <p className="text-xl font-black text-[#0B3D91]">{analytics.lastTestScorePercentage}%</p>
+                  <p className="text-[10px] uppercase font-bold text-[#16449B]">Last Test Score</p>
+                  <p className="text-xl font-black text-[#16449B]">{analytics.lastTestScorePercentage}%</p>
                 </div>
 
                 <div className="bg-white border border-[#D6E4FF] px-4 py-2.5 rounded-[10px] text-center shadow-sm">
-                  <p className="text-[10px] uppercase font-bold text-[#0B3D91]">Grade</p>
-                  <p className="text-xl font-black text-[#0B3D91]">{analytics.grade}</p>
+                  <p className="text-[10px] uppercase font-bold text-[#16449B]">Grade</p>
+                  <p className="text-xl font-black text-[#16449B]">{analytics.grade}</p>
                 </div>
               </div>
             </div>
@@ -183,65 +183,65 @@ export const ProgressAnalytics: React.FC<ProgressAnalyticsProps> = ({
             {/* Overall Progress Bar */}
             <div className="space-y-2">
               <div className="flex justify-between items-center text-xs">
-                <span className="font-bold text-[#0B3D91] flex items-center gap-1.5">
-                  <CheckCircle className="w-4 h-4 text-[#2563EB]" />
+                <span className="font-bold text-[#16449B] flex items-center gap-1.5">
+                  <CheckCircle className="w-4 h-4 text-[#16449B]" />
                   Overall Learning Progress
                 </span>
-                <span className="font-extrabold text-[#0B3D91] text-sm">{analytics.avgPercentage}%</span>
+                <span className="font-extrabold text-[#16449B] text-sm">{analytics.avgPercentage}%</span>
               </div>
               <div className="w-full bg-white border border-[#D6E4FF] rounded-full h-4 overflow-hidden p-0.5 shadow-inner">
                 <div
-                  className="h-full rounded-full transition-all duration-500 bg-[#2563EB]"
+                  className="h-full rounded-full transition-all duration-500 bg-[#16449B]"
                   style={{ width: `${Math.max(3, Math.min(100, analytics.avgPercentage))}%` }}
                 />
               </div>
-              <div className="flex justify-between items-center text-[11px] text-[#0B3D91]/80 font-semibold pt-1">
-                <span>Total Tests Attempted: <strong className="text-[#0B3D91]">{analytics.totalTestsAttempted}</strong></span>
-                <span>Last Test: <strong className="text-[#0B3D91]">{analytics.lastTestTitle}</strong></span>
+              <div className="flex justify-between items-center text-[11px] text-[#16449B]/80 font-semibold pt-1">
+                <span>Total Tests Attempted: <strong className="text-[#16449B]">{analytics.totalTestsAttempted}</strong></span>
+                <span>Last Test: <strong className="text-[#16449B]">{analytics.lastTestTitle}</strong></span>
               </div>
             </div>
           </div>
 
           {/* Metrics Grid */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-            <div className="bg-[#FFFFFF] border border-[#D6E4FF] border-t-4 border-t-[#2563EB] p-4 rounded-[14px] shadow-[0_2px_8px_rgba(11,61,145,0.08)]">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-[#0B3D91]">
+            <div className="bg-[#FFFFFF] border border-[#D6E4FF] border-t-4 border-t-[#16449B] p-4 rounded-[14px] shadow-[0_2px_8px_rgba(11,61,145,0.08)]">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-[#16449B]">
                 Tests Attempted
               </p>
-              <h3 className="text-2xl font-black text-[#0B3D91] mt-1">{analytics.totalTestsAttempted}</h3>
+              <h3 className="text-2xl font-black text-[#16449B] mt-1">{analytics.totalTestsAttempted}</h3>
             </div>
 
-            <div className="bg-[#FFFFFF] border border-[#D6E4FF] border-t-4 border-t-[#2563EB] p-4 rounded-[14px] shadow-[0_2px_8px_rgba(11,61,145,0.08)]">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-[#0B3D91]">
+            <div className="bg-[#FFFFFF] border border-[#D6E4FF] border-t-4 border-t-[#16449B] p-4 rounded-[14px] shadow-[0_2px_8px_rgba(11,61,145,0.08)]">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-[#16449B]">
                 Average Percentage
               </p>
-              <h3 className="text-2xl font-black text-[#0B3D91] mt-1">{analytics.avgPercentage}%</h3>
+              <h3 className="text-2xl font-black text-[#16449B] mt-1">{analytics.avgPercentage}%</h3>
             </div>
 
-            <div className="bg-[#FFFFFF] border border-[#D6E4FF] border-t-4 border-t-[#2563EB] p-4 rounded-[14px] shadow-[0_2px_8px_rgba(11,61,145,0.08)]">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-[#0B3D91]">
+            <div className="bg-[#FFFFFF] border border-[#D6E4FF] border-t-4 border-t-[#16449B] p-4 rounded-[14px] shadow-[0_2px_8px_rgba(11,61,145,0.08)]">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-[#16449B]">
                 Performance Grade
               </p>
               <div className="flex items-baseline gap-2 mt-1">
-                <h3 className="text-2xl font-black text-[#0B3D91]">{analytics.grade}</h3>
-                <span className="text-[10px] font-bold text-[#0B3D91]">{analytics.performanceGradeTitle}</span>
+                <h3 className="text-2xl font-black text-[#16449B]">{analytics.grade}</h3>
+                <span className="text-[10px] font-bold text-[#16449B]">{analytics.performanceGradeTitle}</span>
               </div>
             </div>
 
-            <div className="bg-[#FFFFFF] border border-[#D6E4FF] border-t-4 border-t-[#2563EB] p-4 rounded-[14px] shadow-[0_2px_8px_rgba(11,61,145,0.08)]">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-[#0B3D91]">
+            <div className="bg-[#FFFFFF] border border-[#D6E4FF] border-t-4 border-t-[#16449B] p-4 rounded-[14px] shadow-[0_2px_8px_rgba(11,61,145,0.08)]">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-[#16449B]">
                 Last Test Score
               </p>
-              <h3 className="text-2xl font-black text-[#0B3D91] mt-1">
+              <h3 className="text-2xl font-black text-[#16449B] mt-1">
                 {analytics.lastTestScorePercentage}%
               </h3>
             </div>
 
-            <div className="bg-[#FFFFFF] border border-[#D6E4FF] border-t-4 border-t-[#2563EB] p-4 rounded-[14px] shadow-[0_2px_8px_rgba(11,61,145,0.08)]">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-[#0B3D91]">
+            <div className="bg-[#FFFFFF] border border-[#D6E4FF] border-t-4 border-t-[#16449B] p-4 rounded-[14px] shadow-[0_2px_8px_rgba(11,61,145,0.08)]">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-[#16449B]">
                 Highest Score
               </p>
-              <h3 className="text-2xl font-black text-[#0B3D91] mt-1">
+              <h3 className="text-2xl font-black text-[#16449B] mt-1">
                 {analytics.highestScorePercentage}%
               </h3>
             </div>
@@ -258,11 +258,11 @@ export const ProgressAnalytics: React.FC<ProgressAnalyticsProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Teacher Remarks Box */}
             <div className="cbse-card p-6 space-y-3">
-              <div className="flex items-center gap-2 text-[#0B3D91] font-bold text-sm">
-                <Award className="w-5 h-5 text-[#2563EB]" />
+              <div className="flex items-center gap-2 text-[#16449B] font-bold text-sm">
+                <Award className="w-5 h-5 text-[#16449B]" />
                 <span>Teacher Evaluation & Remarks</span>
               </div>
-              <p className="text-xs text-[#0B3D91] leading-relaxed italic bg-white p-4 rounded-[10px] border border-[#D6E4FF] font-medium">
+              <p className="text-xs text-[#16449B] leading-relaxed italic bg-white p-4 rounded-[10px] border border-[#D6E4FF] font-medium">
                 "{analytics.teacherRemarks}"
               </p>
             </div>
@@ -270,11 +270,11 @@ export const ProgressAnalytics: React.FC<ProgressAnalyticsProps> = ({
             {/* Quick Actions */}
             <div className="cbse-card p-6 space-y-4 flex flex-col justify-between">
               <div>
-                <div className="flex items-center gap-2 text-[#0B3D91] font-bold text-sm mb-2">
-                  <FileText className="w-5 h-5 text-[#2563EB]" />
+                <div className="flex items-center gap-2 text-[#16449B] font-bold text-sm mb-2">
+                  <FileText className="w-5 h-5 text-[#16449B]" />
                   <span>Parent Progress Card</span>
                 </div>
-                <p className="text-xs text-[#0B3D91]/80 font-semibold leading-relaxed">
+                <p className="text-xs text-[#16449B]/80 font-semibold leading-relaxed">
                   Generate an official performance report card for parents containing lesson breakdown, average score, grade, and weak topic action plans.
                 </p>
               </div>
@@ -291,15 +291,15 @@ export const ProgressAnalytics: React.FC<ProgressAnalyticsProps> = ({
 
           {/* Recent Submissions */}
           <div className="cbse-card overflow-hidden">
-            <div className="p-4 bg-[#0B3D91] text-white font-bold text-sm">
+            <div className="p-4 bg-[#16449B] text-white font-bold text-sm">
               Recent Test Attempts Log
             </div>
             {attempts.length === 0 ? (
-              <p className="p-6 text-center text-xs text-[#0B3D91]/70 font-semibold">No attempts recorded yet.</p>
+              <p className="p-6 text-center text-xs text-[#16449B]/70 font-semibold">No attempts recorded yet.</p>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs text-[#0B3D91]">
-                  <thead className="bg-[#0B3D91] text-white uppercase font-bold border-b border-[#D6E4FF]">
+                <table className="w-full text-left text-xs text-[#16449B]">
+                  <thead className="bg-[#16449B] text-white uppercase font-bold border-b border-[#D6E4FF]">
                     <tr>
                       <th className="px-6 py-3">Test Title</th>
                       <th className="px-6 py-3">Attempt #</th>
@@ -313,16 +313,16 @@ export const ProgressAnalytics: React.FC<ProgressAnalyticsProps> = ({
                       const pct = Math.round((att.score / (att.totalQuestions || 1)) * 100);
                       return (
                         <tr key={att.id} className="hover:bg-[#F8FBFF] transition-colors">
-                          <td className="px-6 py-3.5 font-bold text-[#0B3D91]">{att.testTitle}</td>
+                          <td className="px-6 py-3.5 font-bold text-[#16449B]">{att.testTitle}</td>
                           <td className="px-6 py-3.5 font-semibold">Attempt {att.attemptNumber}</td>
-                          <td className="px-6 py-3.5 font-bold text-[#0B3D91]">
+                          <td className="px-6 py-3.5 font-bold text-[#16449B]">
                             {att.score} / {att.totalQuestions}
                           </td>
                           <td className="px-6 py-3.5">
                             <span
                               className={`px-2.5 py-0.5 rounded-full font-bold text-[11px] ${
                                 pct >= 70
-                                  ? 'bg-[#2563EB] text-white'
+                                  ? 'bg-[#16449B] text-white'
                                   : 'bg-[#DC2626] text-white'
                               }`}
                             >
@@ -333,7 +333,7 @@ export const ProgressAnalytics: React.FC<ProgressAnalyticsProps> = ({
                             {onViewAttemptReview && (
                               <button
                                 onClick={() => onViewAttemptReview(att)}
-                                className="text-[#2563EB] hover:underline font-bold cursor-pointer"
+                                className="text-[#16449B] hover:underline font-bold cursor-pointer"
                               >
                                 Review →
                               </button>
@@ -357,11 +357,11 @@ export const ProgressAnalytics: React.FC<ProgressAnalyticsProps> = ({
           <div className="cbse-card p-6 space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#D6E4FF] pb-4">
               <div>
-                <h3 className="text-base font-bold text-[#0B3D91] flex items-center gap-2">
-                  <BarChart2 className="w-5 h-5 text-[#2563EB]" />
+                <h3 className="text-base font-bold text-[#16449B] flex items-center gap-2">
+                  <BarChart2 className="w-5 h-5 text-[#16449B]" />
                   <span>Lesson-wise Progress Bar Chart</span>
                 </h3>
-                <p className="text-xs text-[#0B3D91]/80 font-semibold mt-1">
+                <p className="text-xs text-[#16449B]/80 font-semibold mt-1">
                   Percentage score for each mathematics lesson (0–100%). Easily identify strong vs weak lessons.
                 </p>
               </div>
@@ -370,10 +370,10 @@ export const ProgressAnalytics: React.FC<ProgressAnalyticsProps> = ({
             {/* Color Legend Rule Box */}
             <div className="grid grid-cols-2 gap-3 bg-white p-4 rounded-[10px] border border-[#D6E4FF] text-xs">
               <div className="flex items-center gap-2.5 bg-white p-2.5 rounded-lg border border-[#D6E4FF]">
-                <div className="w-3.5 h-3.5 rounded-sm bg-[#2563EB]" />
+                <div className="w-3.5 h-3.5 rounded-sm bg-[#16449B]" />
                 <div>
-                  <span className="font-extrabold text-[#0B3D91] block">70% and above</span>
-                  <span className="text-[10px] font-bold text-[#0B3D91]/80">Blue → Strong Mastery</span>
+                  <span className="font-extrabold text-[#16449B] block">70% and above</span>
+                  <span className="text-[10px] font-bold text-[#16449B]/80">Blue → Strong Mastery</span>
                 </div>
               </div>
 
@@ -393,15 +393,15 @@ export const ProgressAnalytics: React.FC<ProgressAnalyticsProps> = ({
                   <CartesianGrid strokeDasharray="3 3" stroke="#D6E4FF" strokeOpacity={0.6} />
                   <XAxis
                     dataKey="lesson"
-                    stroke="#0B3D91"
-                    tick={{ fontSize: 11, fontWeight: 700, fill: '#0B3D91' }}
+                    stroke="#16449B"
+                    tick={{ fontSize: 11, fontWeight: 700, fill: '#16449B' }}
                     interval={0}
                     angle={-15}
                     textAnchor="end"
                   />
-                  <YAxis domain={[0, 100]} stroke="#0B3D91" tick={{ fontSize: 11, fill: '#0B3D91' }} unit="%" />
+                  <YAxis domain={[0, 100]} stroke="#16449B" tick={{ fontSize: 11, fill: '#16449B' }} unit="%" />
                   <Tooltip
-                    contentStyle={{ backgroundColor: '#FFFFFF', borderColor: '#2563EB', borderRadius: '8px', color: '#0B3D91' }}
+                    contentStyle={{ backgroundColor: '#FFFFFF', borderColor: '#16449B', borderRadius: '8px', color: '#16449B' }}
                     formatter={(value: any, name: any, props: any) => [
                       `${value}% (${props.payload.status})`,
                       'Lesson Score',
@@ -420,12 +420,12 @@ export const ProgressAnalytics: React.FC<ProgressAnalyticsProps> = ({
 
           {/* Detailed Lesson Breakdown Table */}
           <div className="cbse-card overflow-hidden">
-            <div className="p-4 bg-[#0B3D91] font-bold text-sm text-white">
+            <div className="p-4 bg-[#16449B] font-bold text-sm text-white">
               CBSE Lesson Wise Performance Summary
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs text-[#0B3D91]">
-                <thead className="bg-[#0B3D91] text-white uppercase font-bold border-b border-[#D6E4FF]">
+              <table className="w-full text-left text-xs text-[#16449B]">
+                <thead className="bg-[#16449B] text-white uppercase font-bold border-b border-[#D6E4FF]">
                   <tr>
                     <th className="px-6 py-3.5">Lesson Name</th>
                     <th className="px-6 py-3.5">Tests Attempted</th>
@@ -436,15 +436,15 @@ export const ProgressAnalytics: React.FC<ProgressAnalyticsProps> = ({
                 <tbody className="divide-y divide-[#D6E4FF]">
                   {analytics.lessonBarChartData.map((lb) => (
                     <tr key={lb.lesson} className="hover:bg-[#F8FBFF] transition-colors">
-                      <td className="px-6 py-4 font-bold text-[#0B3D91]">{lb.lesson}</td>
+                      <td className="px-6 py-4 font-bold text-[#16449B]">{lb.lesson}</td>
                       <td className="px-6 py-4 font-semibold">{lb.attemptsCount} test(s)</td>
-                      <td className="px-6 py-4 font-bold" style={{ color: lb.score >= 70 ? '#2563EB' : '#DC2626' }}>
+                      <td className="px-6 py-4 font-bold" style={{ color: lb.score >= 70 ? '#16449B' : '#DC2626' }}>
                         {lb.score}%
                       </td>
                       <td className="px-6 py-4">
                         <span
                           className={`px-3 py-1 rounded-full text-xs font-bold ${
-                            lb.score >= 70 ? 'bg-[#2563EB] text-white' : 'bg-[#DC2626] text-white'
+                            lb.score >= 70 ? 'bg-[#16449B] text-white' : 'bg-[#DC2626] text-white'
                           }`}
                         >
                           {lb.status}
@@ -465,11 +465,11 @@ export const ProgressAnalytics: React.FC<ProgressAnalyticsProps> = ({
           {/* Pie Chart */}
           <div className="cbse-card p-6 space-y-4">
             <div>
-              <h3 className="text-base font-bold text-[#0B3D91] flex items-center gap-2">
-                <PieIcon className="w-5 h-5 text-[#2563EB]" />
+              <h3 className="text-base font-bold text-[#16449B] flex items-center gap-2">
+                <PieIcon className="w-5 h-5 text-[#16449B]" />
                 <span>Overall Test Performance</span>
               </h3>
-              <p className="text-xs text-[#0B3D91]/80 font-semibold mt-1">
+              <p className="text-xs text-[#16449B]/80 font-semibold mt-1">
                 Distribution of correct, wrong, and unanswered questions.
               </p>
             </div>
@@ -490,7 +490,7 @@ export const ProgressAnalytics: React.FC<ProgressAnalyticsProps> = ({
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
-                  <Tooltip contentStyle={{ backgroundColor: '#FFFFFF', borderColor: '#2563EB', borderRadius: '8px', color: '#0B3D91' }} />
+                  <Tooltip contentStyle={{ backgroundColor: '#FFFFFF', borderColor: '#16449B', borderRadius: '8px', color: '#16449B' }} />
                   <Legend />
                 </PieChart>
               </ResponsiveContainer>
@@ -500,26 +500,26 @@ export const ProgressAnalytics: React.FC<ProgressAnalyticsProps> = ({
           {/* Line Chart */}
           <div className="cbse-card p-6 space-y-4">
             <div>
-              <h3 className="text-base font-bold text-[#0B3D91] flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-[#2563EB]" />
+              <h3 className="text-base font-bold text-[#16449B] flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-[#16449B]" />
                 <span>Performance Improvement Trend</span>
               </h3>
-              <p className="text-xs text-[#0B3D91]/80 font-semibold mt-1">
+              <p className="text-xs text-[#16449B]/80 font-semibold mt-1">
                 Progress line showing score growth across consecutive test attempts.
               </p>
             </div>
 
             {lineData.length === 0 ? (
-              <p className="text-center text-xs text-[#0B3D91]/70 font-semibold py-12">No test history recorded.</p>
+              <p className="text-center text-xs text-[#16449B]/70 font-semibold py-12">No test history recorded.</p>
             ) : (
               <div className="w-full h-64">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={lineData} margin={{ top: 20, right: 30, left: 0, bottom: 20 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#D6E4FF" strokeOpacity={0.6} />
-                    <XAxis dataKey="attempt" stroke="#0B3D91" tick={{ fontSize: 11, fill: '#0B3D91' }} />
-                    <YAxis domain={[0, 100]} stroke="#0B3D91" tick={{ fontSize: 11, fill: '#0B3D91' }} />
-                    <Tooltip contentStyle={{ backgroundColor: '#FFFFFF', borderColor: '#2563EB', borderRadius: '8px', color: '#0B3D91' }} />
-                    <Line type="monotone" dataKey="Score" stroke="#2563EB" strokeWidth={3} dot={{ r: 5, fill: '#2563EB' }} />
+                    <XAxis dataKey="attempt" stroke="#16449B" tick={{ fontSize: 11, fill: '#16449B' }} />
+                    <YAxis domain={[0, 100]} stroke="#16449B" tick={{ fontSize: 11, fill: '#16449B' }} />
+                    <Tooltip contentStyle={{ backgroundColor: '#FFFFFF', borderColor: '#16449B', borderRadius: '8px', color: '#16449B' }} />
+                    <Line type="monotone" dataKey="Score" stroke="#16449B" strokeWidth={3} dot={{ r: 5, fill: '#16449B' }} />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
@@ -534,11 +534,11 @@ export const ProgressAnalytics: React.FC<ProgressAnalyticsProps> = ({
           <div className="cbse-card p-6 space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-base font-bold text-[#0B3D91] flex items-center gap-2">
+                <h3 className="text-base font-bold text-[#16449B] flex items-center gap-2">
                   <AlertTriangle className="w-5 h-5 text-[#DC2626]" />
                   <span>Improvement Area Detection</span>
                 </h3>
-                <p className="text-xs text-[#0B3D91]/80 font-semibold mt-1">
+                <p className="text-xs text-[#16449B]/80 font-semibold mt-1">
                   Automated rule-based detection identifying weak CBSE chapters and recommended actions.
                 </p>
               </div>
@@ -554,9 +554,9 @@ export const ProgressAnalytics: React.FC<ProgressAnalyticsProps> = ({
                 <span className="text-[10px] font-bold text-[#DC2626] block uppercase">&lt; 70%</span>
                 <span className="text-xs font-bold text-[#DC2626]">Improvement Required</span>
               </div>
-              <div className="bg-[#2563EB]/10 border border-[#2563EB] p-2.5 rounded-[10px] text-center">
-                <span className="text-[10px] font-bold text-[#2563EB] block uppercase">70%+</span>
-                <span className="text-xs font-bold text-[#2563EB]">Good Mastery</span>
+              <div className="bg-[#16449B]/10 border border-[#16449B] p-2.5 rounded-[10px] text-center">
+                <span className="text-[10px] font-bold text-[#16449B] block uppercase">70%+</span>
+                <span className="text-xs font-bold text-[#16449B]">Good Mastery</span>
               </div>
             </div>
           </div>
@@ -564,9 +564,9 @@ export const ProgressAnalytics: React.FC<ProgressAnalyticsProps> = ({
           {/* Weak Topics Cards */}
           {analytics.weakTopics.length === 0 ? (
             <div className="cbse-card p-8 text-center space-y-2">
-              <CheckCircle className="w-10 h-10 text-[#2563EB] mx-auto" />
-              <h4 className="text-base font-bold text-[#0B3D91]">No Critical Weak Areas Found!</h4>
-              <p className="text-xs text-[#0B3D91]/80 font-semibold">
+              <CheckCircle className="w-10 h-10 text-[#16449B] mx-auto" />
+              <h4 className="text-base font-bold text-[#16449B]">No Critical Weak Areas Found!</h4>
+              <p className="text-xs text-[#16449B]/80 font-semibold">
                 You are scoring above 70% in all attempted topics. Maintain your revision momentum!
               </p>
             </div>
@@ -591,14 +591,14 @@ export const ProgressAnalytics: React.FC<ProgressAnalyticsProps> = ({
                   </div>
 
                   <div>
-                    <h5 className="text-xs font-bold text-[#0B3D91] mb-2 flex items-center gap-1.5">
-                      <BookOpen className="w-3.5 h-3.5 text-[#2563EB]" />
+                    <h5 className="text-xs font-bold text-[#16449B] mb-2 flex items-center gap-1.5">
+                      <BookOpen className="w-3.5 h-3.5 text-[#16449B]" />
                       <span>Recommended Action Plan:</span>
                     </h5>
-                    <ul className="space-y-2 text-xs text-[#0B3D91] font-semibold">
+                    <ul className="space-y-2 text-xs text-[#16449B] font-semibold">
                       {wt.recommendedActions.map((action, idx) => (
                         <li key={idx} className="flex items-start gap-2 bg-white p-2.5 rounded-[8px] border border-[#D6E4FF]">
-                          <span className="text-[#2563EB] font-bold">•</span>
+                          <span className="text-[#16449B] font-bold">•</span>
                           <span>{action}</span>
                         </li>
                       ))}
@@ -616,11 +616,11 @@ export const ProgressAnalytics: React.FC<ProgressAnalyticsProps> = ({
         <div className="cbse-card p-6 space-y-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#D6E4FF] pb-4">
             <div>
-              <h3 className="text-lg font-bold text-[#0B3D91] flex items-center gap-2">
-                <Award className="w-5 h-5 text-[#2563EB]" />
+              <h3 className="text-lg font-bold text-[#16449B] flex items-center gap-2">
+                <Award className="w-5 h-5 text-[#16449B]" />
                 <span>Parent Progress Card Preview</span>
               </h3>
-              <p className="text-xs text-[#0B3D91]/80 font-semibold mt-0.5">
+              <p className="text-xs text-[#16449B]/80 font-semibold mt-0.5">
                 Full progress report formatted for parent submission and printable export.
               </p>
             </div>
@@ -638,33 +638,33 @@ export const ProgressAnalytics: React.FC<ProgressAnalyticsProps> = ({
           <div className="bg-white border border-[#D6E4FF] p-6 rounded-[14px] space-y-5">
             <div className="flex justify-between items-start border-b border-[#D6E4FF] pb-4">
               <div>
-                <h2 className="text-xl font-bold text-[#0B3D91]">{analytics.studentName}</h2>
-                <p className="text-xs text-[#0B3D91]/80 font-semibold mt-1">Class: {analytics.studentClass}</p>
+                <h2 className="text-xl font-bold text-[#16449B]">{analytics.studentName}</h2>
+                <p className="text-xs text-[#16449B]/80 font-semibold mt-1">Class: {analytics.studentClass}</p>
               </div>
               <div className="text-right">
-                <span className="text-2xl font-black text-[#0B3D91]">Grade {analytics.grade}</span>
-                <p className="text-[10px] text-[#0B3D91] uppercase font-bold">{analytics.performanceGradeTitle}</p>
+                <span className="text-2xl font-black text-[#16449B]">Grade {analytics.grade}</span>
+                <p className="text-[10px] text-[#16449B] uppercase font-bold">{analytics.performanceGradeTitle}</p>
               </div>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-center">
               <div className="bg-white p-3 rounded-[8px] border border-[#D6E4FF]">
-                <span className="text-[10px] text-[#0B3D91] font-bold uppercase block">Overall Average</span>
-                <span className="text-base font-bold text-[#0B3D91]">{analytics.avgPercentage}%</span>
+                <span className="text-[10px] text-[#16449B] font-bold uppercase block">Overall Average</span>
+                <span className="text-base font-bold text-[#16449B]">{analytics.avgPercentage}%</span>
               </div>
               <div className="bg-white p-3 rounded-[8px] border border-[#D6E4FF]">
-                <span className="text-[10px] text-[#0B3D91] font-bold uppercase block">Tests Attempted</span>
-                <span className="text-base font-bold text-[#0B3D91]">{analytics.totalTestsAttempted}</span>
+                <span className="text-[10px] text-[#16449B] font-bold uppercase block">Tests Attempted</span>
+                <span className="text-base font-bold text-[#16449B]">{analytics.totalTestsAttempted}</span>
               </div>
               <div className="bg-white p-3 rounded-[8px] border border-[#D6E4FF] col-span-2 sm:col-span-1">
-                <span className="text-[10px] text-[#0B3D91] font-bold uppercase block">Highest Score</span>
-                <span className="text-base font-bold text-[#0B3D91]">{analytics.highestScorePercentage}%</span>
+                <span className="text-[10px] text-[#16449B] font-bold uppercase block">Highest Score</span>
+                <span className="text-base font-bold text-[#16449B]">{analytics.highestScorePercentage}%</span>
               </div>
             </div>
 
             <div className="space-y-2">
-              <h4 className="text-xs font-bold text-[#0B3D91]">Teacher Remarks:</h4>
-              <p className="text-xs text-[#0B3D91] italic bg-white p-3 rounded-[8px] border border-[#D6E4FF] font-medium">
+              <h4 className="text-xs font-bold text-[#16449B]">Teacher Remarks:</h4>
+              <p className="text-xs text-[#16449B] italic bg-white p-3 rounded-[8px] border border-[#D6E4FF] font-medium">
                 "{analytics.teacherRemarks}"
               </p>
             </div>
@@ -676,24 +676,24 @@ export const ProgressAnalytics: React.FC<ProgressAnalyticsProps> = ({
       {activeTab === 'parent' && (
         <div className="cbse-card p-6 space-y-6">
           <div>
-            <h3 className="text-lg font-bold text-[#0B3D91] flex items-center gap-2">
-              <Share2 className="w-5 h-5 text-[#2563EB]" />
+            <h3 className="text-lg font-bold text-[#16449B] flex items-center gap-2">
+              <Share2 className="w-5 h-5 text-[#16449B]" />
               <span>Send Progress Card to Parent</span>
             </h3>
-            <p className="text-xs text-[#0B3D91]/80 font-semibold mt-1">
+            <p className="text-xs text-[#16449B]/80 font-semibold mt-1">
               Select your preferred communication channel to send the student progress report directly to parents.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* WhatsApp */}
-            <div className="bg-white border border-[#D6E4FF] border-t-4 border-t-[#2563EB] p-6 rounded-[14px] shadow-[0_2px_8px_rgba(11,61,145,0.08)] space-y-4 flex flex-col justify-between">
+            <div className="bg-white border border-[#D6E4FF] border-t-4 border-t-[#16449B] p-6 rounded-[14px] shadow-[0_2px_8px_rgba(11,61,145,0.08)] space-y-4 flex flex-col justify-between">
               <div>
-                <div className="w-10 h-10 rounded-[10px] bg-[#2563EB] flex items-center justify-center text-white mb-3">
+                <div className="w-10 h-10 rounded-[10px] bg-[#16449B] flex items-center justify-center text-white mb-3">
                   <Share2 className="w-5 h-5 text-white" />
                 </div>
-                <h4 className="text-base font-bold text-[#0B3D91]">WhatsApp Share Link</h4>
-                <p className="text-xs text-[#0B3D91]/80 font-semibold mt-1">
+                <h4 className="text-base font-bold text-[#16449B]">WhatsApp Share Link</h4>
+                <p className="text-xs text-[#16449B]/80 font-semibold mt-1">
                   Generates an instant WhatsApp message pre-filled with student scores, grade, and weak topic actions.
                 </p>
               </div>
@@ -708,13 +708,13 @@ export const ProgressAnalytics: React.FC<ProgressAnalyticsProps> = ({
             </div>
 
             {/* Email PDF */}
-            <div className="bg-white border border-[#D6E4FF] border-t-4 border-t-[#2563EB] p-6 rounded-[14px] shadow-[0_2px_8px_rgba(11,61,145,0.08)] space-y-4 flex flex-col justify-between">
+            <div className="bg-white border border-[#D6E4FF] border-t-4 border-t-[#16449B] p-6 rounded-[14px] shadow-[0_2px_8px_rgba(11,61,145,0.08)] space-y-4 flex flex-col justify-between">
               <div>
-                <div className="w-10 h-10 rounded-[10px] bg-[#2563EB] flex items-center justify-center text-white mb-3">
+                <div className="w-10 h-10 rounded-[10px] bg-[#16449B] flex items-center justify-center text-white mb-3">
                   <Mail className="w-5 h-5 text-white" />
                 </div>
-                <h4 className="text-base font-bold text-[#0B3D91]">Email Progress Card</h4>
-                <p className="text-xs text-[#0B3D91]/80 font-semibold mt-1">
+                <h4 className="text-base font-bold text-[#16449B]">Email Progress Card</h4>
+                <p className="text-xs text-[#16449B]/80 font-semibold mt-1">
                   Email an official performance progress card with pre-formatted subject line and attached PDF report.
                 </p>
               </div>
@@ -729,13 +729,13 @@ export const ProgressAnalytics: React.FC<ProgressAnalyticsProps> = ({
             </div>
 
             {/* Download PDF */}
-            <div className="bg-white border border-[#D6E4FF] border-t-4 border-t-[#2563EB] p-6 rounded-[14px] shadow-[0_2px_8px_rgba(11,61,145,0.08)] space-y-4 flex flex-col justify-between">
+            <div className="bg-white border border-[#D6E4FF] border-t-4 border-t-[#16449B] p-6 rounded-[14px] shadow-[0_2px_8px_rgba(11,61,145,0.08)] space-y-4 flex flex-col justify-between">
               <div>
-                <div className="w-10 h-10 rounded-[10px] bg-[#2563EB] flex items-center justify-center text-white mb-3">
+                <div className="w-10 h-10 rounded-[10px] bg-[#16449B] flex items-center justify-center text-white mb-3">
                   <Download className="w-5 h-5 text-white" />
                 </div>
-                <h4 className="text-base font-bold text-[#0B3D91]">Download PDF Card</h4>
-                <p className="text-xs text-[#0B3D91]/80 font-semibold mt-1">
+                <h4 className="text-base font-bold text-[#16449B]">Download PDF Card</h4>
+                <p className="text-xs text-[#16449B]/80 font-semibold mt-1">
                   Download or print a clean, high-resolution Progress Report Card for school records and offline distribution.
                 </p>
               </div>
@@ -754,7 +754,7 @@ export const ProgressAnalytics: React.FC<ProgressAnalyticsProps> = ({
 
       {/* Progress Card Modal */}
       {showProgressCardModal && (
-        <React.Suspense fallback={<div className="fixed inset-0 bg-[#0052CC]/20 backdrop-blur-sm flex items-center justify-center text-[#0052CC] font-bold">Loading...</div>}>
+        <React.Suspense fallback={<div className="fixed inset-0 bg-[#16449B]/20 backdrop-blur-sm flex items-center justify-center text-[#16449B] font-bold">Loading...</div>}>
           <ParentProgressCardModal
             analytics={analytics}
             onClose={() => setShowProgressCardModal(false)}

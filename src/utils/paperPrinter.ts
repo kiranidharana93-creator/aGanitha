@@ -321,7 +321,7 @@ export async function printCBSEQuestionPaper(test: Test, existingQuestions?: Que
             z-index: 9999;
           }
           .btn-print {
-            background: #2563eb;
+            background: #16449B;
             color: white;
             border: none;
             padding: 8px 18px;
@@ -514,8 +514,8 @@ export async function downloadAdminAnswerKeyDOCX(test: Test, existingQuestions?:
       <title>${test.title} - Admin Answer Key</title>
       <style>
         body { font-family: 'Calibri', 'Segoe UI', Arial, sans-serif; font-size: 11pt; line-height: 1.5; color: #0f172a; margin: 20pt; }
-        .header { text-align: center; border-bottom: 2pt solid #1e3a8a; padding-bottom: 8pt; margin-bottom: 16pt; }
-        .title { font-size: 16pt; font-weight: bold; color: #1e3a8a; text-transform: uppercase; }
+        .header { text-align: center; border-bottom: 2pt solid #16449B; padding-bottom: 8pt; margin-bottom: 16pt; }
+        .title { font-size: 16pt; font-weight: bold; color: #16449B; text-transform: uppercase; }
         .subtitle { font-size: 13pt; font-weight: bold; color: #334155; margin-top: 4pt; }
         .meta { font-size: 10.5pt; color: #475569; margin-top: 6pt; font-weight: bold; }
         table { width: 100%; border-collapse: collapse; margin-top: 16pt; font-size: 10.5pt; }
@@ -619,10 +619,10 @@ export async function downloadAdminAnswerKeyPDF(test: Test, existingQuestions?: 
           @page { size: A4 portrait; margin: 12mm; }
           body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 10.5pt; color: #0f172a; margin: 0; padding: 20px; }
           .no-print-bar { position: fixed; top: 0; left: 0; right: 0; background: #0f172a; color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 9999; font-family: system-ui; }
-          .btn-action { background: #2563eb; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+          .btn-action { background: #16449B; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; }
           .btn-close { background: #475569; color: white; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; }
-          .header { text-align: center; border-bottom: 2px solid #1e3a8a; padding-bottom: 10px; margin-top: 40px; margin-bottom: 16px; }
-          .title { font-size: 16pt; font-weight: bold; color: #1e3a8a; text-transform: uppercase; }
+          .header { text-align: center; border-bottom: 2px solid #16449B; padding-bottom: 10px; margin-top: 40px; margin-bottom: 16px; }
+          .title { font-size: 16pt; font-weight: bold; color: #16449B; text-transform: uppercase; }
           .subtitle { font-size: 13pt; font-weight: bold; color: #334155; margin-top: 4px; }
           .admin-tag { font-size: 11pt; font-weight: bold; color: #15803d; margin-top: 4px; }
           .meta { font-size: 10.5pt; font-weight: bold; color: #475569; margin-top: 6px; }
