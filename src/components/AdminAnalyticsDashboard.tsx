@@ -18,7 +18,6 @@ import {
   Award,
   AlertTriangle,
   Search,
-  Eye,
   FileText,
   TrendingDown,
   TrendingUp,
@@ -160,73 +159,73 @@ export const AdminAnalyticsDashboard: React.FC<AdminAnalyticsDashboardProps> = (
     <div className="space-y-6">
       {/* School Overview Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-lg flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400 shrink-0">
-            <Users className="w-6 h-6" />
+        <div className="bg-white border-2 border-[#0052CC] p-5 rounded-2xl shadow-md flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-[#0052CC] flex items-center justify-center text-white shrink-0">
+            <Users className="w-6 h-6 text-white" />
           </div>
           <div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-[#0052CC] block">
               Total Students
             </span>
-            <h3 className="text-2xl font-black text-white mt-0.5">{schoolMetrics.totalStudents}</h3>
+            <h3 className="text-2xl font-black text-[#0052CC] mt-0.5">{schoolMetrics.totalStudents}</h3>
           </div>
         </div>
 
-        <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-lg flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shrink-0">
-            <FileCheck className="w-6 h-6" />
+        <div className="bg-white border-2 border-[#0052CC] p-5 rounded-2xl shadow-md flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-[#0052CC] flex items-center justify-center text-white shrink-0">
+            <FileCheck className="w-6 h-6 text-white" />
           </div>
           <div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-[#0052CC] block">
               Tests Conducted
             </span>
-            <h3 className="text-2xl font-black text-white mt-0.5">
+            <h3 className="text-2xl font-black text-[#0052CC] mt-0.5">
               {schoolMetrics.totalTestsConducted}
             </h3>
           </div>
         </div>
 
-        <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-lg flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
-            <Award className="w-6 h-6" />
+        <div className="bg-white border-2 border-[#0052CC] p-5 rounded-2xl shadow-md flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-[#0052CC] flex items-center justify-center text-white shrink-0">
+            <Award className="w-6 h-6 text-white" />
           </div>
           <div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-[#0052CC] block">
               School Avg Score
             </span>
-            <h3 className="text-2xl font-black text-emerald-400 mt-0.5">
+            <h3 className="text-2xl font-black text-[#0052CC] mt-0.5">
               {schoolMetrics.avgSchoolScore}%
             </h3>
           </div>
         </div>
 
-        <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-lg flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400 shrink-0">
-            <TrendingUp className="w-6 h-6" />
+        <div className="bg-white border-2 border-[#0052CC] p-5 rounded-2xl shadow-md flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-[#0052CC] flex items-center justify-center text-white shrink-0">
+            <TrendingUp className="w-6 h-6 text-white" />
           </div>
           <div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-[#0052CC] block">
               Top Topic
             </span>
-            <h3 className="text-sm font-bold text-white mt-0.5 truncate max-w-[120px]">
+            <h3 className="text-sm font-bold text-[#0052CC] mt-0.5 truncate max-w-[120px]">
               {schoolMetrics.topTopic}
             </h3>
           </div>
         </div>
 
         {/* Lowest Scoring Topic Highlighted in Red */}
-        <div className="bg-red-950/30 border border-red-800/60 p-5 rounded-2xl shadow-lg flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-red-500/20 border border-red-500/40 flex items-center justify-center text-red-400 shrink-0">
-            <TrendingDown className="w-6 h-6" />
+        <div className="bg-white border-2 border-[#D32F2F] p-5 rounded-2xl shadow-md flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-[#D32F2F] flex items-center justify-center text-white shrink-0">
+            <TrendingDown className="w-6 h-6 text-white" />
           </div>
           <div>
-            <span className="text-[10px] font-extrabold uppercase tracking-wider text-red-400 block">
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#D32F2F] block">
               Most Difficult Topic
             </span>
-            <h3 className="text-sm font-bold text-red-200 mt-0.5 truncate max-w-[120px]">
+            <h3 className="text-sm font-bold text-[#D32F2F] mt-0.5 truncate max-w-[120px]">
               {schoolMetrics.lowestTopic}
             </h3>
-            <span className="text-[11px] font-bold text-red-400">
+            <span className="text-[11px] font-bold text-[#D32F2F]">
               Avg: {schoolMetrics.lowestTopicAvg}%
             </span>
           </div>
@@ -236,31 +235,31 @@ export const AdminAnalyticsDashboard: React.FC<AdminAnalyticsDashboardProps> = (
       {/* Analytics Charts Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Top 5 Students Chart */}
-        <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl space-y-4">
+        <div className="bg-white border-2 border-[#0052CC] p-6 rounded-2xl shadow-md space-y-4">
           <div>
-            <h3 className="text-base font-bold text-white flex items-center gap-2">
-              <Award className="w-5 h-5 text-emerald-400" />
+            <h3 className="text-base font-bold text-[#0052CC] flex items-center gap-2">
+              <Award className="w-5 h-5 text-[#0052CC]" />
               <span>Top 5 Performing Students</span>
             </h3>
-            <p className="text-xs text-slate-400 mt-1">
+            <p className="text-xs font-semibold text-[#0052CC]/80 mt-1">
               Bar chart highlighting highest average percentages across all test submissions.
             </p>
           </div>
 
           {schoolMetrics.topStudentsData.length === 0 ? (
-            <p className="text-center text-xs text-slate-500 py-12">No student scores recorded.</p>
+            <p className="text-center text-xs font-semibold text-[#0052CC]/70 py-12">No student scores recorded.</p>
           ) : (
             <div className="w-full h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={schoolMetrics.topStudentsData} margin={{ top: 20, right: 30, left: 0, bottom: 20 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                  <XAxis dataKey="name" stroke="#94a3b8" tick={{ fontSize: 11 }} />
-                  <YAxis domain={[0, 100]} stroke="#94a3b8" tick={{ fontSize: 11 }} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#0052CC" strokeOpacity={0.2} />
+                  <XAxis dataKey="name" stroke="#0052CC" tick={{ fontSize: 11, fill: '#0052CC' }} />
+                  <YAxis domain={[0, 100]} stroke="#0052CC" tick={{ fontSize: 11, fill: '#0052CC' }} />
                   <Tooltip
-                    contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px' }}
+                    contentStyle={{ backgroundColor: '#FFFFFF', borderColor: '#0052CC', borderRadius: '12px', color: '#0052CC' }}
                     formatter={(val: any) => [`${val}%`, 'Average Score']}
                   />
-                  <Bar dataKey="Average" fill="#10b981" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="Average" fill="#0052CC" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -268,38 +267,38 @@ export const AdminAnalyticsDashboard: React.FC<AdminAnalyticsDashboardProps> = (
         </div>
 
         {/* Topic Difficulty Analysis Table & Highlight */}
-        <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl space-y-4">
+        <div className="bg-white border-2 border-[#0052CC] p-6 rounded-2xl shadow-md space-y-4">
           <div>
-            <h3 className="text-base font-bold text-white flex items-center gap-2">
-              <AlertTriangle className="w-5 h-5 text-amber-400" />
+            <h3 className="text-base font-bold text-[#0052CC] flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-[#D32F2F]" />
               <span>Topic Difficulty Analysis</span>
             </h3>
-            <p className="text-xs text-slate-400 mt-1">
+            <p className="text-xs font-semibold text-[#0052CC]/80 mt-1">
               Chapter difficulty ranking based on overall student accuracy. Lowest scoring topic is highlighted in red.
             </p>
           </div>
 
-          <div className="overflow-y-auto max-h-60 rounded-xl border border-slate-800">
-            <table className="w-full text-left text-xs text-slate-300">
-              <thead className="bg-slate-950 text-slate-400 uppercase font-semibold sticky top-0 border-b border-slate-800">
+          <div className="overflow-y-auto max-h-60 rounded-xl border border-[#0052CC]">
+            <table className="w-full text-left text-xs text-[#0052CC]">
+              <thead className="bg-[#0052CC] text-white uppercase font-bold sticky top-0 border-b border-[#0052CC]">
                 <tr>
                   <th className="px-4 py-3">Topic Chapter</th>
                   <th className="px-4 py-3 text-center">Attempts</th>
                   <th className="px-4 py-3 text-right">Avg Score</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60">
+              <tbody className="divide-y divide-[#0052CC]/20">
                 {schoolMetrics.topicDifficultyData.map((t, idx) => {
                   const isLowest = idx === schoolMetrics.topicDifficultyData.length - 1 && schoolMetrics.topicDifficultyData.length > 1;
 
                   return (
                     <tr
                       key={t.topic}
-                      className={isLowest ? 'bg-red-950/40 text-red-200 font-bold' : 'hover:bg-slate-800/30'}
+                      className={isLowest ? 'bg-[#D32F2F]/10 text-[#D32F2F] font-bold' : 'hover:bg-[#0052CC]/5'}
                     >
                       <td className="px-4 py-3 flex items-center gap-2">
                         {isLowest && (
-                          <span className="bg-red-500/20 text-red-400 border border-red-500/40 text-[9px] px-2 py-0.5 rounded uppercase font-extrabold">
+                          <span className="bg-[#D32F2F] text-white text-[9px] px-2 py-0.5 rounded uppercase font-extrabold">
                             Needs Focus
                           </span>
                         )}
@@ -307,7 +306,7 @@ export const AdminAnalyticsDashboard: React.FC<AdminAnalyticsDashboardProps> = (
                       </td>
                       <td className="px-4 py-3 text-center">{t.count}</td>
                       <td className="px-4 py-3 text-right font-bold">
-                        <span className={isLowest ? 'text-red-400 font-black' : 'text-blue-400'}>
+                        <span className={isLowest ? 'text-[#D32F2F] font-black' : 'text-[#0052CC]'}>
                           {t.avgScore}%
                         </span>
                       </td>
@@ -321,34 +320,34 @@ export const AdminAnalyticsDashboard: React.FC<AdminAnalyticsDashboardProps> = (
       </div>
 
       {/* Student Progress Card Inspection Directory */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl space-y-4 p-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+      <div className="bg-white border-2 border-[#0052CC] rounded-2xl overflow-hidden shadow-md space-y-4 p-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#0052CC]/20 pb-4">
           <div>
-            <h3 className="text-base font-bold text-white flex items-center gap-2">
-              <School className="w-5 h-5 text-blue-400" />
+            <h3 className="text-base font-bold text-[#0052CC] flex items-center gap-2">
+              <School className="w-5 h-5 text-[#0052CC]" />
               <span>Student Performance Directory & Progress Cards</span>
             </h3>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="text-xs font-semibold text-[#0052CC]/80 mt-0.5">
               Select any student to generate and inspect their official Parent Progress Card.
             </p>
           </div>
 
           <div className="flex items-center gap-3">
             <div className="relative">
-              <Search className="w-4 h-4 text-slate-500 absolute left-3 top-2.5" />
+              <Search className="w-4 h-4 text-[#0052CC] absolute left-3 top-2.5" />
               <input
                 type="text"
                 placeholder="Search student..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs text-white focus:outline-none focus:border-blue-500"
+                className="bg-white border border-[#0052CC] rounded-xl pl-9 pr-4 py-2 text-xs text-[#0052CC] font-bold placeholder-[#0052CC]/50 focus:outline-none focus:ring-2 focus:ring-[#0052CC]"
               />
             </div>
 
             <select
               value={classFilter}
               onChange={(e) => setClassFilter(e.target.value)}
-              className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500"
+              className="bg-white border border-[#0052CC] rounded-xl px-3 py-2 text-xs text-[#0052CC] font-bold focus:outline-none focus:ring-2 focus:ring-[#0052CC] cursor-pointer"
             >
               <option value="All">All Classes</option>
               <option value="Class 6">Class 6</option>
@@ -361,8 +360,8 @@ export const AdminAnalyticsDashboard: React.FC<AdminAnalyticsDashboardProps> = (
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-slate-300">
-            <thead className="bg-slate-950 text-slate-400 uppercase font-semibold border-b border-slate-800">
+          <table className="w-full text-left text-xs text-[#0052CC]">
+            <thead className="bg-[#0052CC] text-white uppercase font-bold border-b border-[#0052CC]">
               <tr>
                 <th className="px-6 py-3.5">Student Name</th>
                 <th className="px-6 py-3.5">Class</th>
@@ -372,36 +371,36 @@ export const AdminAnalyticsDashboard: React.FC<AdminAnalyticsDashboardProps> = (
                 <th className="px-6 py-3.5 text-right">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60">
+            <tbody className="divide-y divide-[#0052CC]/20">
               {filteredStudents.map((s) => {
                 const sAttempts = allAttempts.filter((a) => a.studentId === s.id);
                 const sAnalytics = calculateStudentAnalytics(s.name, s.class, sAttempts);
 
                 return (
-                  <tr key={s.id} className="hover:bg-slate-800/40">
-                    <td className="px-6 py-4 font-bold text-white">{s.name}</td>
+                  <tr key={s.id} className="hover:bg-[#0052CC]/5 transition-colors">
+                    <td className="px-6 py-4 font-bold text-[#0052CC]">{s.name}</td>
                     <td className="px-6 py-4">
-                      <span className="bg-slate-800 border border-slate-700 text-blue-300 px-2.5 py-1 rounded-md font-semibold">
+                      <span className="bg-white border border-[#0052CC] text-[#0052CC] px-2.5 py-1 rounded-md font-semibold">
                         {s.class}
                       </span>
                     </td>
-                    <td className="px-6 py-4">{sAnalytics.totalTestsAttempted} test(s)</td>
-                    <td className="px-6 py-4 font-bold text-blue-400">
+                    <td className="px-6 py-4 font-bold text-[#0052CC]">{sAnalytics.totalTestsAttempted} test(s)</td>
+                    <td className="px-6 py-4 font-bold text-[#0052CC]">
                       {sAnalytics.totalTestsAttempted > 0 ? `${sAnalytics.avgPercentage}%` : 'N/A'}
                     </td>
                     <td className="px-6 py-4">
                       {sAnalytics.totalTestsAttempted > 0 ? (
-                        <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2.5 py-0.5 rounded-full font-bold">
+                        <span className="bg-[#0052CC] text-white px-2.5 py-0.5 rounded-full font-bold">
                           Grade {sAnalytics.grade}
                         </span>
                       ) : (
-                        <span className="text-slate-500 italic">No Tests</span>
+                        <span className="text-[#0052CC]/60 italic font-medium">No Tests</span>
                       )}
                     </td>
                     <td className="px-6 py-4 text-right">
                       <button
                         onClick={() => setSelectedStudent(s)}
-                        className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold flex items-center gap-1.5 text-xs ml-auto cursor-pointer transition-colors"
+                        className="px-3 py-1.5 bg-[#0052CC] hover:bg-[#003d99] text-white rounded-xl font-bold flex items-center gap-1.5 text-xs ml-auto cursor-pointer transition-colors"
                       >
                         <FileText className="w-3.5 h-3.5" />
                         <span>Inspect Progress Card</span>

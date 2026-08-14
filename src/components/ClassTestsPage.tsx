@@ -41,28 +41,28 @@ export const ClassTestsPage: React.FC<ClassTestsPageProps> = ({
   });
 
   return (
-    <div className="tests-page max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div className="tests-page max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 bg-white">
       {/* Page Header */}
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="bg-white border-2 border-[#0052CC] rounded-3xl p-6 shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-[#0052CC]">
         <div>
           <button
             onClick={onChangeClass}
-            className="inline-flex items-center gap-1.5 text-xs text-blue-400 hover:text-blue-300 font-semibold mb-2 cursor-pointer transition-colors"
+            className="inline-flex items-center gap-1.5 text-xs text-[#0052CC] hover:underline font-bold mb-2 cursor-pointer transition-colors"
           >
-            <ArrowLeft className="w-3.5 h-3.5" />
+            <ArrowLeft className="w-3.5 h-3.5 text-[#0052CC]" />
             <span>Select Different Class</span>
           </button>
-          <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0052CC] tracking-tight">
             Available Tests – Class {classNumStr}
           </h2>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-[#0052CC]/80 font-medium mt-1">
             Showing all published mathematics assessment test papers for Class {classNumStr}
           </p>
         </div>
 
         <button
           onClick={onChangeClass}
-          className="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-4 py-2.5 rounded-xl text-xs font-semibold transition-colors cursor-pointer self-start sm:self-auto"
+          className="bg-[#0052CC] hover:bg-[#0052CC]/90 text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow-md transition-colors cursor-pointer self-start sm:self-auto"
         >
           Change Class ({`Class ${classNumStr}`})
         </button>
@@ -70,20 +70,20 @@ export const ClassTestsPage: React.FC<ClassTestsPageProps> = ({
 
       {/* Tests Grid */}
       {isLoading ? (
-        <div className="text-center py-16 bg-slate-900 border border-slate-800 rounded-3xl">
-          <RefreshCw className="w-10 h-10 text-blue-500 animate-spin mx-auto mb-3" />
-          <p className="text-sm font-semibold text-slate-300">Loading Available Tests...</p>
+        <div className="text-center py-16 bg-white border-2 border-[#0052CC] rounded-3xl">
+          <RefreshCw className="w-10 h-10 text-[#0052CC] animate-spin mx-auto mb-3" />
+          <p className="text-sm font-bold text-[#0052CC]">Loading Available Tests...</p>
         </div>
       ) : filteredTests.length === 0 ? (
-        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-12 text-center space-y-3">
-          <FileText className="w-12 h-12 text-slate-600 mx-auto" />
-          <h3 className="text-lg font-bold text-slate-200">No Tests Available for Class {classNumStr}</h3>
-          <p className="text-xs text-slate-400 max-w-md mx-auto">
+        <div className="bg-white border-2 border-[#0052CC] rounded-3xl p-12 text-center space-y-3 text-[#0052CC]">
+          <FileText className="w-12 h-12 text-[#0052CC] mx-auto" />
+          <h3 className="text-lg font-extrabold text-[#0052CC]">No Tests Available for Class {classNumStr}</h3>
+          <p className="text-xs text-[#0052CC]/80 font-medium max-w-md mx-auto">
             There are currently no active test papers published for Class {classNumStr}. Please select another class or check back later.
           </p>
           <button
             onClick={onChangeClass}
-            className="mt-2 bg-blue-600 hover:bg-blue-500 text-white font-bold px-5 py-2.5 rounded-xl text-xs shadow-md cursor-pointer"
+            className="mt-2 bg-[#0052CC] hover:bg-[#0052CC]/90 text-white font-bold px-5 py-2.5 rounded-xl text-xs shadow-md cursor-pointer"
           >
             Select Another Class
           </button>

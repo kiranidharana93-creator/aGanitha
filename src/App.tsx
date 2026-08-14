@@ -78,15 +78,15 @@ export default function App() {
 
   if (isInitializing) {
     return (
-      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-white">
-        <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-3"></div>
-        <p className="text-xs font-semibold text-slate-400">Loading CBSE Maths Test Portal...</p>
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center text-[#0052CC]">
+        <div className="w-10 h-10 border-4 border-[#0052CC] border-t-transparent rounded-full animate-spin mb-3"></div>
+        <p className="text-xs font-semibold text-[#0052CC]">Loading CBSE Maths Test Portal...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-blue-500 selection:text-white">
+    <div className="min-h-screen bg-white text-[#0052CC] flex flex-col font-sans selection:bg-[#0052CC] selection:text-white">
       {/* Top Navbar */}
       <Navbar
         currentUser={currentUser}
@@ -96,7 +96,7 @@ export default function App() {
       />
 
       {/* View Router */}
-      <main className="flex-1">
+      <main className="flex-1 bg-white">
         <Suspense fallback={<LoadingScreen />}>
           {!currentUser.role ? (
             <LoginModal onStudentLogin={handleStudentLogin} onAdminLogin={handleAdminLogin} />
@@ -125,9 +125,9 @@ export default function App() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-slate-900 border-t border-slate-800/80 py-4 px-6 text-center text-xs text-slate-500">
+      <footer className="bg-white border-t-2 border-[#0052CC]/20 py-4 px-6 text-center text-xs text-[#0052CC]">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
-          <p>© CBSE Maths Online Assessment Portal • Unlimited Practice Attempts Enabled • Firebase Firestore Backend</p>
+          <p className="font-semibold">© CBSE Maths Online Assessment Portal • Unlimited Practice Attempts Enabled • Firebase Firestore Backend</p>
         </div>
       </footer>
     </div>

@@ -169,51 +169,51 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
   const currentClassNum = selectedClass.replace(/\D/g, '') || '6';
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 bg-white text-[#0052CC]">
       {/* Welcome Banner */}
-      <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-blue-950 border border-slate-800 rounded-3xl p-6 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-white border-2 border-[#0052CC] rounded-3xl p-6 shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs px-3 py-1 rounded-full font-semibold mb-2">
-            <GraduationCap className="w-3.5 h-3.5" />
+          <div className="inline-flex items-center gap-2 bg-[#0052CC] text-white text-xs px-3 py-1 rounded-full font-bold mb-2">
+            <GraduationCap className="w-3.5 h-3.5 text-white" />
             <span>Official Student Examination Portal</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-            Welcome, <span className="text-blue-400">{student.name}</span>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#0052CC] tracking-tight">
+            Welcome, <span className="text-[#0052CC] underline">{student.name}</span>
           </h1>
-          <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            Student ID: <strong className="text-blue-300 font-mono">{student.studentId || student.id}</strong> • Enrolled Class:{' '}
-            <strong className="text-slate-200">{student.class}</strong> ({student.section || 'A'}) • Active View Class:{' '}
-            <strong className="text-emerald-400">{selectedClass}</strong>
+          <p className="text-xs sm:text-sm text-[#0052CC]/80 font-medium mt-1">
+            Student ID: <strong className="text-[#0052CC] font-mono">{student.studentId || student.id}</strong> • Enrolled Class:{' '}
+            <strong className="text-[#0052CC] font-bold">{student.class}</strong> ({student.section || 'A'}) • Active View Class:{' '}
+            <strong className="text-[#0052CC] font-extrabold">{selectedClass}</strong>
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={() => setShowParentModal(true)}
-            className="flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow-lg transition-all cursor-pointer"
+            className="flex items-center gap-2 bg-[#0052CC] hover:bg-[#0052CC]/90 text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow-md transition-all cursor-pointer"
           >
-            <Download className="w-4 h-4" />
+            <Download className="w-4 h-4 text-white" />
             <span>Download Progress Card</span>
           </button>
 
           <button
             onClick={loadDashboardData}
-            className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
+            className="flex items-center gap-2 bg-white text-[#0052CC] hover:bg-[#0052CC]/10 border-2 border-[#0052CC] px-3.5 py-2.5 rounded-xl text-xs font-bold transition-colors cursor-pointer"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 text-[#0052CC] ${isLoading ? 'animate-spin' : ''}`} />
             <span>Refresh</span>
           </button>
         </div>
       </div>
 
       {/* Top Navigation Bar / Quick Tabs */}
-      <div className="flex border-b border-slate-800 overflow-x-auto gap-2 no-scrollbar">
+      <div className="flex border-b-2 border-[#0052CC] overflow-x-auto gap-2 no-scrollbar">
         <button
           onClick={() => setActiveTab('select-class')}
-          className={`flex items-center gap-2 px-5 py-3 text-xs font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
+          className={`flex items-center gap-2 px-5 py-3 text-xs font-bold transition-all cursor-pointer whitespace-nowrap rounded-t-xl ${
             activeTab === 'select-class'
-              ? 'border-blue-500 text-blue-400 bg-blue-500/10'
-              : 'border-transparent text-slate-400 hover:text-slate-200'
+              ? 'bg-[#0052CC] text-white'
+              : 'border border-[#0052CC] text-[#0052CC] hover:bg-[#0052CC]/10'
           }`}
         >
           <BookOpen className="w-4 h-4" />
@@ -222,10 +222,10 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
 
         <button
           onClick={() => setActiveTab('tests')}
-          className={`flex items-center gap-2 px-5 py-3 text-xs font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
+          className={`flex items-center gap-2 px-5 py-3 text-xs font-bold transition-all cursor-pointer whitespace-nowrap rounded-t-xl ${
             activeTab === 'tests'
-              ? 'border-blue-500 text-blue-400 bg-blue-500/10'
-              : 'border-transparent text-slate-400 hover:text-slate-200'
+              ? 'bg-[#0052CC] text-white'
+              : 'border border-[#0052CC] text-[#0052CC] hover:bg-[#0052CC]/10'
           }`}
         >
           <FileText className="w-4 h-4" />
@@ -234,10 +234,10 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
 
         <button
           onClick={() => setActiveTab('results')}
-          className={`flex items-center gap-2 px-5 py-3 text-xs font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
+          className={`flex items-center gap-2 px-5 py-3 text-xs font-bold transition-all cursor-pointer whitespace-nowrap rounded-t-xl ${
             activeTab === 'results'
-              ? 'border-blue-500 text-blue-400 bg-blue-500/10'
-              : 'border-transparent text-slate-400 hover:text-slate-200'
+              ? 'bg-[#0052CC] text-white'
+              : 'border border-[#0052CC] text-[#0052CC] hover:bg-[#0052CC]/10'
           }`}
         >
           <History className="w-4 h-4" />
@@ -246,10 +246,10 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
 
         <button
           onClick={() => setActiveTab('progress')}
-          className={`flex items-center gap-2 px-5 py-3 text-xs font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
+          className={`flex items-center gap-2 px-5 py-3 text-xs font-bold transition-all cursor-pointer whitespace-nowrap rounded-t-xl ${
             activeTab === 'progress'
-              ? 'border-blue-500 text-blue-400 bg-blue-500/10'
-              : 'border-transparent text-slate-400 hover:text-slate-200'
+              ? 'bg-[#0052CC] text-white'
+              : 'border border-[#0052CC] text-[#0052CC] hover:bg-[#0052CC]/10'
           }`}
         >
           <BarChart2 className="w-4 h-4" />
@@ -270,33 +270,33 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
         <div className="space-y-6">
           {/* Active / Unfinished Exam Draft Banner */}
           {draftExam && (
-            <div className="bg-gradient-to-r from-amber-950/40 via-slate-900 to-slate-900 border-2 border-amber-500/50 rounded-3xl p-6 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-5">
+            <div className="bg-white border-2 border-[#D32F2F] rounded-3xl p-6 shadow-md flex flex-col md:flex-row md:items-center justify-between gap-5 text-[#D32F2F]">
               <div className="space-y-2">
-                <span className="bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                <span className="bg-[#D32F2F] text-white text-[11px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">
                   Unfinished Exam Found
                 </span>
-                <h3 className="text-xl font-bold text-white mt-1">
+                <h3 className="text-xl font-extrabold text-[#D32F2F] mt-1">
                   {cleanStudentTestTitle(draftExam.testTitle || 'Mathematics Test')}
                 </h3>
-                <div className="flex flex-wrap items-center gap-4 text-xs text-slate-300">
-                  <span>Class: <strong className="text-white">{draftExam.testClass}</strong></span>
-                  <span>Progress: <strong className="text-amber-400">Question {draftExam.currentIndex + 1}</strong></span>
-                  <span>Time Left: <strong className="text-amber-400">{Math.ceil(draftExam.timeLeft / 60)} Minutes</strong></span>
+                <div className="flex flex-wrap items-center gap-4 text-xs font-bold">
+                  <span>Class: {draftExam.testClass}</span>
+                  <span>Progress: Question {draftExam.currentIndex + 1}</span>
+                  <span>Time Left: {Math.ceil(draftExam.timeLeft / 60)} Minutes</span>
                 </div>
               </div>
 
               <div className="flex items-center gap-3">
                 <button
                   onClick={handleDiscardDraft}
-                  className="px-4 py-3 rounded-xl border border-slate-700 text-slate-400 hover:text-red-400 hover:border-red-500/40 text-xs font-semibold transition-all cursor-pointer"
+                  className="px-4 py-3 rounded-xl border-2 border-[#D32F2F] text-[#D32F2F] hover:bg-[#D32F2F] hover:text-white text-xs font-bold transition-all cursor-pointer"
                 >
                   Discard
                 </button>
                 <button
                   onClick={handleContinueDraft}
-                  className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold px-6 py-3 rounded-xl shadow-lg transition-all text-xs flex items-center gap-2 cursor-pointer"
+                  className="bg-[#0052CC] hover:bg-[#0052CC]/90 text-white font-extrabold px-6 py-3 rounded-xl shadow-md transition-all text-xs flex items-center gap-2 cursor-pointer"
                 >
-                  <Play className="w-4 h-4 fill-slate-950" />
+                  <Play className="w-4 h-4 fill-white" />
                   <span>Continue Exam</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
@@ -322,30 +322,30 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
       {activeTab === 'results' && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-base font-extrabold text-white flex items-center gap-2">
-              <History className="w-4 h-4 text-emerald-400" />
+            <h2 className="text-base font-extrabold text-[#0052CC] flex items-center gap-2">
+              <History className="w-4 h-4 text-[#0052CC]" />
               <span>My Results ({allStudentAttempts.length})</span>
             </h2>
-            <span className="text-xs text-slate-400">History of submitted test attempts</span>
+            <span className="text-xs font-semibold text-[#0052CC]">History of submitted test attempts</span>
           </div>
 
           {allStudentAttempts.length === 0 ? (
-            <div className="bg-slate-900 border border-slate-800 rounded-3xl p-12 text-center space-y-2">
-              <Award className="w-12 h-12 text-slate-600 mx-auto" />
-              <h3 className="text-base font-bold text-slate-200">No Test Results Recorded Yet</h3>
-              <p className="text-xs text-slate-400">Complete an available test paper to record test results.</p>
+            <div className="bg-white border-2 border-[#0052CC] rounded-3xl p-12 text-center space-y-2 text-[#0052CC]">
+              <Award className="w-12 h-12 text-[#0052CC] mx-auto" />
+              <h3 className="text-base font-extrabold text-[#0052CC]">No Test Results Recorded Yet</h3>
+              <p className="text-xs font-medium text-[#0052CC]/80">Complete an available test paper to record test results.</p>
               <button
                 onClick={() => setActiveTab('select-class')}
-                className="mt-3 bg-blue-600 hover:bg-blue-500 text-white font-bold px-5 py-2.5 rounded-xl text-xs shadow-md cursor-pointer"
+                className="mt-3 bg-[#0052CC] hover:bg-[#0052CC]/90 text-white font-extrabold px-5 py-2.5 rounded-xl text-xs shadow-md cursor-pointer"
               >
                 Start a Test Now
               </button>
             </div>
           ) : (
-            <div className="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-xl">
+            <div className="bg-white border-2 border-[#0052CC] rounded-3xl overflow-hidden shadow-md">
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs text-slate-300">
-                  <thead className="bg-slate-950 text-slate-400 uppercase font-semibold border-b border-slate-800">
+                <table className="w-full text-left text-xs text-[#0052CC]">
+                  <thead className="bg-[#0052CC] text-white uppercase font-bold">
                     <tr>
                       <th className="px-6 py-4">Lesson Test Name</th>
                       <th className="px-6 py-4">Attempt #</th>
@@ -355,41 +355,41 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
                       <th className="px-6 py-4 text-right">Action</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-800/60">
+                  <tbody className="divide-y border-[#0052CC]/20">
                     {allStudentAttempts.map((att) => {
                       const percentage = Math.round((att.score / (att.totalQuestions || 1)) * 100);
                       const isPassed = percentage >= 40;
                       const cleanTitle = cleanStudentTestTitle(att.testTitle || 'Mathematics Test');
 
                       return (
-                        <tr key={att.id} className="hover:bg-slate-800/40 transition-colors">
-                          <td className="px-6 py-4 font-bold text-white">{cleanTitle}</td>
+                        <tr key={att.id} className="hover:bg-[#0052CC]/5 transition-colors">
+                          <td className="px-6 py-4 font-bold text-[#0052CC]">{cleanTitle}</td>
                           <td className="px-6 py-4">
-                            <span className="bg-slate-800 border border-slate-700 text-slate-200 px-2.5 py-1 rounded-full font-semibold">
+                            <span className="bg-white border border-[#0052CC] text-[#0052CC] px-2.5 py-1 rounded-full font-extrabold">
                               Attempt #{att.attemptNumber}
                             </span>
                           </td>
-                          <td className="px-6 py-4 font-bold text-slate-200">
+                          <td className="px-6 py-4 font-extrabold text-[#0052CC]">
                             {att.score} / {att.totalQuestions}
                           </td>
                           <td className="px-6 py-4">
                             <span
-                              className={`inline-flex items-center gap-1 font-bold px-2.5 py-0.5 rounded-full ${
+                              className={`inline-flex items-center gap-1 font-extrabold px-2.5 py-0.5 rounded-full ${
                                 isPassed
-                                  ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
-                                  : 'bg-red-500/10 text-red-400 border border-red-500/30'
+                                  ? 'bg-white text-[#0052CC] border border-[#0052CC]'
+                                  : 'bg-white text-[#D32F2F] border border-[#D32F2F]'
                               }`}
                             >
                               {percentage}%
                             </span>
                           </td>
-                          <td className="px-6 py-4 text-slate-400">
+                          <td className="px-6 py-4 font-medium text-[#0052CC]">
                             {att.submittedAt ? new Date(att.submittedAt).toLocaleString('en-IN') : 'N/A'}
                           </td>
                           <td className="px-6 py-4 text-right">
                             <button
                               onClick={() => onViewAttemptReview(att)}
-                              className="text-blue-400 hover:text-blue-300 font-semibold cursor-pointer"
+                              className="text-[#0052CC] hover:underline font-extrabold cursor-pointer"
                             >
                               Review Answers →
                             </button>
@@ -409,21 +409,21 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
       {activeTab === 'progress' && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-base font-extrabold text-white flex items-center gap-2">
-              <BarChart2 className="w-4 h-4 text-purple-400" />
+            <h2 className="text-base font-extrabold text-[#0052CC] flex items-center gap-2">
+              <BarChart2 className="w-4 h-4 text-[#0052CC]" />
               <span>My Progress Analytics & Lesson Bar Chart</span>
             </h2>
 
             <button
               onClick={() => setShowParentModal(true)}
-              className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3.5 py-1.5 rounded-xl text-xs flex items-center gap-1.5 cursor-pointer shadow-md"
+              className="bg-[#0052CC] hover:bg-[#0052CC]/90 text-white font-extrabold px-3.5 py-1.5 rounded-xl text-xs flex items-center gap-1.5 cursor-pointer shadow-md"
             >
-              <Download className="w-3.5 h-3.5" />
+              <Download className="w-3.5 h-3.5 text-white" />
               <span>Parent Card Modal</span>
             </button>
           </div>
 
-          <React.Suspense fallback={<div className="p-6 text-center text-slate-400 font-medium animate-pulse">Loading analytics...</div>}>
+          <React.Suspense fallback={<div className="p-6 text-center text-[#0052CC] font-bold animate-pulse">Loading analytics...</div>}>
             <ProgressAnalytics
               student={student}
               attempts={allStudentAttempts}
@@ -435,7 +435,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
 
       {/* Parent Progress Card Modal */}
       {showParentModal && (
-        <React.Suspense fallback={<div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center text-white">Loading report card...</div>}>
+        <React.Suspense fallback={<div className="fixed inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center text-[#0052CC] font-bold">Loading report card...</div>}>
           <ParentProgressCardModal
             analytics={analytics}
             onClose={() => setShowParentModal(false)}

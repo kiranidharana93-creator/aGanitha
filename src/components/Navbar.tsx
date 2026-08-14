@@ -14,18 +14,18 @@ export const Navbar: React.FC<NavbarProps> = ({
   onLogout,
 }) => {
   return (
-    <header className="bg-slate-900 text-white shadow-md border-b border-slate-800 sticky top-0 z-40">
+    <header className="bg-[#0052CC] text-white shadow-md sticky top-0 z-40 border-b-2 border-white/20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         {/* Brand */}
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white shadow-inner font-bold">
-            <Calculator className="w-6 h-6" />
+          <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center text-[#0052CC] shadow-inner font-bold">
+            <Calculator className="w-6 h-6 text-[#0052CC]" />
           </div>
           <div>
             <h1 className="text-lg font-bold tracking-tight text-white flex items-center gap-2">
-              CBSE Maths <span className="bg-blue-600 text-xs px-2 py-0.5 rounded font-medium tracking-wide">PORTAL</span>
+              CBSE Maths <span className="bg-white text-[#0052CC] text-xs px-2 py-0.5 rounded font-extrabold tracking-wide">PORTAL</span>
             </h1>
-            <p className="text-xs text-slate-400">Online Examination & Assessment System</p>
+            <p className="text-xs text-white/90 font-medium">Online Examination & Assessment System</p>
           </div>
         </div>
 
@@ -33,29 +33,29 @@ export const Navbar: React.FC<NavbarProps> = ({
         {currentUser.role && (
           <div className="flex items-center space-x-4">
             {currentUser.role === 'student' && currentUser.student && (
-              <div className="hidden sm:flex items-center space-x-2 bg-slate-800/80 border border-slate-700/60 rounded-full px-3.5 py-1.5 text-xs text-slate-200">
-                <GraduationCap className="w-4 h-4 text-blue-400" />
-                <span className="font-semibold text-white">{currentUser.student.name}</span>
-                <span className="text-slate-500">•</span>
-                <span className="bg-blue-500/20 text-blue-300 font-medium px-2 py-0.5 rounded-full border border-blue-500/30">
+              <div className="hidden sm:flex items-center space-x-2 bg-white/10 border border-white/30 rounded-full px-3.5 py-1.5 text-xs text-white">
+                <GraduationCap className="w-4 h-4 text-white" />
+                <span className="font-bold text-white">{currentUser.student.name}</span>
+                <span className="text-white/60">•</span>
+                <span className="bg-white text-[#0052CC] font-extrabold px-2 py-0.5 rounded-full">
                   {currentUser.student.class}
                 </span>
               </div>
             )}
 
             {currentUser.role === 'admin' && (
-              <div className="flex items-center space-x-2 bg-indigo-950/80 border border-indigo-700/60 rounded-full px-3.5 py-1.5 text-xs text-indigo-200">
-                <ShieldCheck className="w-4 h-4 text-indigo-400" />
+              <div className="flex items-center space-x-2 bg-white/10 border border-white/30 rounded-full px-3.5 py-1.5 text-xs text-white">
+                <ShieldCheck className="w-4 h-4 text-white" />
                 <span className="font-bold tracking-wide">ADMINISTRATOR</span>
               </div>
             )}
 
             <button
               onClick={onLogout}
-              className="flex items-center space-x-1.5 text-xs font-medium text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
+              className="flex items-center space-x-1.5 text-xs font-bold text-[#0052CC] bg-white hover:bg-white/90 border border-white px-3.5 py-1.5 rounded-lg transition-colors cursor-pointer shadow-sm"
               title="Logout"
             >
-              <LogOut className="w-3.5 h-3.5 text-slate-400" />
+              <LogOut className="w-3.5 h-3.5 text-[#0052CC]" />
               <span className="hidden sm:inline">Logout</span>
             </button>
           </div>

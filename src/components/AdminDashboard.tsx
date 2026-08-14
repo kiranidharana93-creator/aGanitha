@@ -518,135 +518,133 @@ export const AdminDashboard: React.FC = () => {
   const publishedCount = tests.filter((t) => t.published).length;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6 bg-white text-[#0052CC]">
       {/* Top Admin Header */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-white border-2 border-[#0052CC] rounded-2xl p-6 shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4 text-[#0052CC]">
         <div>
-          <span className="bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs px-3 py-1 rounded-full font-semibold">
+          <span className="bg-[#0052CC] text-white text-xs px-3.5 py-1 rounded-full font-extrabold shadow-sm">
             Admin Management Console
           </span>
-          <h1 className="text-2xl font-bold text-white mt-1">CBSE Maths Examination Control Center</h1>
-          <p className="text-xs text-slate-400 mt-1">
+          <h1 className="text-2xl font-extrabold text-[#0052CC] mt-2">CBSE Maths Examination Control Center</h1>
+          <p className="text-xs text-[#0052CC]/80 mt-1 font-semibold">
             Manage upcoming tests, add/edit MCQ questions, publish exams, and export student performance reports.
           </p>
         </div>
 
         <button
           onClick={loadData}
-          className="self-start md:self-auto flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-4 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
+          className="self-start md:self-auto flex items-center gap-2 bg-[#0052CC] hover:bg-[#0052CC]/90 text-white px-4 py-2.5 rounded-xl text-xs font-extrabold shadow-md transition-all cursor-pointer"
         >
-          <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
+          <RefreshCw className={`w-3.5 h-3.5 text-white ${isLoading ? 'animate-spin' : ''}`} />
           <span>Refresh Data</span>
         </button>
       </div>
 
       {/* Metrics Overview Bar */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-lg">
+        <div className="bg-white border-2 border-[#0052CC] p-4 rounded-xl shadow-md text-[#0052CC]">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-400 uppercase">Total Tests</span>
-            <FileText className="w-5 h-5 text-blue-400" />
+            <span className="text-xs font-extrabold text-[#0052CC] uppercase tracking-wider">Total Tests</span>
+            <FileText className="w-5 h-5 text-[#0052CC]" />
           </div>
-          <p className="text-2xl font-black text-white mt-2">{tests.length}</p>
-          <p className="text-[11px] text-slate-500 mt-0.5">{publishedCount} Published Live</p>
+          <p className="text-2xl font-extrabold text-[#0052CC] mt-2">{tests.length}</p>
+          <p className="text-[11px] text-[#0052CC]/80 font-bold mt-0.5">{publishedCount} Published Live</p>
         </div>
 
-        <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-lg">
+        <div className="bg-white border-2 border-[#0052CC] p-4 rounded-xl shadow-md text-[#0052CC]">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-400 uppercase">Total Questions</span>
-            <HelpCircle className="w-5 h-5 text-indigo-400" />
+            <span className="text-xs font-extrabold text-[#0052CC] uppercase tracking-wider">Total Questions</span>
+            <HelpCircle className="w-5 h-5 text-[#0052CC]" />
           </div>
-          <p className="text-2xl font-black text-white mt-2">{totalQuestionsCount}</p>
-          <p className="text-[11px] text-slate-500 mt-0.5">MCQs in database</p>
+          <p className="text-2xl font-extrabold text-[#0052CC] mt-2">{totalQuestionsCount}</p>
+          <p className="text-[11px] text-[#0052CC]/80 font-bold mt-0.5">MCQs in database</p>
         </div>
 
-        <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-lg">
+        <div className="bg-white border-2 border-[#0052CC] p-4 rounded-xl shadow-md text-[#0052CC]">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-400 uppercase">Student Submissions</span>
-            <Award className="w-5 h-5 text-emerald-400" />
+            <span className="text-xs font-extrabold text-[#0052CC] uppercase tracking-wider">Student Submissions</span>
+            <Award className="w-5 h-5 text-[#0052CC]" />
           </div>
-          <p className="text-2xl font-black text-white mt-2">{allAttempts.length}</p>
-          <p className="text-[11px] text-slate-500 mt-0.5">Completed attempts</p>
+          <p className="text-2xl font-extrabold text-[#0052CC] mt-2">{allAttempts.length}</p>
+          <p className="text-[11px] text-[#0052CC]/80 font-bold mt-0.5">Completed attempts</p>
         </div>
 
-        <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-lg">
+        <div className="bg-white border-2 border-[#0052CC] p-4 rounded-xl shadow-md text-[#0052CC]">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-400 uppercase">Classes Covered</span>
-            <Layers className="w-5 h-5 text-amber-400" />
+            <span className="text-xs font-extrabold text-[#0052CC] uppercase tracking-wider">Classes Covered</span>
+            <Layers className="w-5 h-5 text-[#0052CC]" />
           </div>
-          <p className="text-2xl font-black text-white mt-2">Class 6 - 10</p>
-          <p className="text-[11px] text-slate-500 mt-0.5">CBSE Mathematics</p>
+          <p className="text-2xl font-extrabold text-[#0052CC] mt-2">Class 6 - 10</p>
+          <p className="text-[11px] text-[#0052CC]/80 font-bold mt-0.5">CBSE Mathematics</p>
         </div>
       </div>
 
-
-
       {/* Navigation Tabs */}
-      <div className="flex border-b border-slate-800 space-x-1">
+      <div className="flex border-b-2 border-[#0052CC]/20 space-x-1 overflow-x-auto pb-1">
         <button
           onClick={() => setActiveTab('tests')}
-          className={`flex items-center gap-2 px-5 py-3 text-xs font-bold border-b-2 transition-all cursor-pointer ${
+          className={`flex items-center gap-2 px-5 py-3 text-xs font-extrabold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
             activeTab === 'tests'
-              ? 'border-indigo-500 text-indigo-400 bg-indigo-500/5'
-              : 'border-transparent text-slate-400 hover:text-slate-200'
+              ? 'border-[#0052CC] text-[#0052CC] bg-[#0052CC]/10'
+              : 'border-transparent text-[#0052CC]/70 hover:text-[#0052CC]'
           }`}
         >
-          <FileText className="w-4 h-4" />
+          <FileText className="w-4 h-4 text-[#0052CC]" />
           <span>Create & Manage Tests ({tests.length})</span>
         </button>
 
         <button
           onClick={() => setActiveTab('questions')}
-          className={`flex items-center gap-2 px-5 py-3 text-xs font-bold border-b-2 transition-all cursor-pointer ${
+          className={`flex items-center gap-2 px-5 py-3 text-xs font-extrabold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
             activeTab === 'questions'
-              ? 'border-indigo-500 text-indigo-400 bg-indigo-500/5'
-              : 'border-transparent text-slate-400 hover:text-slate-200'
+              ? 'border-[#0052CC] text-[#0052CC] bg-[#0052CC]/10'
+              : 'border-transparent text-[#0052CC]/70 hover:text-[#0052CC]'
           }`}
         >
-          <HelpCircle className="w-4 h-4" />
+          <HelpCircle className="w-4 h-4 text-[#0052CC]" />
           <span>Manage MCQ Questions</span>
         </button>
 
         <button
           onClick={() => setActiveTab('students')}
-          className={`flex items-center gap-2 px-5 py-3 text-xs font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
+          className={`flex items-center gap-2 px-5 py-3 text-xs font-extrabold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
             activeTab === 'students'
-              ? 'border-indigo-500 text-indigo-400 bg-indigo-500/5'
-              : 'border-transparent text-slate-400 hover:text-slate-200'
+              ? 'border-[#0052CC] text-[#0052CC] bg-[#0052CC]/10'
+              : 'border-transparent text-[#0052CC]/70 hover:text-[#0052CC]'
           }`}
         >
-          <Users className="w-4 h-4" />
+          <Users className="w-4 h-4 text-[#0052CC]" />
           <span>Student Management & Credentials</span>
         </button>
 
         <button
           onClick={() => setActiveTab('results')}
-          className={`flex items-center gap-2 px-5 py-3 text-xs font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
+          className={`flex items-center gap-2 px-5 py-3 text-xs font-extrabold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
             activeTab === 'results'
-              ? 'border-indigo-500 text-indigo-400 bg-indigo-500/5'
-              : 'border-transparent text-slate-400 hover:text-slate-200'
+              ? 'border-[#0052CC] text-[#0052CC] bg-[#0052CC]/10'
+              : 'border-transparent text-[#0052CC]/70 hover:text-[#0052CC]'
           }`}
         >
-          <Award className="w-4 h-4" />
+          <Award className="w-4 h-4 text-[#0052CC]" />
           <span>Student Results & Reports ({allAttempts.length})</span>
         </button>
 
         <button
           onClick={() => setActiveTab('analytics')}
-          className={`flex items-center gap-2 px-5 py-3 text-xs font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
+          className={`flex items-center gap-2 px-5 py-3 text-xs font-extrabold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
             activeTab === 'analytics'
-              ? 'border-indigo-500 text-indigo-400 bg-indigo-500/5'
-              : 'border-transparent text-slate-400 hover:text-slate-200'
+              ? 'border-[#0052CC] text-[#0052CC] bg-[#0052CC]/10'
+              : 'border-transparent text-[#0052CC]/70 hover:text-[#0052CC]'
           }`}
         >
-          <BarChart2 className="w-4 h-4" />
+          <BarChart2 className="w-4 h-4 text-[#0052CC]" />
           <span>School Analytics & Progress Cards</span>
         </button>
       </div>
 
       {/* TAB: STUDENT MANAGEMENT */}
       {activeTab === 'students' && (
-        <React.Suspense fallback={<div className="p-8 text-center text-slate-400 font-medium animate-pulse">Loading Student Management...</div>}>
+        <React.Suspense fallback={<div className="p-8 text-center text-[#0052CC] font-bold animate-pulse">Loading Student Management...</div>}>
           <StudentManagement />
         </React.Suspense>
       )}
@@ -671,7 +669,7 @@ export const AdminDashboard: React.FC = () => {
         const studentList = Object.values(studentMap);
 
         return (
-          <React.Suspense fallback={<div className="p-8 text-center text-slate-400 font-medium animate-pulse">Loading Analytics Dashboard...</div>}>
+          <React.Suspense fallback={<div className="p-8 text-center text-[#0052CC] font-bold animate-pulse">Loading Analytics Dashboard...</div>}>
             <AdminAnalyticsDashboard
               students={studentList}
               allAttempts={allAttempts}
@@ -684,28 +682,28 @@ export const AdminDashboard: React.FC = () => {
       {/* TAB 1: MANAGE TESTS */}
       {activeTab === 'tests' && (
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h3 className="text-base font-bold text-white">CBSE Maths Tests</h3>
-              <p className="text-xs text-slate-400">Publish or unpublish upcoming tests for students.</p>
+              <h3 className="text-base font-extrabold text-[#0052CC]">CBSE Maths Tests</h3>
+              <p className="text-xs text-[#0052CC]/80 font-medium">Publish or unpublish upcoming tests for students.</p>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <button
                 onClick={handleCleanDuplicates}
-                className="bg-amber-600 hover:bg-amber-500 text-white font-bold px-3.5 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow-lg cursor-pointer transition-all"
+                className="bg-white text-[#D32F2F] hover:bg-[#D32F2F]/10 border-2 border-[#D32F2F] font-extrabold px-3.5 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow-sm cursor-pointer transition-all"
                 title="Remove duplicate test papers and keep only Test 1 & 2 per topic"
               >
-                <Trash2 className="w-3.5 h-3.5" />
+                <Trash2 className="w-3.5 h-3.5 text-[#D32F2F]" />
                 <span>Clean Duplicates</span>
               </button>
 
               <button
                 onClick={handlePublishClass6To10}
-                className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 shadow-lg cursor-pointer transition-all"
+                className="bg-[#0052CC] hover:bg-[#0052CC]/90 text-white font-extrabold px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 shadow-md cursor-pointer transition-all"
                 title="Replace with Class 6, 7, 8, 9 & 10 CBSE Math Test Papers"
               >
-                <Sparkles className="w-4 h-4" />
+                <Sparkles className="w-4 h-4 text-white" />
                 <span>Publish Class 6–10 Papers</span>
               </button>
 
@@ -714,18 +712,18 @@ export const AdminDashboard: React.FC = () => {
                   setEditingTest(null);
                   setShowTestModal(true);
                 }}
-                className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 shadow-lg cursor-pointer"
+                className="bg-[#0052CC] hover:bg-[#0052CC]/90 text-white font-extrabold px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 shadow-md cursor-pointer"
               >
-                <Plus className="w-4 h-4" />
+                <Plus className="w-4 h-4 text-white" />
                 <span>Create Custom Test</span>
               </button>
             </div>
           </div>
 
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+          <div className="bg-white border-2 border-[#0052CC] rounded-2xl overflow-hidden shadow-md text-[#0052CC]">
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs text-slate-300">
-                <thead className="bg-slate-950 text-slate-400 uppercase font-semibold border-b border-slate-800">
+              <table className="w-full text-left text-xs text-[#0052CC]">
+                <thead className="bg-[#0052CC] text-white uppercase font-extrabold border-b-2 border-[#0052CC]">
                   <tr>
                     <th className="px-6 py-3.5">Test Title</th>
                     <th className="px-6 py-3.5">Class</th>
@@ -735,24 +733,24 @@ export const AdminDashboard: React.FC = () => {
                     <th className="px-6 py-3.5 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/60">
+                <tbody className="divide-y-2 divide-[#0052CC]/10">
                   {tests.map((t) => (
-                    <tr key={t.id} className="hover:bg-slate-800/40 transition-colors">
-                      <td className="px-6 py-4 font-bold text-white">{t.title}</td>
+                    <tr key={t.id} className="hover:bg-[#0052CC]/5 transition-colors">
+                      <td className="px-6 py-4 font-extrabold text-[#0052CC]">{t.title}</td>
                       <td className="px-6 py-4">
-                        <span className="bg-slate-800 border border-slate-700 text-blue-300 px-2.5 py-1 rounded-lg font-semibold">
+                        <span className="bg-white border border-[#0052CC] text-[#0052CC] px-2.5 py-1 rounded-lg font-bold">
                           {t.class}
                         </span>
                       </td>
-                      <td className="px-6 py-4 font-medium text-slate-300">{t.duration} Mins</td>
-                      <td className="px-6 py-4 font-bold text-slate-200">{t.questionCount || 0} MCQs</td>
+                      <td className="px-6 py-4 font-bold text-[#0052CC]">{t.duration} Mins</td>
+                      <td className="px-6 py-4 font-extrabold text-[#0052CC]">{t.questionCount || 0} MCQs</td>
                       <td className="px-6 py-4">
                         <button
                           onClick={() => handleTogglePublish(t)}
-                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border transition-colors cursor-pointer ${
+                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold border-2 transition-colors cursor-pointer ${
                             t.published
-                              ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20'
-                              : 'bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700'
+                              ? 'bg-white text-[#0052CC] border-[#0052CC] hover:bg-[#0052CC]/10'
+                              : 'bg-white text-[#D32F2F] border-[#D32F2F] hover:bg-[#D32F2F]/10'
                           }`}
                           title="Click to Publish / Unpublish"
                         >
@@ -764,28 +762,28 @@ export const AdminDashboard: React.FC = () => {
                         <div className="flex items-center justify-end gap-1.5 flex-wrap">
                           <button
                             onClick={() => downloadQuestionPaper(t)}
-                            className="px-2.5 py-1.5 bg-slate-800 text-slate-200 hover:bg-slate-700 border border-slate-700 rounded-lg text-xs font-bold inline-flex items-center gap-1 cursor-pointer transition-colors"
+                            className="px-2.5 py-1.5 bg-white text-[#0052CC] hover:bg-[#0052CC]/10 border-2 border-[#0052CC] rounded-lg text-xs font-extrabold inline-flex items-center gap-1 cursor-pointer transition-colors"
                             title="Print / Download CBSE Question Paper PDF"
                           >
-                            <Printer className="w-3 h-3" />
+                            <Printer className="w-3 h-3 text-[#0052CC]" />
                             <span>Paper PDF</span>
                           </button>
 
                           <button
                             onClick={() => handleDownloadAnswerKeyPDF(t)}
-                            className="px-2.5 py-1.5 bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/30 border border-emerald-500/30 rounded-lg text-xs font-bold inline-flex items-center gap-1 cursor-pointer transition-colors"
+                            className="px-2.5 py-1.5 bg-[#0052CC] text-white hover:bg-[#0052CC]/90 border border-[#0052CC] rounded-lg text-xs font-extrabold inline-flex items-center gap-1 cursor-pointer transition-colors shadow-sm"
                             title="Download Admin Answer Key PDF with Explanations"
                           >
-                            <Download className="w-3 h-3" />
+                            <Download className="w-3 h-3 text-white" />
                             <span>Key PDF</span>
                           </button>
 
                           <button
                             onClick={() => handleDownloadAnswerKeyDOCX(t)}
-                            className="px-2.5 py-1.5 bg-blue-600/20 text-blue-300 hover:bg-blue-600/30 border border-blue-500/30 rounded-lg text-xs font-bold inline-flex items-center gap-1 cursor-pointer transition-colors"
+                            className="px-2.5 py-1.5 bg-white text-[#0052CC] hover:bg-[#0052CC]/10 border-2 border-[#0052CC] rounded-lg text-xs font-extrabold inline-flex items-center gap-1 cursor-pointer transition-colors"
                             title="Download Admin Answer Key DOCX Word Document"
                           >
-                            <FileText className="w-3 h-3" />
+                            <FileText className="w-3 h-3 text-[#0052CC]" />
                             <span>DOCX Key</span>
                           </button>
 
@@ -794,7 +792,7 @@ export const AdminDashboard: React.FC = () => {
                               setSelectedTestId(t.id);
                               setActiveTab('questions');
                             }}
-                            className="px-2.5 py-1.5 text-blue-400 hover:text-blue-300 font-semibold cursor-pointer"
+                            className="px-2.5 py-1.5 text-[#0052CC] hover:underline font-extrabold cursor-pointer"
                             title="Manage Questions"
                           >
                             Questions
@@ -804,17 +802,17 @@ export const AdminDashboard: React.FC = () => {
                               setEditingTest(t);
                               setShowTestModal(true);
                             }}
-                            className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg cursor-pointer"
+                            className="p-1.5 text-[#0052CC] hover:bg-[#0052CC]/10 rounded-lg cursor-pointer"
                             title="Edit Test"
                           >
-                            <Edit className="w-4 h-4" />
+                            <Edit className="w-4 h-4 text-[#0052CC]" />
                           </button>
                           <button
                             onClick={() => handleDeleteTest(t.id)}
-                            className="p-1.5 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg cursor-pointer"
+                            className="p-1.5 text-[#D32F2F] hover:bg-[#D32F2F]/10 rounded-lg cursor-pointer"
                             title="Delete Test"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="w-4 h-4 text-[#D32F2F]" />
                           </button>
                         </div>
                       </td>
@@ -830,13 +828,13 @@ export const AdminDashboard: React.FC = () => {
       {/* TAB 2: MANAGE QUESTIONS */}
       {activeTab === 'questions' && (
         <div className="space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900 p-4 border border-slate-800 rounded-2xl">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 border-2 border-[#0052CC] rounded-2xl text-[#0052CC]">
             <div className="space-y-1 flex-1">
-              <label className="text-xs font-bold text-slate-400 uppercase">Select Test to Manage Questions</label>
+              <label className="text-xs font-extrabold text-[#0052CC] uppercase tracking-wider">Select Test to Manage Questions</label>
               <select
                 value={selectedTestId}
                 onChange={(e) => setSelectedTestId(e.target.value)}
-                className="w-full sm:max-w-md bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+                className="w-full sm:max-w-md bg-white border-2 border-[#0052CC] rounded-xl px-4 py-2.5 text-sm text-[#0052CC] font-bold focus:outline-none focus:ring-2 focus:ring-[#0052CC] cursor-pointer"
               >
                 {tests.map((t) => {
                   const displayTitle = t.title.replace(/\s*\(\s*Class\s*\d+\s*\)/gi, '').trim();
@@ -857,29 +855,29 @@ export const AdminDashboard: React.FC = () => {
                 setShowQuestionModal(true);
               }}
               disabled={!selectedTestId}
-              className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 shadow-lg cursor-pointer disabled:opacity-50"
+              className="bg-[#0052CC] hover:bg-[#0052CC]/90 text-white font-extrabold px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 shadow-md cursor-pointer disabled:opacity-50"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-4 h-4 text-white" />
               <span>Add Question</span>
             </button>
           </div>
 
           {/* Questions List */}
           {questions.length === 0 ? (
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-12 text-center space-y-3">
-              <HelpCircle className="w-12 h-12 text-slate-600 mx-auto" />
-              <h3 className="text-lg font-bold text-slate-200">No Questions Added to This Test</h3>
-              <p className="text-xs text-slate-400 max-w-md mx-auto">
+            <div className="bg-white border-2 border-[#0052CC] rounded-2xl p-12 text-center space-y-3 text-[#0052CC]">
+              <HelpCircle className="w-12 h-12 text-[#0052CC] mx-auto" />
+              <h3 className="text-lg font-extrabold text-[#0052CC]">No Questions Added to This Test</h3>
+              <p className="text-xs text-[#0052CC]/80 font-semibold max-w-md mx-auto">
                 Click <strong>"Add Question"</strong> above to enter multiple-choice math questions for students.
               </p>
             </div>
           ) : (
             <div className="space-y-4">
               {questions.map((q, idx) => (
-                <div key={q.id} className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg space-y-3">
+                <div key={q.id} className="bg-white border-2 border-[#0052CC] rounded-2xl p-5 shadow-md space-y-3 text-[#0052CC]">
                   <div className="flex items-start justify-between gap-4">
-                    <p className="text-sm font-bold text-white">
-                      <span className="text-indigo-400 mr-2">Q{idx + 1}.</span>
+                    <p className="text-sm font-extrabold text-[#0052CC]">
+                      <span className="text-[#0052CC] mr-2">Q{idx + 1}.</span>
                       {q.question}
                     </p>
 
@@ -889,17 +887,17 @@ export const AdminDashboard: React.FC = () => {
                           setEditingQuestion(q);
                           setShowQuestionModal(true);
                         }}
-                        className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg cursor-pointer"
+                        className="p-1.5 text-[#0052CC] hover:bg-[#0052CC]/10 rounded-lg cursor-pointer"
                         title="Edit Question"
                       >
-                        <Edit className="w-4 h-4" />
+                        <Edit className="w-4 h-4 text-[#0052CC]" />
                       </button>
                       <button
                         onClick={() => handleDeleteQuestion(q.id)}
-                        className="p-1.5 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg cursor-pointer"
+                        className="p-1.5 text-[#D32F2F] hover:bg-[#D32F2F]/10 rounded-lg cursor-pointer"
                         title="Delete Question"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-4 h-4 text-[#D32F2F]" />
                       </button>
                     </div>
                   </div>
@@ -915,16 +913,16 @@ export const AdminDashboard: React.FC = () => {
                       return (
                         <div
                           key={opt.key}
-                          className={`p-2.5 rounded-xl border flex items-center justify-between ${
+                          className={`p-2.5 rounded-xl border-2 flex items-center justify-between ${
                             isCorrect
-                              ? 'bg-emerald-950/40 border-emerald-500/50 text-emerald-200 font-bold'
-                              : 'bg-slate-950 border-slate-800 text-slate-300'
+                              ? 'bg-[#0052CC]/10 border-[#0052CC] text-[#0052CC] font-extrabold'
+                              : 'bg-white border-[#0052CC]/30 text-[#0052CC] font-semibold'
                           }`}
                         >
                           <span>
                             <strong className="mr-1">{opt.label}:</strong> {opt.val}
                           </span>
-                          {isCorrect && <span className="text-[10px] text-emerald-400 font-extrabold">✔ Correct</span>}
+                          {isCorrect && <span className="text-[10px] text-[#0052CC] font-extrabold">✔ Correct</span>}
                         </div>
                       );
                     })}
@@ -939,26 +937,26 @@ export const AdminDashboard: React.FC = () => {
       {/* TAB 3: STUDENT RESULTS & REPORTS */}
       {activeTab === 'results' && (
         <div className="space-y-4">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900 p-4 border border-slate-800 rounded-2xl">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 border-2 border-[#0052CC] rounded-2xl text-[#0052CC]">
             {/* Filters */}
             <div className="flex flex-wrap items-center gap-3 flex-1">
               <div className="relative flex-1 min-w-[200px]">
-                <Search className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
+                <Search className="w-4 h-4 text-[#0052CC] absolute left-3 top-3" />
                 <input
                   type="text"
                   value={nameSearch}
                   onChange={(e) => setNameSearch(e.target.value)}
                   placeholder="Filter by Student Name or Test..."
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full bg-white border-2 border-[#0052CC] rounded-xl pl-9 pr-4 py-2 text-xs text-[#0052CC] font-bold placeholder-[#0052CC]/50 focus:outline-none focus:ring-2 focus:ring-[#0052CC]"
                 />
               </div>
 
               <div className="flex items-center space-x-2">
-                <Filter className="w-4 h-4 text-slate-400" />
+                <Filter className="w-4 h-4 text-[#0052CC]" />
                 <select
                   value={classFilter}
                   onChange={(e) => setClassFilter(e.target.value)}
-                  className="bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+                  className="bg-white border-2 border-[#0052CC] rounded-xl px-3 py-2 text-xs text-[#0052CC] font-bold focus:outline-none focus:ring-2 focus:ring-[#0052CC] cursor-pointer"
                 >
                   <option value="All">All Classes</option>
                   <option value="Class 6">Class 6</option>
@@ -975,10 +973,10 @@ export const AdminDashboard: React.FC = () => {
               {selectedAttemptIds.length > 0 && (
                 <button
                   onClick={handleDeleteSelectedAttempts}
-                  className="bg-red-600 hover:bg-red-500 text-white font-bold px-3.5 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow-lg transition-colors cursor-pointer"
+                  className="bg-[#D32F2F] hover:bg-[#D32F2F]/90 text-white font-extrabold px-3.5 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow-md transition-colors cursor-pointer"
                   title="Delete selected student results"
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <Trash2 className="w-4 h-4 text-white" />
                   <span>Delete Selected ({selectedAttemptIds.length})</span>
                 </button>
               )}
@@ -986,19 +984,19 @@ export const AdminDashboard: React.FC = () => {
               {allAttempts.length > 0 && (
                 <button
                   onClick={handleDeleteAllAttempts}
-                  className="bg-red-950/80 hover:bg-red-900 border border-red-800 text-red-300 font-bold px-3.5 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow-lg transition-colors cursor-pointer"
+                  className="bg-white border-2 border-[#D32F2F] text-[#D32F2F] hover:bg-[#D32F2F]/10 font-extrabold px-3.5 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow-sm transition-colors cursor-pointer"
                   title="Delete ALL student results permanently"
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <Trash2 className="w-4 h-4 text-[#D32F2F]" />
                   <span>Delete All Results</span>
                 </button>
               )}
 
               <button
                 onClick={handleExportCSV}
-                className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 shadow-lg transition-colors cursor-pointer"
+                className="bg-[#0052CC] hover:bg-[#0052CC]/90 text-white font-extrabold px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 shadow-md transition-colors cursor-pointer"
               >
-                <Download className="w-4 h-4" />
+                <Download className="w-4 h-4 text-white" />
                 <span>Export CSV</span>
               </button>
             </div>
@@ -1006,23 +1004,23 @@ export const AdminDashboard: React.FC = () => {
 
           {/* Results Table */}
           {filteredAttempts.length === 0 ? (
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-12 text-center space-y-2">
-              <Award className="w-12 h-12 text-slate-600 mx-auto" />
-              <h3 className="text-lg font-bold text-slate-200">No Student Results Found</h3>
-              <p className="text-xs text-slate-400">Try clearing search filters or wait for students to complete tests.</p>
+            <div className="bg-white border-2 border-[#0052CC] rounded-2xl p-12 text-center space-y-2 text-[#0052CC]">
+              <Award className="w-12 h-12 text-[#0052CC] mx-auto" />
+              <h3 className="text-lg font-extrabold text-[#0052CC]">No Student Results Found</h3>
+              <p className="text-xs text-[#0052CC]/80 font-semibold">Try clearing search filters or wait for students to complete tests.</p>
             </div>
           ) : (
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
-              <div className="p-4 bg-slate-800/80 border-b border-slate-800 flex items-center justify-between text-xs text-slate-400">
+            <div className="bg-white border-2 border-[#0052CC] rounded-2xl overflow-hidden shadow-md text-[#0052CC]">
+              <div className="p-4 bg-white border-b-2 border-[#0052CC] flex items-center justify-between text-xs text-[#0052CC] font-bold">
                 <span>Showing {filteredAttempts.length} Student Test Submissions</span>
                 {selectedAttemptIds.length > 0 && (
-                  <span className="text-indigo-400 font-semibold">{selectedAttemptIds.length} row(s) selected</span>
+                  <span className="text-[#0052CC] font-extrabold">{selectedAttemptIds.length} row(s) selected</span>
                 )}
               </div>
 
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs text-slate-300">
-                  <thead className="bg-slate-950 text-slate-400 uppercase font-semibold border-b border-slate-800">
+                <table className="w-full text-left text-xs text-[#0052CC]">
+                  <thead className="bg-[#0052CC] text-white uppercase font-extrabold border-b-2 border-[#0052CC]">
                     <tr>
                       <th className="px-4 py-3.5 w-10 text-center">
                         <input
@@ -1038,7 +1036,7 @@ export const AdminDashboard: React.FC = () => {
                               setSelectedAttemptIds([]);
                             }
                           }}
-                          className="w-4 h-4 accent-indigo-600 rounded cursor-pointer"
+                          className="w-4 h-4 accent-white rounded cursor-pointer"
                           title="Select All Results"
                         />
                       </th>
@@ -1052,7 +1050,7 @@ export const AdminDashboard: React.FC = () => {
                       <th className="px-6 py-3.5 text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-800/60">
+                  <tbody className="divide-y-2 divide-[#0052CC]/10">
                     {filteredAttempts.map((att) => {
                       const percentage = Math.round((att.score / (att.totalQuestions || 1)) * 100);
                       const isPassed = percentage >= 40;
@@ -1062,7 +1060,7 @@ export const AdminDashboard: React.FC = () => {
                         <tr
                           key={att.id}
                           className={`transition-colors ${
-                            isSelected ? 'bg-indigo-950/30' : 'hover:bg-slate-800/40'
+                            isSelected ? 'bg-[#0052CC]/15 font-bold' : 'hover:bg-[#0052CC]/5'
                           }`}
                         >
                           <td className="px-4 py-4 w-10 text-center">
@@ -1076,62 +1074,62 @@ export const AdminDashboard: React.FC = () => {
                                   setSelectedAttemptIds((prev) => prev.filter((id) => id !== att.id));
                                 }
                               }}
-                              className="w-4 h-4 accent-indigo-600 rounded cursor-pointer"
+                              className="w-4 h-4 accent-[#0052CC] rounded cursor-pointer"
                             />
                           </td>
-                          <td className="px-6 py-4 font-bold text-white">{att.studentName || 'Student'}</td>
+                          <td className="px-6 py-4 font-extrabold text-[#0052CC]">{att.studentName || 'Student'}</td>
                           <td className="px-6 py-4">
-                            <span className="bg-slate-800 border border-slate-700 text-blue-300 px-2 py-0.5 rounded font-semibold">
+                            <span className="bg-white border border-[#0052CC] text-[#0052CC] px-2 py-0.5 rounded font-extrabold">
                               {att.studentClass || 'N/A'}
                             </span>
                           </td>
-                          <td className="px-6 py-4 font-medium text-slate-200">{att.testTitle || 'Test'}</td>
+                          <td className="px-6 py-4 font-bold text-[#0052CC]">{att.testTitle || 'Test'}</td>
                           <td className="px-6 py-4">
-                            <span className="bg-slate-800 border border-slate-700 text-slate-300 px-2 py-0.5 rounded-full font-bold">
+                            <span className="bg-white border border-[#0052CC] text-[#0052CC] px-2 py-0.5 rounded-full font-extrabold">
                               Attempt {att.attemptNumber}
                             </span>
                           </td>
-                          <td className="px-6 py-4 font-bold text-slate-100">
+                          <td className="px-6 py-4 font-extrabold text-[#0052CC]">
                             {att.score} / {att.totalQuestions}
                           </td>
                           <td className="px-6 py-4">
                             <span
-                              className={`font-extrabold px-2 py-0.5 rounded-full ${
-                                isPassed ? 'bg-emerald-500/20 text-emerald-300' : 'bg-red-500/20 text-red-300'
+                              className={`font-extrabold px-2 py-0.5 rounded-full border ${
+                                isPassed ? 'bg-white border-[#0052CC] text-[#0052CC]' : 'bg-white border-[#D32F2F] text-[#D32F2F]'
                               }`}
                             >
                               {percentage}%
                             </span>
                           </td>
-                          <td className="px-6 py-4 text-slate-400">
+                          <td className="px-6 py-4 text-[#0052CC] font-medium">
                             {att.submittedAt ? new Date(att.submittedAt).toLocaleString('en-IN') : 'N/A'}
                           </td>
                           <td className="px-6 py-4 text-right">
                             <div className="flex items-center justify-end gap-1">
                               <button
                                 onClick={() => setViewingAttempt(att)}
-                                className="px-2.5 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-lg text-xs font-semibold flex items-center gap-1 cursor-pointer transition-colors"
+                                className="px-2.5 py-1.5 bg-[#0052CC] text-white hover:bg-[#0052CC]/90 border border-[#0052CC] rounded-lg text-xs font-extrabold flex items-center gap-1 cursor-pointer transition-colors shadow-sm"
                                 title="View Submission Details"
                               >
-                                <Eye className="w-3.5 h-3.5" />
+                                <Eye className="w-3.5 h-3.5 text-white" />
                                 <span>View</span>
                               </button>
 
                               <button
                                 onClick={() => handleDownloadPDF(att)}
-                                className="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg text-xs font-semibold flex items-center gap-1 cursor-pointer transition-colors"
+                                className="px-2.5 py-1.5 bg-white text-[#0052CC] hover:bg-[#0052CC]/10 border-2 border-[#0052CC] rounded-lg text-xs font-extrabold flex items-center gap-1 cursor-pointer transition-colors"
                                 title="Download PDF Report"
                               >
-                                <Download className="w-3.5 h-3.5" />
+                                <Download className="w-3.5 h-3.5 text-[#0052CC]" />
                                 <span>PDF</span>
                               </button>
 
                               <button
                                 onClick={() => handleDeleteAttempt(att)}
-                                className="p-1.5 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg cursor-pointer transition-colors"
+                                className="p-1.5 text-[#D32F2F] hover:bg-[#D32F2F]/10 rounded-lg cursor-pointer transition-colors"
                                 title="Delete Result Record"
                               >
-                                <Trash2 className="w-4 h-4" />
+                                <Trash2 className="w-4 h-4 text-[#D32F2F]" />
                               </button>
                             </div>
                           </td>
@@ -1148,7 +1146,7 @@ export const AdminDashboard: React.FC = () => {
 
       {/* Test Modal */}
       {showTestModal && (
-        <React.Suspense fallback={<div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center text-white">Loading...</div>}>
+        <React.Suspense fallback={<div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center text-[#0052CC]">Loading...</div>}>
           <TestModal
             testToEdit={editingTest}
             onClose={() => setShowTestModal(false)}
@@ -1159,7 +1157,7 @@ export const AdminDashboard: React.FC = () => {
 
       {/* Question Modal */}
       {showQuestionModal && (
-        <React.Suspense fallback={<div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center text-white">Loading...</div>}>
+        <React.Suspense fallback={<div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center text-[#0052CC]">Loading...</div>}>
           <QuestionModal
             testList={tests}
             selectedTestId={selectedTestId}
@@ -1172,28 +1170,28 @@ export const AdminDashboard: React.FC = () => {
 
       {/* Result Details Modal */}
       {viewingAttempt && (
-        <React.Suspense fallback={<div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center text-white">Loading...</div>}>
+        <React.Suspense fallback={<div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center text-[#0052CC]">Loading...</div>}>
           <ResultDetailsModal attempt={viewingAttempt} onClose={() => setViewingAttempt(null)} />
         </React.Suspense>
       )}
 
       {/* Delete Confirmation Modal */}
       {deletingItem && (
-        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150">
-            <div className="flex items-center space-x-3 text-red-400">
-              <div className="p-3 bg-red-500/10 rounded-xl">
-                <Trash2 className="w-6 h-6" />
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white border-2 border-[#0052CC] rounded-2xl w-full max-w-md p-6 shadow-xl space-y-4 text-[#0052CC] animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center space-x-3 text-[#D32F2F]">
+              <div className="p-3 bg-white border-2 border-[#D32F2F] rounded-xl">
+                <Trash2 className="w-6 h-6 text-[#D32F2F]" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-white">
+                <h3 className="text-lg font-extrabold text-[#D32F2F]">
                   {deletingItem.type === 'reset' ? 'Confirm Reset' : 'Confirm Deletion'}
                 </h3>
-                <p className="text-xs text-slate-400">This action cannot be undone</p>
+                <p className="text-xs text-[#0052CC] font-bold">This action cannot be undone</p>
               </div>
             </div>
 
-            <p className="text-sm text-slate-300 leading-relaxed font-medium">
+            <p className="text-sm text-[#0052CC] leading-relaxed font-bold">
               {deletingItem.type === 'reset'
                 ? 'Are you sure you want to reset all test papers to standard CBSE Class 6-10 questions?'
                 : deletingItem.type === 'attempt'
@@ -1205,18 +1203,18 @@ export const AdminDashboard: React.FC = () => {
                 : `Are you sure you want to delete "${deletingItem.title || 'this item'}"?`}
             </p>
 
-            <div className="flex items-center justify-end space-x-3 pt-2">
+            <div className="flex items-center justify-end space-x-3 pt-2 border-t border-[#0052CC]/20">
               <button
                 onClick={() => setDeletingItem(null)}
-                className="px-4 py-2.5 rounded-xl border border-slate-700 text-slate-300 text-xs font-bold hover:bg-slate-800 cursor-pointer transition-colors"
+                className="px-4 py-2.5 rounded-xl border-2 border-[#0052CC] text-[#0052CC] text-xs font-extrabold hover:bg-[#0052CC]/10 cursor-pointer transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={confirmDeleteAction}
-                className="px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold shadow-lg flex items-center space-x-2 cursor-pointer transition-colors"
+                className="px-4 py-2.5 rounded-xl bg-[#D32F2F] hover:bg-[#D32F2F]/90 text-white text-xs font-extrabold shadow-md flex items-center space-x-2 cursor-pointer transition-colors"
               >
-                <Trash2 className="w-4 h-4" />
+                <Trash2 className="w-4 h-4 text-white" />
                 <span>{deletingItem.type === 'reset' ? 'Yes, Reset' : 'Yes, Delete'}</span>
               </button>
             </div>

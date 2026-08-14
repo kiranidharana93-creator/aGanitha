@@ -47,10 +47,8 @@ export interface StudentAnalytics {
 }
 
 export function getBarColor(pct: number): string {
-  if (pct >= 85) return '#10b981'; // Green (85% and above)
-  if (pct >= 70) return '#3b82f6'; // Blue (70% to 84%)
-  if (pct >= 50) return '#f59e0b'; // Orange (50% to 69%)
-  return '#ef4444';                  // Red (Below 50%)
+  if (pct >= 70) return '#0052CC'; // Primary Blue
+  return '#D32F2F';                  // Accent Red
 }
 
 export function cleanStudentTestTitle(title: string): string {
@@ -224,7 +222,7 @@ export function calculateStudentAnalytics(
     const emptyLessonData = defaultStandardLessons.map((lesson) => ({
       lesson,
       score: 0,
-      color: '#ef4444',
+      color: '#D32F2F',
       status: 'Critical Improvement Required' as const,
       attemptsCount: 0,
     }));

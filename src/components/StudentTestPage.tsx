@@ -377,10 +377,10 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
 
   if (isLoading) {
     return (
-      <div className="min-h-[70vh] flex flex-col items-center justify-center p-6 text-center">
-        <RefreshCw className="w-10 h-10 text-blue-500 animate-spin mb-4" />
-        <h2 className="text-lg font-bold text-slate-200">Loading Test Questions...</h2>
-        <p className="text-xs text-slate-400 mt-1">Preparing examination environment for {test.title}</p>
+      <div className="min-h-[70vh] flex flex-col items-center justify-center p-6 text-center bg-white text-[#0052CC]">
+        <RefreshCw className="w-10 h-10 text-[#0052CC] animate-spin mb-4" />
+        <h2 className="text-lg font-extrabold text-[#0052CC]">Loading Test Questions...</h2>
+        <p className="text-xs text-[#0052CC]/80 mt-1 font-medium">Preparing examination environment for {test.title}</p>
       </div>
     );
   }
@@ -400,52 +400,52 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
     const topicName = extractTopicFromTitle(test.title);
 
     return (
-      <div className="max-w-xl mx-auto px-4 py-12">
-        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl text-center space-y-6">
-          <div className="w-16 h-16 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center mx-auto shadow-inner">
-            <CheckCircle className="w-8 h-8" />
+      <div className="max-w-xl mx-auto px-4 py-12 bg-white">
+        <div className="bg-white border-2 border-[#0052CC] rounded-3xl p-8 shadow-md text-center space-y-6 text-[#0052CC]">
+          <div className="w-16 h-16 rounded-2xl bg-white border-2 border-[#0052CC] text-[#0052CC] flex items-center justify-center mx-auto shadow-sm">
+            <CheckCircle className="w-8 h-8 text-[#0052CC]" />
           </div>
 
           <div>
-            <h2 className="text-2xl font-black text-white">Exam Submitted Successfully</h2>
-            <p className="text-xs text-slate-400 mt-1 font-medium">CBSE Mathematics Online Examination Portal</p>
+            <h2 className="text-2xl font-extrabold text-[#0052CC]">Exam Submitted Successfully</h2>
+            <p className="text-xs text-[#0052CC]/80 mt-1 font-semibold">CBSE Mathematics Online Examination Portal</p>
           </div>
 
-          <div className="bg-slate-950/80 border border-slate-800 rounded-2xl p-5 text-left space-y-3 font-medium text-xs">
-            <div className="flex justify-between items-center py-2 border-b border-slate-800/80">
-              <span className="text-slate-400">Topic</span>
-              <span className="text-white font-bold">{topicName}</span>
+          <div className="bg-white border-2 border-[#0052CC] rounded-2xl p-5 text-left space-y-3 font-semibold text-xs text-[#0052CC]">
+            <div className="flex justify-between items-center py-2 border-b border-[#0052CC]/20">
+              <span className="text-[#0052CC]">Topic</span>
+              <span className="text-[#0052CC] font-bold">{topicName}</span>
             </div>
-            <div className="flex justify-between items-center py-2 border-b border-slate-800/80">
-              <span className="text-slate-400">Score</span>
-              <span className="text-white font-bold">{completedAttempt.score} / {completedAttempt.totalQuestions}</span>
+            <div className="flex justify-between items-center py-2 border-b border-[#0052CC]/20">
+              <span className="text-[#0052CC]">Score</span>
+              <span className="text-[#0052CC] font-extrabold">{completedAttempt.score} / {completedAttempt.totalQuestions}</span>
             </div>
-            <div className="flex justify-between items-center py-2 border-b border-slate-800/80">
-              <span className="text-slate-400">Percentage</span>
-              <span className="text-emerald-400 font-bold">{percentage}%</span>
+            <div className="flex justify-between items-center py-2 border-b border-[#0052CC]/20">
+              <span className="text-[#0052CC]">Percentage</span>
+              <span className="text-[#0052CC] font-extrabold">{percentage}%</span>
             </div>
             <div className="flex justify-between items-center py-2">
-              <span className="text-slate-400">Status</span>
-              <span className={`font-bold uppercase ${isPassed ? 'text-emerald-400' : 'text-amber-400'}`}>
+              <span className="text-[#0052CC]">Status</span>
+              <span className={`font-extrabold uppercase ${isPassed ? 'text-[#0052CC]' : 'text-[#D32F2F]'}`}>
                 {isPassed ? 'PASSED' : 'NEEDS PRACTICE'}
               </span>
             </div>
           </div>
 
-          <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-semibold py-3.5 px-4 rounded-xl text-center space-y-1">
-            <p className="font-bold text-sm text-emerald-300">Result submitted successfully. Parent has been notified.</p>
+          <div className="bg-white border-2 border-[#0052CC] text-[#0052CC] text-xs font-bold py-3.5 px-4 rounded-xl text-center space-y-1">
+            <p className="font-extrabold text-sm text-[#0052CC]">Result submitted successfully. Parent has been notified.</p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
             <button
               onClick={onFinishTest}
-              className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg transition-all text-xs cursor-pointer hover:scale-[1.01]"
+              className="w-full bg-[#0052CC] hover:bg-[#0052CC]/90 text-white font-extrabold py-3.5 px-4 rounded-xl shadow-md transition-all text-xs cursor-pointer"
             >
               Return to Dashboard
             </button>
             <button
               onClick={onFinishTest}
-              className="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold py-3.5 px-4 rounded-xl transition-all text-xs cursor-pointer"
+              className="w-full bg-white text-[#0052CC] hover:bg-[#0052CC]/10 border-2 border-[#0052CC] font-extrabold py-3.5 px-4 rounded-xl transition-all text-xs cursor-pointer"
             >
               View My Progress
             </button>
@@ -461,51 +461,49 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
     selectedOpt && currentQ ? normalizeAnswerKey(selectedOpt) === normalizeAnswerKey(currentQ.correctAnswer) : false;
 
   // Visual styling for the per-question timer
-  let timerStyle = 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400';
+  let timerStyle = 'bg-white border-2 border-[#0052CC] text-[#0052CC]';
   if (questionTimeLeft <= 10) {
-    timerStyle = 'bg-red-500/20 border-red-500/50 text-red-400 animate-pulse';
-  } else if (questionTimeLeft <= 30) {
-    timerStyle = 'bg-amber-500/10 border-amber-500/30 text-amber-400';
+    timerStyle = 'bg-white border-2 border-[#D32F2F] text-[#D32F2F] animate-pulse';
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-6 space-y-6">
+    <div className="max-w-5xl mx-auto px-4 py-6 space-y-6 bg-white text-[#0052CC]">
       {/* Test Sticky Header */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl sticky top-20 z-30 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="bg-white border-2 border-[#0052CC] rounded-2xl p-4 shadow-md sticky top-20 z-30 flex flex-col sm:flex-row items-center justify-between gap-4 text-[#0052CC]">
         <div>
-          <span className="bg-blue-600/20 text-blue-300 border border-blue-500/30 text-[11px] font-bold px-2.5 py-0.5 rounded-full">
+          <span className="bg-[#0052CC] text-white text-[11px] font-extrabold px-2.5 py-0.5 rounded-full">
             CBSE Examination Mode • Attempt #{attemptNumber}
           </span>
-          <h2 className="text-base sm:text-lg font-bold text-white mt-1">{cleanStudentTestTitle(test.title)}</h2>
+          <h2 className="text-base sm:text-lg font-extrabold text-[#0052CC] mt-1">{cleanStudentTestTitle(test.title)}</h2>
         </div>
 
         {/* Global Action & Finish Button */}
         <div className="flex items-center space-x-4 shrink-0">
           <button
             onClick={() => setShowSubmitModal(true)}
-            className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow-md transition-colors cursor-pointer"
+            className="bg-[#0052CC] hover:bg-[#0052CC]/90 text-white font-extrabold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow-md transition-colors cursor-pointer"
           >
-            <Send className="w-3.5 h-3.5" />
+            <Send className="w-3.5 h-3.5 text-white" />
             <span>Submit Test</span>
           </button>
         </div>
       </div>
 
       {/* Test Instructions Card */}
-      <div className="bg-slate-900 border border-blue-500/30 rounded-2xl p-5 shadow-xl space-y-3">
-        <div className="flex items-center justify-between border-b border-slate-800 pb-2.5">
+      <div className="bg-white border-2 border-[#0052CC] rounded-2xl p-5 shadow-md space-y-3 text-[#0052CC]">
+        <div className="flex items-center justify-between border-b-2 border-[#0052CC]/20 pb-2.5">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-blue-600/20 border border-blue-500/40 text-blue-400 flex items-center justify-center font-bold">
-              <FileText className="w-4 h-4" />
+            <div className="w-8 h-8 rounded-xl bg-[#0052CC] text-white flex items-center justify-center font-bold">
+              <FileText className="w-4 h-4 text-white" />
             </div>
             <div>
-              <h3 className="text-sm font-extrabold text-white tracking-wide uppercase">Test Instructions</h3>
-              <p className="text-[11px] text-blue-300 font-medium">Please read carefully before entering answers in the blank</p>
+              <h3 className="text-sm font-extrabold text-[#0052CC] tracking-wide uppercase">Test Instructions</h3>
+              <p className="text-[11px] text-[#0052CC]/80 font-bold">Please read carefully before entering answers in the blank</p>
             </div>
           </div>
           <button
             onClick={() => setShowInstructions((prev) => !prev)}
-            className="text-xs font-bold text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg border border-slate-700 transition-colors flex items-center gap-1 cursor-pointer"
+            className="text-xs font-bold text-[#0052CC] hover:bg-[#0052CC]/10 px-3 py-1.5 rounded-lg border border-[#0052CC] transition-colors flex items-center gap-1 cursor-pointer"
           >
             <span>{showInstructions ? 'Hide Instructions' : 'Show Instructions'}</span>
             <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showInstructions ? 'rotate-180' : ''}`} />
@@ -513,28 +511,28 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
         </div>
 
         {showInstructions && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1 text-xs text-slate-300">
-            <div className="bg-slate-950/80 border border-slate-800/80 rounded-xl p-3.5 space-y-2">
-              <div className="flex items-center gap-2 text-blue-400 font-bold text-xs">
-                <CheckCircle2 className="w-4 h-4 text-blue-400 shrink-0" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1 text-xs text-[#0052CC]">
+            <div className="bg-white border-2 border-[#0052CC] rounded-xl p-3.5 space-y-2">
+              <div className="flex items-center gap-2 text-[#0052CC] font-bold text-xs">
+                <CheckCircle2 className="w-4 h-4 text-[#0052CC] shrink-0" />
                 <span>Writing Multiple Answers (Factors, Multiples & Lists)</span>
               </div>
-              <ul className="list-disc list-inside space-y-1 text-slate-300 text-[11px] pl-1 leading-relaxed">
-                <li>Separate numbers with commas or spaces (e.g. <strong className="text-emerald-300">1, 2, 3, 4, 6, 8, 12, 24</strong> or <strong className="text-emerald-300">5 10 15 20 25</strong>).</li>
-                <li>Number order does not matter (e.g. <strong className="text-emerald-300">24, 12, 8, 6, 4, 3, 2, 1</strong> is accepted).</li>
-                <li>For prime number pairs or list answers, write clearly like <strong className="text-emerald-300">(13, 31), (17, 71)</strong> or <strong className="text-emerald-300">17, 19</strong>.</li>
+              <ul className="list-disc list-inside space-y-1 text-[#0052CC] text-[11px] pl-1 leading-relaxed font-medium">
+                <li>Separate numbers with commas or spaces (e.g. <strong className="text-[#0052CC] font-bold">1, 2, 3, 4, 6, 8, 12, 24</strong> or <strong className="text-[#0052CC] font-bold">5 10 15 20 25</strong>).</li>
+                <li>Number order does not matter (e.g. <strong className="text-[#0052CC] font-bold">24, 12, 8, 6, 4, 3, 2, 1</strong> is accepted).</li>
+                <li>For prime number pairs or list answers, write clearly like <strong className="text-[#0052CC] font-bold">(13, 31), (17, 71)</strong> or <strong className="text-[#0052CC] font-bold">17, 19</strong>.</li>
               </ul>
             </div>
 
-            <div className="bg-slate-950/80 border border-slate-800/80 rounded-xl p-3.5 space-y-2">
-              <div className="flex items-center gap-2 text-amber-400 font-bold text-xs">
-                <Clock className="w-4 h-4 text-amber-400 shrink-0" />
+            <div className="bg-white border-2 border-[#0052CC] rounded-xl p-3.5 space-y-2">
+              <div className="flex items-center gap-2 text-[#0052CC] font-bold text-xs">
+                <Clock className="w-4 h-4 text-[#0052CC] shrink-0" />
                 <span>Timer & Test Navigation</span>
               </div>
-              <ul className="list-disc list-inside space-y-1 text-slate-300 text-[11px] pl-1 leading-relaxed">
-                <li>For True / False questions, write <strong className="text-emerald-300">True</strong> or <strong className="text-emerald-300">False</strong>.</li>
-                <li>You have <strong className="text-amber-300">60 seconds per question</strong>. The test auto-advances when time expires.</li>
-                <li>Click any question number on the left <strong className="text-blue-300">Question Palette</strong> to review or update your answer anytime.</li>
+              <ul className="list-disc list-inside space-y-1 text-[#0052CC] text-[11px] pl-1 leading-relaxed font-medium">
+                <li>For True / False questions, write <strong className="text-[#0052CC] font-bold">True</strong> or <strong className="text-[#0052CC] font-bold">False</strong>.</li>
+                <li>You have <strong className="text-[#0052CC] font-bold">60 seconds per question</strong>. The test auto-advances when time expires.</li>
+                <li>Click any question number on the left <strong className="text-[#0052CC] font-bold">Question Palette</strong> to review or update your answer anytime.</li>
               </ul>
             </div>
           </div>
@@ -543,13 +541,13 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
 
       {/* Main Examination Layout */}
       {questions.length === 0 ? (
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-12 text-center">
-          <AlertTriangle className="w-12 h-12 text-amber-400 mx-auto mb-3" />
-          <h3 className="text-lg font-bold text-white">No Questions Found</h3>
-          <p className="text-xs text-slate-400 mt-1">This test does not have any questions assigned yet.</p>
+        <div className="bg-white border-2 border-[#0052CC] rounded-2xl p-12 text-center text-[#0052CC]">
+          <AlertTriangle className="w-12 h-12 text-[#D32F2F] mx-auto mb-3" />
+          <h3 className="text-lg font-extrabold text-[#0052CC]">No Questions Found</h3>
+          <p className="text-xs text-[#0052CC]/80 mt-1 font-medium">This test does not have any questions assigned yet.</p>
           <button
             onClick={onFinishTest}
-            className="mt-4 bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold px-4 py-2 rounded-xl border border-slate-700 cursor-pointer"
+            className="mt-4 bg-[#0052CC] hover:bg-[#0052CC]/90 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-md cursor-pointer"
           >
             Back to Dashboard
           </button>
@@ -557,10 +555,10 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Question Palette Sidebar */}
-          <div className="lg:col-span-1 bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-lg space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-              <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider">Question Palette</h3>
-              <span className="text-xs font-bold text-blue-400">
+          <div className="lg:col-span-1 bg-white border-2 border-[#0052CC] rounded-2xl p-4 shadow-md space-y-4 text-[#0052CC]">
+            <div className="flex items-center justify-between border-b-2 border-[#0052CC]/20 pb-2">
+              <h3 className="text-xs font-extrabold text-[#0052CC] uppercase tracking-wider">Question Palette</h3>
+              <span className="text-xs font-extrabold text-[#0052CC]">
                 {answeredCount} / {questions.length} Answered
               </span>
             </div>
@@ -570,18 +568,18 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
                 const isAnswered = Boolean(selectedAnswers[q.id]);
                 const isCurrent = idx === currentIndex;
 
-                let paletteStyle = 'bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700';
+                let paletteStyle = 'bg-white text-[#0052CC] border-2 border-[#0052CC] hover:bg-[#0052CC]/10';
                 if (isCurrent) {
-                  paletteStyle = 'bg-blue-600 text-white border-blue-400 font-extrabold ring-2 ring-blue-500/40';
+                  paletteStyle = 'bg-[#0052CC] text-white border-2 border-[#0052CC] font-extrabold shadow-md';
                 } else if (isAnswered) {
-                  paletteStyle = 'bg-emerald-950 text-emerald-300 border-emerald-600/60 font-bold';
+                  paletteStyle = 'bg-[#0052CC]/20 text-[#0052CC] border-2 border-[#0052CC] font-bold';
                 }
 
                 return (
                   <button
                     key={q.id}
                     onClick={() => setCurrentIndex(idx)}
-                    className={`h-10 rounded-xl text-xs font-semibold border flex items-center justify-center transition-all cursor-pointer ${paletteStyle}`}
+                    className={`h-10 rounded-xl text-xs font-bold border-2 flex items-center justify-center transition-all cursor-pointer ${paletteStyle}`}
                   >
                     {idx + 1}
                   </button>
@@ -589,33 +587,33 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
               })}
             </div>
 
-            <div className="pt-2 border-t border-slate-800 space-y-1.5 text-[11px] text-slate-400">
+            <div className="pt-2 border-t-2 border-[#0052CC]/20 space-y-1.5 text-[11px] text-[#0052CC] font-bold">
               <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-emerald-600 inline-block"></span>
+                <span className="w-3 h-3 rounded-full bg-[#0052CC]/20 border border-[#0052CC] inline-block"></span>
                 <span>Answered</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-slate-800 border border-slate-700 inline-block"></span>
+                <span className="w-3 h-3 rounded-full bg-white border border-[#0052CC] inline-block"></span>
                 <span>Unanswered</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-blue-600 inline-block"></span>
+                <span className="w-3 h-3 rounded-full bg-[#0052CC] inline-block"></span>
                 <span>Current Question</span>
               </div>
             </div>
           </div>
 
           {/* Active Question Display */}
-          <div className="lg:col-span-3 bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col justify-between space-y-6">
+          <div className="lg:col-span-3 bg-white border-2 border-[#0052CC] rounded-2xl p-6 shadow-md flex flex-col justify-between space-y-6 text-[#0052CC]">
             <div className="space-y-6">
               {/* Question Header with Per-Question Timer */}
-              <div className="flex items-center justify-between border-b border-slate-800 pb-3 gap-2">
-                <span className="text-xs font-extrabold text-blue-400 uppercase tracking-wider">
+              <div className="flex items-center justify-between border-b-2 border-[#0052CC]/20 pb-3 gap-2">
+                <span className="text-xs font-extrabold text-[#0052CC] uppercase tracking-wider">
                   Question {currentIndex + 1} of {questions.length}
                 </span>
 
                 {/* Per-Question Timer (60s countdown) */}
-                <div className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl border transition-colors ${timerStyle}`}>
+                <div className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl border-2 transition-colors ${timerStyle}`}>
                   <Clock className="w-4 h-4 shrink-0" />
                   <span className="text-xs font-mono font-bold">
                     Time left: <strong className="text-sm">{questionTimeLeft}s</strong>
@@ -624,7 +622,7 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
               </div>
 
               {/* Question Text */}
-              <h3 className="text-lg font-bold text-white leading-relaxed">{currentQ.question}</h3>
+              <h3 className="text-lg font-extrabold text-[#0052CC] leading-relaxed">{currentQ.question}</h3>
 
               {/* Options or Short Answer Field */}
               {(!((test.title || '').toLowerCase().includes('grand test') || (test.title || '').toLowerCase().includes('playing with'))) && Boolean(currentQ.optionA && currentQ.optionA.trim() !== '') ? (
@@ -641,35 +639,27 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
                       <button
                         key={opt.key}
                         onClick={() => handleOptionSelect(currentQ.id, opt.key)}
-                        className={`w-full text-left p-4 rounded-xl border transition-all flex items-center justify-between cursor-pointer ${
+                        className={`w-full text-left p-4 rounded-xl border-2 transition-all flex items-center justify-between cursor-pointer ${
                           isSelected
-                            ? isSelectedCorrect
-                              ? 'bg-emerald-600/15 border-emerald-500 text-white shadow-md ring-1 ring-emerald-500'
-                              : 'bg-amber-600/15 border-amber-500 text-white shadow-md ring-1 ring-amber-500'
-                            : 'bg-slate-800/50 border-slate-700/80 text-slate-300 hover:bg-slate-800 hover:border-slate-600'
+                            ? 'bg-[#0052CC] text-white border-[#0052CC] shadow-md'
+                            : 'bg-white border-[#0052CC] text-[#0052CC] hover:bg-[#0052CC]/10'
                         }`}
                       >
                         <div className="flex items-center space-x-3">
                           <div
-                            className={`w-6 h-6 rounded-full border text-xs font-bold flex items-center justify-center transition-colors ${
+                            className={`w-6 h-6 rounded-full border-2 text-xs font-bold flex items-center justify-center transition-colors ${
                               isSelected
-                                ? isSelectedCorrect
-                                  ? 'bg-emerald-600 border-emerald-500 text-white'
-                                  : 'bg-amber-600 border-amber-500 text-white'
-                                : 'border-slate-600 text-slate-400 bg-slate-900'
+                                ? 'bg-white border-white text-[#0052CC]'
+                                : 'border-[#0052CC] text-[#0052CC] bg-white'
                             }`}
                           >
                             {opt.label.replace('Option ', '')}
                           </div>
-                          <span className="text-sm font-medium">{opt.text}</span>
+                          <span className="text-sm font-bold">{opt.text}</span>
                         </div>
 
                         {isSelected && (
-                          isSelectedCorrect ? (
-                            <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
-                          ) : (
-                            <XCircle className="w-5 h-5 text-amber-400 shrink-0" />
-                          )
+                          <CheckCircle2 className="w-5 h-5 text-white shrink-0" />
                         )}
                       </button>
                     );
@@ -678,10 +668,10 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
               ) : (
                 <div className="space-y-3 pt-2">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
-                    <label className="block text-xs font-extrabold text-blue-300 uppercase tracking-wider">
+                    <label className="block text-xs font-extrabold text-[#0052CC] uppercase tracking-wider">
                       Write your answer in the space given:
                     </label>
-                    <span className="text-[11px] text-emerald-400 font-semibold bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-md">
+                    <span className="text-[11px] text-[#0052CC] font-extrabold bg-white border-2 border-[#0052CC] px-2.5 py-1 rounded-md">
                       Separate multiple numbers with commas (e.g. 1, 2, 3, 4, 6, 8, 12, 24)
                     </span>
                   </div>
@@ -690,11 +680,11 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
                     value={selectedAnswers[currentQ.id] || ''}
                     onChange={(e) => handleOptionSelect(currentQ.id, e.target.value)}
                     placeholder="Type your answer here... e.g. 1, 2, 3, 4, 6, 8, 12, 24"
-                    className="w-full bg-slate-950 border border-slate-700 rounded-2xl p-4 text-white text-sm font-medium focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/50 shadow-inner resize-y"
+                    className="w-full bg-white border-2 border-[#0052CC] rounded-2xl p-4 text-[#0052CC] text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#0052CC] shadow-inner resize-y"
                   />
-                  <div className="text-xs text-slate-400 font-semibold pt-1 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div className="text-xs text-[#0052CC] font-bold pt-1 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <span>Answer: __________________________________________________</span>
-                    <span className="text-[11px] text-slate-500 font-medium italic">Evaluated automatically upon submission</span>
+                    <span className="text-[11px] text-[#0052CC] font-semibold italic">Evaluated automatically upon submission</span>
                   </div>
                 </div>
               )}
@@ -702,20 +692,20 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
               {/* Educational Feedback / Hint Box (MCQ only) */}
               {Boolean(currentQ.optionA || currentQ.optionB) && selectedOpt && (
                 isSelectedCorrect ? (
-                  <div className="p-3.5 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-400 text-xs flex items-center gap-2.5 font-bold shadow-sm">
-                    <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+                  <div className="p-3.5 bg-white border-2 border-[#0052CC] text-[#0052CC] text-xs flex items-center gap-2.5 font-extrabold shadow-sm">
+                    <CheckCircle2 className="w-5 h-5 text-[#0052CC] shrink-0" />
                     <span>Correct! Well done.</span>
                   </div>
                 ) : (
-                  <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl text-amber-300 text-xs space-y-1.5 shadow-sm">
-                    <div className="flex items-center gap-2 font-bold text-amber-400 text-sm">
-                      <Lightbulb className="w-4 h-4 text-amber-400 shrink-0" />
+                  <div className="p-4 bg-white border-2 border-[#0052CC] text-[#0052CC] text-xs space-y-1.5 shadow-sm">
+                    <div className="flex items-center gap-2 font-extrabold text-[#0052CC] text-sm">
+                      <Lightbulb className="w-4 h-4 text-[#0052CC] shrink-0" />
                       <span>Hint</span>
                     </div>
-                    <p className="italic text-amber-200/90 leading-relaxed pl-6">
+                    <p className="italic text-[#0052CC] leading-relaxed pl-6 font-semibold">
                       {currentQ.hint || 'Think about the mathematical concept used in this question.'}
                     </p>
-                    <p className="text-[11px] text-slate-400 pl-6 pt-1 font-medium">
+                    <p className="text-[11px] text-[#0052CC]/80 pl-6 pt-1 font-bold">
                       You can select another option while time remains for this question.
                     </p>
                   </div>
@@ -724,30 +714,30 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
             </div>
 
             {/* Navigation Controls */}
-            <div className="flex items-center justify-between border-t border-slate-800 pt-4">
+            <div className="flex items-center justify-between border-t-2 border-[#0052CC]/20 pt-4">
               <button
                 onClick={() => setCurrentIndex((prev) => Math.max(0, prev - 1))}
                 disabled={currentIndex === 0}
-                className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold px-4 py-2.5 rounded-xl text-xs transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                className="flex items-center gap-1.5 bg-white text-[#0052CC] hover:bg-[#0052CC]/10 border-2 border-[#0052CC] font-extrabold px-4 py-2.5 rounded-xl text-xs transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                <ChevronLeft className="w-4 h-4" />
+                <ChevronLeft className="w-4 h-4 text-[#0052CC]" />
                 <span>Previous</span>
               </button>
 
               {currentIndex < questions.length - 1 ? (
                 <button
                   onClick={() => setCurrentIndex((prev) => Math.min(questions.length - 1, prev + 1))}
-                  className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold px-5 py-2.5 rounded-xl text-xs shadow-md transition-colors cursor-pointer"
+                  className="flex items-center gap-1.5 bg-[#0052CC] hover:bg-[#0052CC]/90 text-white font-extrabold px-5 py-2.5 rounded-xl text-xs shadow-md transition-colors cursor-pointer"
                 >
                   <span>Next Question</span>
-                  <ChevronRight className="w-4 h-4" />
+                  <ChevronRight className="w-4 h-4 text-white" />
                 </button>
               ) : (
                 <button
                   onClick={() => setShowSubmitModal(true)}
-                  className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-2.5 rounded-xl text-xs shadow-lg transition-colors cursor-pointer"
+                  className="flex items-center gap-1.5 bg-[#0052CC] hover:bg-[#0052CC]/90 text-white font-extrabold px-5 py-2.5 rounded-xl text-xs shadow-md transition-colors cursor-pointer"
                 >
-                  <Send className="w-4 h-4" />
+                  <Send className="w-4 h-4 text-white" />
                   <span>Review & Submit</span>
                 </button>
               )}
@@ -758,17 +748,17 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
 
       {/* Submit Confirmation Modal */}
       {showSubmitModal && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
-            <h3 className="text-lg font-bold text-white">Submit Test Confirmation</h3>
-            <p className="text-xs text-slate-300 leading-relaxed">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white border-2 border-[#0052CC] rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl text-[#0052CC]">
+            <h3 className="text-lg font-extrabold text-[#0052CC]">Submit Test Confirmation</h3>
+            <p className="text-xs text-[#0052CC] leading-relaxed font-semibold">
               You have answered <strong>{answeredCount}</strong> out of <strong>{questions.length}</strong> questions.
               Are you sure you want to finalize and submit Attempt #{attemptNumber}?
             </p>
 
             {answeredCount < questions.length && (
-              <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-amber-300 text-xs flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 shrink-0 text-amber-400" />
+              <div className="p-3 bg-white border-2 border-[#D32F2F] rounded-xl text-[#D32F2F] text-xs flex items-center gap-2 font-bold">
+                <AlertTriangle className="w-4 h-4 shrink-0 text-[#D32F2F]" />
                 <span>You have {questions.length - answeredCount} unanswered question(s).</span>
               </div>
             )}
@@ -777,14 +767,14 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
               <button
                 onClick={() => setShowSubmitModal(false)}
                 disabled={isSubmitting}
-                className="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white transition-colors cursor-pointer"
+                className="px-4 py-2 text-xs font-bold text-[#0052CC] hover:underline cursor-pointer"
               >
                 Continue Test
               </button>
               <button
                 onClick={processSubmission}
                 disabled={isSubmitting}
-                className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-2 rounded-xl text-xs shadow-md cursor-pointer disabled:opacity-50"
+                className="bg-[#0052CC] hover:bg-[#0052CC]/90 text-white font-extrabold px-5 py-2 rounded-xl text-xs shadow-md cursor-pointer disabled:opacity-50"
               >
                 {isSubmitting ? 'Submitting...' : 'Yes, Submit Test'}
               </button>
