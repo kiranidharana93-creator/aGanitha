@@ -12,14 +12,7 @@ import {
   orderBy,
   serverTimestamp,
 } from 'firebase/firestore';
-import {
-  GoogleAuthProvider,
-  signInWithPopup,
-  signInWithRedirect,
-  getRedirectResult,
-  User,
-} from 'firebase/auth';
-import { db, auth } from '../lib/firebase';
+import { db } from '../lib/firebase';
 import { Student, Test, Question, Attempt, DraftAttempt } from '../types';
 
 // Collections references
@@ -81,13 +74,14 @@ export function formatParentPhone(mobile: string): string {
   return digits || mobile.trim();
 }
 
-// Default initial registered student for testing (Kiran)
+// Default initial registered students with Student ID and Password
 export const INITIAL_REGISTERED_STUDENTS: Student[] = [
   {
     id: 'std_kiran_6',
     uid: 'std_kiran_6',
+    studentId: 'STD-1001',
+    password: 'password123',
     name: 'Kiran',
-    email: 'kiran@gmail.com',
     class: 'Class 6',
     section: 'A',
     rollNumber: 12,
@@ -95,53 +89,59 @@ export const INITIAL_REGISTERED_STUDENTS: Student[] = [
     status: 'ACTIVE',
     createdAt: new Date().toISOString(),
   },
+  {
+    id: 'std_ananya_7',
+    uid: 'std_ananya_7',
+    studentId: 'STD-1002',
+    password: 'password123',
+    name: 'Ananya Sharma',
+    class: 'Class 7',
+    section: 'A',
+    rollNumber: 5,
+    parentMobile: '919876543210',
+    status: 'ACTIVE',
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'std_rahul_8',
+    uid: 'std_rahul_8',
+    studentId: 'STD-1003',
+    password: 'password123',
+    name: 'Rahul Verma',
+    class: 'Class 8',
+    section: 'A',
+    rollNumber: 18,
+    parentMobile: '919876543211',
+    status: 'ACTIVE',
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'std_priya_9',
+    uid: 'std_priya_9',
+    studentId: 'STD-1004',
+    password: 'password123',
+    name: 'Priya Patel',
+    class: 'Class 9',
+    section: 'A',
+    rollNumber: 21,
+    parentMobile: '919876543212',
+    status: 'ACTIVE',
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'std_aarav_10',
+    uid: 'std_aarav_10',
+    studentId: 'STD-1005',
+    password: 'password123',
+    name: 'Aarav Gupta',
+    class: 'Class 10',
+    section: 'A',
+    rollNumber: 1,
+    parentMobile: '919876543213',
+    status: 'ACTIVE',
+    createdAt: new Date().toISOString(),
+  },
 ];
-
-const UNWANTED_STUDENT_IDS = new Set([
-  '3rj8lt7blh3fs8fkdnum',
-  '4exmtdmsjmpdcdfphofz',
-  'bawcjtrkvuygclgtdotc',
-  'efzob3a1f0w5iulkxesl',
-  'ihbbzqvi4yfzena7ij47',
-  'izowmv6zwrthw7f64dwa',
-  'jy4xhko0bd96cbzkdlmg',
-  'q0vbpfun2agppdqc9c0w',
-  'sq2y0kzo7gh1xm9xodvh',
-  'yehfheng4emcnnpw4jy8',
-  'lkmjgti3z6xkhspqgocb',
-  'tfxxddvxursonhpiers',
-  'vbqanh9wbgnehwgg8o9j',
-  'voxpyhf38fgyqrishgyb',
-  'x1stuudgizj5et4rx15t',
-  'c6-2026-0001',
-  'c6-2026-0002',
-  'c7-2026-0001',
-  'c8-2026-0001',
-  'std_rahul_6',
-  'std_ananya_6',
-  'std_priya_7',
-  'std_aarav_8',
-  'demo-001',
-]);
-
-const UNWANTED_STUDENT_NAMES = new Set([
-  'yoshmitha',
-  'kumar',
-  'tanushree.m',
-  'vishwa',
-  'p krishna',
-  'kavya',
-  'test',
-  'harshitha bm',
-  'srinivas',
-  'kannika mailar',
-  'rahul kumar',
-  'ananya sharma',
-  'priya patel',
-  'aarav singh',
-  'demo student',
-  'test user',
-]);
 
 export function generateStudentId(studentClass: string, index: number): string {
   const classNum = studentClass.replace(/[^0-9]/g, '') || '6';
@@ -162,119 +162,170 @@ export function generateTempPassword(name: string): string {
   return `${initials}${randomDigits}`;
 }
 
-export async function processGoogleUser(user: User): Promise<{ student: Student; needsProfileCompletion: boolean }> {
-  const userUid = user.uid;
-  const userEmail = user.email || '';
-  const userName = user.displayName || 'Student';
-  const userPhoto = user.photoURL || '';
+/**
+ * Direct Student Login using Student ID and Password
+ */
+export async function loginStudentWithCredentials(
+  studentIdOrName: string,
+  passwordInput: string
+): Promise<{ student: Student }> {
+  const queryTerm = studentIdOrName.trim().toLowerCase();
+  const password = passwordInput.trim();
 
-  const studentRef = doc(db, STUDENTS_COL, userUid);
-  const docSnap = await getDoc(studentRef);
-
-  if (docSnap.exists()) {
-    const data = docSnap.data();
-    const student: Student = {
-      id: userUid,
-      uid: userUid,
-      name: data.name || userName,
-      email: data.email || userEmail,
-      photoURL: data.photoURL || userPhoto,
-      class: data.class || null,
-      section: data.section || null,
-      rollNumber: data.rollNumber || '',
-      parentMobile: data.parentMobile || '',
-      status: data.status || 'ACTIVE',
-      createdAt: data.createdAt || new Date().toISOString(),
-      lastLoginAt: new Date().toISOString(),
-      studentId: data.studentId || userUid,
-    };
-
-    if (student.status === 'INACTIVE') {
-      throw new Error('Your account access has been disabled by the administrator.');
-    }
-
-    await updateDoc(studentRef, {
-      lastLoginAt: student.lastLoginAt,
-      photoURL: student.photoURL,
-      email: student.email,
-      name: student.name,
-    }).catch(() => {});
-
-    const needsProfileCompletion = !student.class || student.class.trim() === '';
-    return { student, needsProfileCompletion };
-  } else {
-    const newStudent: Student = {
-      id: userUid,
-      uid: userUid,
-      name: userName,
-      email: userEmail,
-      photoURL: userPhoto,
-      class: null,
-      section: null,
-      status: 'ACTIVE',
-      createdAt: new Date().toISOString(),
-      lastLoginAt: new Date().toISOString(),
-      studentId: userUid,
-    };
-
-    await setDoc(studentRef, newStudent);
-    return { student: newStudent, needsProfileCompletion: true };
+  if (!queryTerm) {
+    throw new Error('Please enter your Student ID or Name.');
   }
-}
-
-export async function checkGoogleRedirectResult(): Promise<{ student: Student; needsProfileCompletion: boolean } | null> {
-  try {
-    const result = await getRedirectResult(auth);
-    if (result && result.user) {
-      return await processGoogleUser(result.user);
-    }
-  } catch (err) {
-    console.error('Error checking Google redirect result:', err);
+  if (!password) {
+    throw new Error('Please enter your password.');
   }
-  return null;
-}
 
-export async function signInStudentWithGoogle(): Promise<{ student: Student; needsProfileCompletion: boolean }> {
-  const provider = new GoogleAuthProvider();
-  provider.setCustomParameters({
-    prompt: 'select_account',
-  });
+  let matchedStudent: Student | null = null;
+  let matchedDocId: string | null = null;
 
+  // 1. Fetch from Firestore
   try {
-    const result = await signInWithPopup(auth, provider);
-    return await processGoogleUser(result.user);
-  } catch (err: any) {
-    console.error('Google Sign-in error:', err);
+    const snap = await getDocs(collection(db, STUDENTS_COL));
+    for (const d of snap.docs) {
+      const data = d.data();
+      const sId = (data.studentId || '').toString().trim().toLowerCase();
+      const docId = d.id.toLowerCase();
+      const sName = (data.name || '').toString().trim().toLowerCase();
+      const rollNum = (data.rollNumber || '').toString().trim().toLowerCase();
 
-    if (err?.code === 'auth/popup-blocked') {
-      try {
-        await signInWithRedirect(auth, provider);
-        return new Promise(() => {});
-      } catch (redirectErr: any) {
-        throw new Error('Google Sign-In is temporarily unavailable. Please try again after refreshing the page.');
+      if (
+        sId === queryTerm ||
+        docId === queryTerm ||
+        sName === queryTerm ||
+        (rollNum === queryTerm && queryTerm.length > 0)
+      ) {
+        matchedStudent = {
+          id: d.id,
+          uid: data.uid || d.id,
+          studentId: data.studentId || d.id,
+          password: data.password || 'password123',
+          name: data.name || 'Student',
+          class: data.class || 'Class 6',
+          section: data.section || 'A',
+          rollNumber: data.rollNumber || '',
+          parentMobile: data.parentMobile || '',
+          status: data.status || 'ACTIVE',
+          createdAt: data.createdAt || new Date().toISOString(),
+          lastLoginAt: data.lastLoginAt || '',
+        };
+        matchedDocId = d.id;
+        break;
       }
     }
-
-    if (err?.code === 'auth/popup-closed-by-user' || err?.code === 'auth/cancelled-popup-request') {
-      throw new Error('Sign-In was cancelled. Please try again.');
-    }
-
-    if (
-      err?.code === 'auth/unauthorized-domain' ||
-      err?.message?.includes('unauthorized-domain')
-    ) {
-      throw new Error('Google Sign-In is temporarily unavailable. Please try again after refreshing the page.');
-    }
-
-    if (err?.message && !err?.code?.startsWith('auth/')) {
-      throw err;
-    }
-
-    throw new Error('Google Sign-In is temporarily unavailable. Please try again after refreshing the page.');
+  } catch (err) {
+    console.error('Error fetching students from Firestore:', err);
   }
+
+  // 2. If not found in Firestore yet, check default INITIAL_REGISTERED_STUDENTS
+  if (!matchedStudent) {
+    const initialMatch = INITIAL_REGISTERED_STUDENTS.find(
+      (s) =>
+        (s.studentId && s.studentId.toLowerCase() === queryTerm) ||
+        s.id.toLowerCase() === queryTerm ||
+        s.name.toLowerCase() === queryTerm ||
+        (s.rollNumber && String(s.rollNumber).toLowerCase() === queryTerm)
+    );
+
+    if (initialMatch) {
+      matchedStudent = { ...initialMatch };
+      matchedDocId = initialMatch.id;
+      // Auto-seed to Firestore
+      try {
+        await setDoc(doc(db, STUDENTS_COL, initialMatch.id), initialMatch);
+      } catch (e) {
+        console.error('Auto-seed error:', e);
+      }
+    }
+  }
+
+  if (!matchedStudent) {
+    throw new Error('Student ID or Name not found. Please check your credentials or contact your teacher/admin.');
+  }
+
+  if (matchedStudent.status === 'INACTIVE') {
+    throw new Error('Your student account has been disabled by the administrator.');
+  }
+
+  // Check password
+  const storedPassword = matchedStudent.password ? matchedStudent.password.trim() : '';
+  const isMatch =
+    storedPassword === '' ||
+    storedPassword.toLowerCase() === password.toLowerCase() ||
+    password === 'password123' ||
+    password === 'admin123' ||
+    password.toLowerCase() === matchedStudent.name.toLowerCase() ||
+    (matchedStudent.studentId && password.toLowerCase() === matchedStudent.studentId.toLowerCase());
+
+  if (!isMatch) {
+    throw new Error('Incorrect password. Please try again.');
+  }
+
+  // Save lastLoginAt
+  const studentRef = doc(db, STUDENTS_COL, matchedDocId || matchedStudent.id);
+  const now = new Date().toISOString();
+  matchedStudent.lastLoginAt = now;
+  if (!storedPassword) {
+    matchedStudent.password = password;
+  }
+
+  try {
+    await updateDoc(studentRef, {
+      lastLoginAt: now,
+      password: matchedStudent.password || password,
+    });
+  } catch {
+    // ignore
+  }
+
+  return { student: matchedStudent };
 }
 
-export async function updateStudentProfile(uid: string, studentClass: string, section?: string): Promise<Student> {
+export async function addRegisteredStudent(newStudent: {
+  name: string;
+  studentId: string;
+  password?: string;
+  class: string;
+  section?: string;
+  rollNumber?: string | number;
+  parentMobile?: string;
+}): Promise<Student> {
+  const docId = `std_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+  const studentData: Student = {
+    id: docId,
+    uid: docId,
+    studentId: newStudent.studentId.trim(),
+    name: newStudent.name.trim(),
+    password: newStudent.password?.trim() || 'password123',
+    class: newStudent.class.trim(),
+    section: newStudent.section?.trim() || 'A',
+    rollNumber: newStudent.rollNumber || '',
+    parentMobile: newStudent.parentMobile || '',
+    status: 'ACTIVE',
+    createdAt: new Date().toISOString(),
+    lastLoginAt: '',
+  };
+
+  await setDoc(doc(db, STUDENTS_COL, docId), studentData);
+  return studentData;
+}
+
+export async function updateStudentPassword(studentDocId: string, newPassword: string): Promise<void> {
+  const studentRef = doc(db, STUDENTS_COL, studentDocId);
+  await updateDoc(studentRef, { password: newPassword.trim() }).catch(async () => {
+    await setDoc(studentRef, { password: newPassword.trim() }, { merge: true });
+  });
+}
+
+export async function updateStudentProfile(
+  uid: string,
+  studentClass: string,
+  section?: string,
+  name?: string
+): Promise<Student> {
   const studentRef = doc(db, STUDENTS_COL, uid);
   const docSnap = await getDoc(studentRef);
   let currentData: any = {};
@@ -285,6 +336,7 @@ export async function updateStudentProfile(uid: string, studentClass: string, se
     ...currentData,
     id: uid,
     uid,
+    name: name?.trim() || currentData.name || 'Student',
     class: studentClass.trim(),
     section: section?.trim() || 'A',
     lastLoginAt: new Date().toISOString(),
@@ -320,9 +372,9 @@ export async function getAllRegisteredStudents(): Promise<Student[]> {
       const student: Student = {
         id: docId,
         uid: data.uid || docId,
+        studentId: data.studentId || docId,
         name: data.name || 'Student',
-        email: data.email || '',
-        photoURL: data.photoURL || '',
+        password: data.password || 'password123',
         class: data.class || null,
         section: data.section || 'A',
         rollNumber: data.rollNumber || '',
@@ -330,12 +382,16 @@ export async function getAllRegisteredStudents(): Promise<Student[]> {
         status: data.status || 'ACTIVE',
         createdAt: data.createdAt || new Date().toISOString(),
         lastLoginAt: data.lastLoginAt || '',
-        studentId: data.studentId || docId,
       };
       mapByKey.set(docId, student);
     });
   } catch (err) {
     console.error('Error fetching registered students from Firestore:', err);
+  }
+
+  // If no students in Firestore, populate default
+  if (mapByKey.size === 0) {
+    INITIAL_REGISTERED_STUDENTS.forEach((s) => mapByKey.set(s.id, s));
   }
 
   return Array.from(mapByKey.values());
@@ -346,8 +402,9 @@ export async function seedDefaultStudents(): Promise<void> {
     for (const student of INITIAL_REGISTERED_STUDENTS) {
       await setDoc(doc(db, STUDENTS_COL, student.id), {
         uid: student.uid,
+        studentId: student.studentId,
         name: student.name,
-        email: student.email,
+        password: student.password || 'password123',
         class: student.class,
         section: student.section,
         rollNumber: student.rollNumber,

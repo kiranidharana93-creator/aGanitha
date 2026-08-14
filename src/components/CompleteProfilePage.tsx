@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Student } from '../types';
 import { updateStudentProfile } from '../services/db';
-import { GraduationCap, ArrowRight, UserCheck, Sparkles } from 'lucide-react';
+import { GraduationCap, ArrowRight } from 'lucide-react';
 
 interface CompleteProfilePageProps {
   student: Student;
@@ -12,13 +12,18 @@ export const CompleteProfilePage: React.FC<CompleteProfilePageProps> = ({
   student,
   onProfileCompleted,
 }) => {
-  const [selectedClass, setSelectedClass] = useState('Class 6');
-  const [section, setSection] = useState('A');
+  const [studentName, setStudentName] = useState(student.name === 'Student' ? '' : student.name || '');
+  const [selectedClass, setSelectedClass] = useState(student.class || 'Class 6');
+  const [section, setSection] = useState(student.section || 'A');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!studentName.trim()) {
+      setError('Please enter your full name');
+      return;
+    }
     if (!selectedClass) {
       setError('Please select your class');
       return;
@@ -28,7 +33,12 @@ export const CompleteProfilePage: React.FC<CompleteProfilePageProps> = ({
     setError('');
 
     try {
-      const updated = await updateStudentProfile(student.uid || student.id, selectedClass, section);
+      const updated = await updateStudentProfile(
+        student.uid || student.id,
+        selectedClass,
+        section,
+        studentName.trim()
+      );
       onProfileCompleted(updated);
     } catch (err) {
       console.error('Error updating profile:', err);
@@ -44,29 +54,41 @@ export const CompleteProfilePage: React.FC<CompleteProfilePageProps> = ({
         {/* Banner */}
         <div className="bg-[#16449B] p-6 text-white text-center space-y-2">
           <div className="w-14 h-14 bg-white text-[#16449B] rounded-full flex items-center justify-center mx-auto shadow-md overflow-hidden">
-            {student.photoURL ? (
-              <img src={student.photoURL} alt={student.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-            ) : (
-              <GraduationCap className="w-7 h-7 text-[#16449B]" />
-            )}
+            <GraduationCap className="w-7 h-7 text-[#16449B]" />
           </div>
           <h2 className="text-2xl font-extrabold tracking-tight text-white">Complete Your Profile</h2>
-          <p className="text-xs text-white/90 font-medium">Please select your enrolled class to access test papers</p>
+          <p className="text-xs text-white/90 font-medium">Enter your details to begin taking CBSE Mathematics tests</p>
         </div>
 
         {/* Form Body */}
         <div className="p-6 space-y-6">
-          <div className="bg-[#16449B]/5 border border-[#16449B]/20 rounded-xl p-4 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-[#16449B] text-white flex items-center justify-center font-bold text-base shrink-0">
-              {student.name ? student.name.charAt(0).toUpperCase() : 'S'}
+          {student.studentId && (
+            <div className="bg-[#16449B]/5 border border-[#16449B]/20 rounded-xl p-3.5 flex items-center gap-3">
+              <div className="w-9 h-9 rounded-full bg-[#16449B] text-white flex items-center justify-center font-bold text-sm shrink-0">
+                <GraduationCap className="w-4 h-4 text-white" />
+              </div>
+              <div className="overflow-hidden">
+                <p className="text-[11px] font-bold text-[#16449B]/70 uppercase tracking-wider">Student ID</p>
+                <p className="text-xs font-extrabold text-[#16449B]">{student.studentId}</p>
+              </div>
             </div>
-            <div className="overflow-hidden">
-              <h3 className="font-extrabold text-[#16449B] text-sm truncate">{student.name}</h3>
-              <p className="text-xs font-semibold text-[#16449B]/80 truncate">{student.email}</p>
-            </div>
-          </div>
+          )}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-[#16449B] block">
+                Student Full Name <span className="text-[#DC2626]">*</span>
+              </label>
+              <input
+                type="text"
+                value={studentName}
+                onChange={(e) => setStudentName(e.target.value)}
+                placeholder="Enter student's full name"
+                className="w-full bg-white border-2 border-[#16449B] rounded-xl px-4 py-2.5 text-sm text-[#16449B] font-bold placeholder-[#16449B]/40 focus:outline-none focus:ring-2 focus:ring-[#16449B]"
+                required
+              />
+            </div>
+
             <div className="space-y-2">
               <label className="text-xs font-bold text-[#16449B] block">
                 Select Your Class <span className="text-[#DC2626]">*</span>
@@ -79,7 +101,7 @@ export const CompleteProfilePage: React.FC<CompleteProfilePageProps> = ({
                       key={cls}
                       type="button"
                       onClick={() => setSelectedClass(cls)}
-                      className={`py-3 px-3 rounded-xl border-2 text-xs font-extrabold transition-all cursor-pointer ${
+                      className={`py-2.5 px-3 rounded-xl border-2 text-xs font-extrabold transition-all cursor-pointer ${
                         isSelected
                           ? 'bg-[#16449B] text-white border-[#16449B] shadow-md'
                           : 'bg-white text-[#16449B] border-[#16449B]/30 hover:border-[#16449B]'

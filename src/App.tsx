@@ -1,6 +1,6 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { CurrentUser, Student, Test, Attempt } from './types';
-import { seedSampleDataIfEmpty, checkGoogleRedirectResult } from './services/db';
+import { seedSampleDataIfEmpty } from './services/db';
 import { Navbar } from './components/Navbar';
 import LoadingScreen from './components/LoadingScreen';
 
@@ -25,15 +25,6 @@ export default function App() {
     setTimeout(() => {
       seedSampleDataIfEmpty().catch(err => console.error('Background seed notice:', err));
     }, 100);
-
-    // Check for Google redirect authentication result (mobile browser fallback)
-    checkGoogleRedirectResult()
-      .then((res) => {
-        if (res && res.student) {
-          handleStudentLogin(res.student);
-        }
-      })
-      .catch((err) => console.error('Redirect check error:', err));
 
     // Check localStorage for persisted session
     const savedStudent = localStorage.getItem('cbse_student_session');
@@ -109,7 +100,10 @@ export default function App() {
       <main className="flex-1 bg-white">
         <Suspense fallback={<LoadingScreen />}>
           {!currentUser.role ? (
-            <LoginModal onStudentLogin={handleStudentLogin} onAdminLogin={handleAdminLogin} />
+            <LoginModal
+              onStudentLogin={handleStudentLogin}
+              onAdminLogin={handleAdminLogin}
+            />
           ) : currentUser.role === 'admin' ? (
             <AdminDashboard />
           ) : activeTest && currentUser.student ? (
