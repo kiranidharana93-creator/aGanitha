@@ -25,17 +25,16 @@ export const SelectClassPage: React.FC<SelectClassPageProps> = ({
     <div className="class-selection-page max-w-4xl mx-auto px-4 py-12 space-y-8 bg-white">
       {/* Welcome Banner */}
       <div className="bg-white border-2 border-[#16449B] rounded-3xl p-8 shadow-md text-center space-y-3 relative overflow-hidden text-[#16449B]">
-        <div className="inline-flex items-center gap-2 bg-[#16449B] text-white text-xs px-3.5 py-1 rounded-full font-bold">
-          <GraduationCap className="w-4 h-4 text-white" />
-          <span>CBSE Mathematics Examination Portal</span>
-        </div>
-
         <h2 className="text-3xl sm:text-4xl font-extrabold text-[#16449B] tracking-tight">
           Welcome, <span className="text-[#16449B] underline">{student.name}</span>
         </h2>
 
         <p className="text-sm text-[#16449B] max-w-lg mx-auto font-medium">
-          Student ID: <strong className="text-[#16449B] font-mono">{student.studentId || student.id}</strong> • Select your class level below to view all available mathematics assessment test papers.
+          Student ID: <strong className="text-[#16449B] font-mono">{student.studentId || student.id}</strong>
+        </p>
+
+        <p className="text-xs text-[#16449B]/80 font-medium">
+          Select your class below to view available test papers.
         </p>
       </div>
 
@@ -79,7 +78,7 @@ export const SelectClassPage: React.FC<SelectClassPageProps> = ({
                 <span className="text-2xl font-black tracking-tight">
                   Class {cls}
                 </span>
-                <span className="text-[11px] font-medium opacity-90">CBSE Maths</span>
+                <span className="text-[11px] font-medium opacity-90">Test Papers</span>
               </button>
             );
           })}

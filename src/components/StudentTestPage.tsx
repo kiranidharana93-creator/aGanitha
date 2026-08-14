@@ -408,7 +408,7 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
 
           <div>
             <h2 className="text-2xl font-extrabold text-[#16449B]">Exam Submitted Successfully</h2>
-            <p className="text-xs text-[#16449B]/80 mt-1 font-semibold">CBSE Mathematics Online Examination Portal</p>
+            <p className="text-xs text-[#16449B]/80 mt-1 font-semibold">CBSE Maths Portal</p>
           </div>
 
           <div className="bg-white border-2 border-[#16449B] rounded-2xl p-5 text-left space-y-3 font-semibold text-xs text-[#16449B]">

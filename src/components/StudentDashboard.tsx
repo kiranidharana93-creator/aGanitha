@@ -141,15 +141,11 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
       {/* Hero Section */}
       <div className="bg-[#FFFFFF] border border-[#D6E4FF] border-top-4 border-t-[#16449B] rounded-[14px] p-6 sm:p-8 shadow-[0_2px_8px_rgba(22,68,155,0.08)] flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="space-y-2">
-          <div className="inline-flex items-center gap-2 bg-[#16449B] text-[#FFFFFF] text-xs px-3 py-1 rounded-full font-bold">
-            <GraduationCap className="w-3.5 h-3.5 text-[#FFFFFF]" />
-            <span>CBSE Mathematics Assessment Portal</span>
-          </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-[#16449B] tracking-tight">
-            Master CBSE Mathematics
+            Mathematics Dashboard
           </h1>
           <p className="text-sm font-semibold text-[#16449B]">
-            Practice • Grand Tests • Progress Tracking
+            Practice • Tests • Progress
           </p>
           <p className="text-xs text-[#16449B]/80 font-medium">
             Welcome, <strong className="text-[#16449B]">{student.name}</strong> • Student ID: <span className="font-mono">{student.studentId || student.id}</span> • Enrolled Class: <strong>{student.class}</strong> ({student.section || 'A'})
@@ -194,7 +190,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
           }`}
         >
           <BookOpen className="w-4 h-4" />
-          <span>Select Class</span>
+          <span>Classes</span>
         </button>
 
         <button
@@ -206,7 +202,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
           }`}
         >
           <FileText className="w-4 h-4" />
-          <span>Available Tests ({selectedClass})</span>
+          <span>Tests</span>
         </button>
 
         <button
@@ -218,7 +214,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
           }`}
         >
           <History className="w-4 h-4" />
-          <span>My Results ({allStudentAttempts.length})</span>
+          <span>Results</span>
         </button>
 
         <button
@@ -230,7 +226,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
           }`}
         >
           <BarChart2 className="w-4 h-4" />
-          <span>My Progress Analytics</span>
+          <span>Progress</span>
         </button>
       </div>
 
@@ -351,7 +347,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
           <div className="flex items-center justify-between">
             <h2 className="text-base font-extrabold text-[#16449B] flex items-center gap-2">
               <BarChart2 className="w-4 h-4 text-[#16449B]" />
-              <span>My Progress Analytics & Lesson Bar Chart</span>
+              <span>Progress Chart</span>
             </h2>
 
             <button

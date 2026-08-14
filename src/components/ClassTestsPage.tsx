@@ -56,7 +56,7 @@ export const ClassTestsPage: React.FC<ClassTestsPageProps> = ({
             Available Tests – Class {classNumStr}
           </h2>
           <p className="text-xs text-[#16449B]/80 font-medium mt-1">
-            Showing all published mathematics assessment test papers for Class {classNumStr}
+            Showing all published test papers for Class {classNumStr}
           </p>
         </div>
 

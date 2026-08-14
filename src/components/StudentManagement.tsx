@@ -446,7 +446,7 @@ export const StudentManagement: React.FC = () => {
 
               <a
                 href={`https://wa.me/91${createdStudent.parentMobile}?text=${encodeURIComponent(
-                  `Dear Parent, Student login details for ${createdStudent.name} on CBSE Maths Examination Portal:\nStudent ID: ${createdStudent.studentId || createdStudent.id}\nTemporary Password: ${createdStudent.password}\nPlease log in to start taking practice exams.`
+                  `Dear Parent, Student login details for ${createdStudent.name} on CBSE Maths Portal:\nStudent ID: ${createdStudent.studentId || createdStudent.id}\nTemporary Password: ${createdStudent.password}\nPlease log in to start taking practice exams.`
                 )}`}
                 target="_blank"
                 rel="noreferrer"

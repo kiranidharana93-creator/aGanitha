@@ -123,13 +123,6 @@ export default function App() {
           )}
         </Suspense>
       </main>
-
-      {/* Footer */}
-      <footer className="bg-white border-t-2 border-[#16449B]/20 py-4 px-6 text-center text-xs text-[#16449B]">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
-          <p className="font-semibold">© CBSE Maths Online Assessment Portal • Unlimited Practice Attempts Enabled • Firebase Firestore Backend</p>
-        </div>
-      </footer>
     </div>
   );
 }

@@ -55,7 +55,7 @@ export const ParentProgressCardModal: React.FC<ParentProgressCardModalProps> = (
       .map((t) => `• ${t.topic}: ${t.avgPercentage}% (${t.status})`)
       .join('\n');
 
-    const message = `📊 *CBSE Maths Portal - Student Performance Progress Card* 📊\n\n*Student Name:* ${analytics.studentName}\n*Class:* ${analytics.studentClass}\n*Reporting Period:* ${reportingPeriod}\n\n🏆 *Overall Performance:* ${analytics.avgPercentage}% (Grade ${analytics.grade})\n📝 *Tests Attempted:* ${analytics.totalTestsAttempted}\n\n📚 *Topic-wise Performance:*\n${topicSummary}\n\n💡 *Teacher Remarks:*\n"${customRemark}"\n\n🎯 *Recommended Action Items:*\n${analytics.weakTopics.length > 0 ? analytics.weakTopics.map(w => `• ${w.topic}: ${w.recommendedActions[0] || 'Daily practice recommended'}`).join('\n') : '• Excellent progress! Keep up regular practice.'}\n\nCBSE Mathematics Portal - Automated Report`;
+    const message = `📊 *CBSE Maths Portal - Progress Card* 📊\n\n*Student Name:* ${analytics.studentName}\n*Class:* ${analytics.studentClass}\n*Reporting Period:* ${reportingPeriod}\n\n🏆 *Overall Performance:* ${analytics.avgPercentage}% (Grade ${analytics.grade})\n📝 *Tests Attempted:* ${analytics.totalTestsAttempted}\n\n📚 *Topic-wise Performance:*\n${topicSummary}\n\n💡 *Teacher Remarks:*\n"${customRemark}"\n\n🎯 *Recommended Action Items:*\n${analytics.weakTopics.length > 0 ? analytics.weakTopics.map(w => `• ${w.topic}: ${w.recommendedActions[0] || 'Daily practice recommended'}`).join('\n') : '• Excellent progress! Keep up regular practice.'}\n\nCBSE Maths Portal - Automated Report`;
 
     return message;
   };
@@ -160,7 +160,7 @@ export const ParentProgressCardModal: React.FC<ParentProgressCardModalProps> = (
               <div class="info-row">
                 <span class="info-label">Level</span>
                 <span class="info-colon">:</span>
-                <div class="info-line">CBSE Mathematics</div>
+                <div class="info-line">Mathematics</div>
               </div>
               <div class="info-row" style="margin-bottom: 0;">
                 <span class="info-label">Class</span>
@@ -307,7 +307,7 @@ export const ParentProgressCardModal: React.FC<ParentProgressCardModalProps> = (
                   <span className="w-24 text-sm font-extrabold text-[#16449B]">Level</span>
                   <span className="font-extrabold text-[#16449B] mr-3">:</span>
                   <div className="flex-1 border-b-2 border-[#16449B] font-bold text-[#16449B] text-sm pb-1">
-                    CBSE Mathematics
+                    Mathematics
                   </div>
                 </div>
 

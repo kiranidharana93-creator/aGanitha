@@ -402,7 +402,7 @@ export const AdminDashboard: React.FC = () => {
         <body>
           <div class="header">
             <div>
-              <div class="title">CBSE Mathematics Test Result</div>
+              <div class="title">Maths Test Result</div>
               <div style="font-size: 13px; color: #64748b; font-weight: 600;">Official Student Performance Report</div>
             </div>
             <span class="badge">${isPassed ? 'PASSED' : 'NEEDS IMPROVEMENT'}</span>
@@ -646,7 +646,7 @@ export const AdminDashboard: React.FC = () => {
                 <Layers className="w-5 h-5 text-[#16449B]" />
               </div>
               <p className="text-2xl font-extrabold text-[#16449B] mt-2">Class 6 - 10</p>
-              <p className="text-[11px] text-[#16449B]/80 font-bold mt-0.5">CBSE Mathematics</p>
+              <p className="text-[11px] text-[#16449B]/80 font-bold mt-0.5">Mathematics</p>
             </div>
           </div>
 

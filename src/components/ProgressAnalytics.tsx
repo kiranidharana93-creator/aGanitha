@@ -163,7 +163,7 @@ export const ProgressAnalytics: React.FC<ProgressAnalyticsProps> = ({
                 </div>
                 <h2 className="text-2xl font-black text-[#16449B]">{analytics.studentName}</h2>
                 <p className="text-xs text-[#16449B]/80 mt-1 font-semibold">
-                  Class: <strong className="text-[#16449B]">{analytics.studentClass}</strong> • CBSE Mathematics Learning Tracker
+                  Class: <strong className="text-[#16449B]">{analytics.studentClass}</strong> • Progress Tracker
                 </p>
               </div>
 
