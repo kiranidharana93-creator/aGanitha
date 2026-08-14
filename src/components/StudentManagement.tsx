@@ -4,7 +4,6 @@ import {
   getAllRegisteredStudents,
   createRegisteredStudent,
   deleteStudent,
-  deleteAllStudentsExceptKiran,
   INITIAL_REGISTERED_STUDENTS,
 } from '../services/db';
 import {
@@ -119,19 +118,6 @@ export const StudentManagement: React.FC = () => {
     await deleteStudent(student.id, student.studentId, student.name);
   };
 
-  const handleDeleteAllExceptKiran = async () => {
-    if (!window.confirm('Delete all students except kiran (c6-2026-0012)? This will remove all other records from the database.')) return;
-    setIsLoading(true);
-    try {
-      const remaining = await deleteAllStudentsExceptKiran();
-      setStudents(remaining);
-    } catch (err) {
-      console.error('Failed to clear students:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const handleCopyCredentials = () => {
     if (!createdStudent) return;
     const text = `CBSE Maths Portal Login Credentials\nStudent ID: ${createdStudent.studentId || createdStudent.id}\nPassword: ${createdStudent.password}\nClass: ${createdStudent.class}\nName: ${createdStudent.name}`;
@@ -166,15 +152,6 @@ export const StudentManagement: React.FC = () => {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <button
-            onClick={handleDeleteAllExceptKiran}
-            title="Delete all students except c6-2026-0012 ID"
-            className="btn-danger text-xs flex items-center gap-2 cursor-pointer shadow-md"
-          >
-            <Trash2 className="w-3.5 h-3.5 text-white" />
-            <span>Delete All Except c6-2026-0012</span>
-          </button>
-
           <button
             onClick={loadStudents}
             className="flex items-center gap-2 bg-white border border-[#D6E4FF] hover:bg-[#F8FBFF] text-[#0B3D91] px-3.5 py-2 rounded-[8px] text-xs font-bold cursor-pointer transition-colors"
