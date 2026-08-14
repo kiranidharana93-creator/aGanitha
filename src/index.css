@@ -20,23 +20,23 @@ body {
 .header {
   background: #16449B;
   color: #FFFFFF;
-  height: 92px;
+  min-height: 60px;
   display: flex;
   align-items: center;
-  padding: 16px 28px;
+  padding: 10px 24px;
 }
 
 .logo-container {
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: 12px;
 }
 
 .logo-icon {
-  width: 64px;
-  height: 64px;
+  width: 40px;
+  height: 40px;
   background: #FFFFFF;
-  border-radius: 14px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -44,17 +44,17 @@ body {
 
 .logo-title {
   font-family: 'Segoe UI', Arial, sans-serif;
-  font-size: 38px;
+  font-size: 20px;
   font-weight: 700;
   color: #FFFFFF;
-  line-height: 1;
+  line-height: 1.2;
   letter-spacing: 0;
 }
 
 .logo-subtitle {
-  margin-top: 6px;
+  margin-top: 2px;
   font-family: 'Segoe UI', Arial, sans-serif;
-  font-size: 15px;
+  font-size: 12px;
   font-weight: 600;
   color: #FFFFFF;
   opacity: 0.95;
