@@ -39,15 +39,19 @@ export const ResultDetailsModal: React.FC<ResultDetailsModalProps> = ({ attempt,
               </span>
             </div>
 
-            <div className="border-t border-[#16449B]/20 pt-3 grid grid-cols-3 gap-2 text-center text-xs">
+            <div className="border-t border-[#16449B]/20 pt-3 grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs">
               <div className="bg-white p-2 rounded-lg border border-[#16449B]">
-                <p className="text-[10px] text-[#16449B] font-bold uppercase">Test</p>
-                <p className="font-bold text-[#16449B] truncate">{cleanTitle}</p>
+                <p className="text-[10px] text-[#16449B] font-bold uppercase">Questions</p>
+                <p className="font-extrabold text-[#16449B]">{attempt.totalQuestions}</p>
               </div>
               <div className="bg-white p-2 rounded-lg border border-[#16449B]">
-                <p className="text-[10px] text-[#16449B] font-bold uppercase">Score</p>
-                <p className="font-extrabold text-[#16449B]">
-                  {attempt.score} / {attempt.totalQuestions}
+                <p className="text-[10px] text-[#16449B] font-bold uppercase">Correct (Score)</p>
+                <p className="font-extrabold text-[#16449B]">{attempt.score} / {attempt.totalQuestions}</p>
+              </div>
+              <div className="bg-white p-2 rounded-lg border border-[#16449B]">
+                <p className="text-[10px] text-[#16449B] font-bold uppercase">Wrong / Unans</p>
+                <p className="font-extrabold text-[#D32F2F]">
+                  {Math.max(0, (attempt.totalQuestions || 0) - attempt.score)}
                 </p>
               </div>
               <div className="bg-white p-2 rounded-lg border border-[#16449B]">

@@ -284,11 +284,13 @@ export function calculateStudentAnalytics(
     if (scorePct > maxPct) maxPct = scorePct;
     if (scorePct < minPct) minPct = scorePct;
 
-    // Approximate correct vs wrong vs unanswered from answers map if available
-    const answeredCount = att.answers ? Object.keys(att.answers).length : att.score;
-    const correct = att.score;
+    // Calculate accurate correct vs wrong vs unanswered from answers map
+    const answeredCount = att.answers
+      ? Object.values(att.answers).filter((a) => a !== undefined && a !== null && String(a).trim() !== '').length
+      : att.score;
+    const correct = Math.min(att.score, totalQ);
     const wrong = Math.max(0, answeredCount - correct);
-    const unanswered = Math.max(0, totalQ - answeredCount);
+    const unanswered = Math.max(0, totalQ - (correct + wrong));
 
     totalCorrect += correct;
     totalWrong += wrong;

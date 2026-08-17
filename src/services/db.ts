@@ -25,10 +25,11 @@ const ATTEMPTS_COL = 'attempts';
 export function normalizeAnswerKey(ans: string): string {
   if (!ans) return 'optionA';
   const clean = ans.trim();
-  if (clean === 'A' || clean === 'optionA') return 'optionA';
-  if (clean === 'B' || clean === 'optionB') return 'optionB';
-  if (clean === 'C' || clean === 'optionC') return 'optionC';
-  if (clean === 'D' || clean === 'optionD') return 'optionD';
+  const lower = clean.toLowerCase();
+  if (lower === 'a' || lower === 'optiona' || lower === 'option a' || lower === 'opt a' || lower === '(a)' || lower === 'a.' || lower === 'a)') return 'optionA';
+  if (lower === 'b' || lower === 'optionb' || lower === 'option b' || lower === 'opt b' || lower === '(b)' || lower === 'b.' || lower === 'b)') return 'optionB';
+  if (lower === 'c' || lower === 'optionc' || lower === 'option c' || lower === 'opt c' || lower === '(c)' || lower === 'c.' || lower === 'c)') return 'optionC';
+  if (lower === 'd' || lower === 'optiond' || lower === 'option d' || lower === 'opt d' || lower === '(d)' || lower === 'd.' || lower === 'd)') return 'optionD';
   return clean;
 }
 

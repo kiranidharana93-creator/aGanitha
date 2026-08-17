@@ -2,50 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Student, Test, Question, Attempt } from '../types';
 import { getQuestionsByTestId, saveAttempt, normalizeAnswerKey, saveDraftAttempt, clearDraftAttempt, getAttemptsForStudent } from '../services/db';
 import { extractTopicFromTitle, getRecommendationsForTopic, calculateStudentAnalytics, cleanStudentTestTitle } from '../utils/analytics';
+import { calculateTestResults, isQuestionCorrect, evaluateShortAnswer } from '../utils/evaluation';
 import { Clock, CheckCircle, CheckCircle2, XCircle, AlertTriangle, ChevronLeft, ChevronRight, Send, ArrowLeft, RefreshCw, Award, Lightbulb, Share2, Copy, Check, MessageSquare, Phone, FileText, HelpCircle, ChevronDown, ChevronUp } from 'lucide-react';
 
-/**
- * Intelligent evaluation for student short answers / fill-in-the-blank questions
- */
-export function evaluateShortAnswer(userAns: string, correctAns: string): boolean {
-  if (!userAns) return false;
-  const user = userAns.trim().toLowerCase();
-  const correct = correctAns.trim().toLowerCase();
-
-  if (user === correct) return true;
-
-  // 1. Alphanumeric normalized equality
-  const normUser = user.replace(/[^a-z0-9]/g, '');
-  const normCorr = correct.replace(/[^a-z0-9]/g, '');
-  if (normUser && normCorr && normUser === normCorr) return true;
-
-  // 2. Number sets comparison (e.g., factors "1, 2, 3, 4, 6, 8, 12, 24" or multiples "5, 10, 15, 20, 25")
-  const corrNums = correct.match(/\d+/g);
-  const userNums = user.match(/\d+/g);
-
-  if (corrNums && corrNums.length > 0 && userNums && userNums.length > 0) {
-    if (corrNums.length === userNums.length) {
-      const sortedCorr = [...corrNums].map(Number).sort((a, b) => a - b).join(',');
-      const sortedUser = [...userNums].map(Number).sort((a, b) => a - b).join(',');
-      if (sortedCorr === sortedUser) return true;
-    }
-  }
-
-  // 3. True / False normalization
-  if (correct === 'true' || correct === 'false') {
-    if (user === 't' || user === 'true' || user === 'yes') return correct === 'true';
-    if (user === 'f' || user === 'false' || user === 'no') return correct === 'false';
-  }
-
-  // 4. Substring containment if normalized match
-  if (normUser && normCorr && (normUser.includes(normCorr) || normCorr.includes(normUser))) {
-    if (Math.abs(normUser.length - normCorr.length) < 12) {
-      return true;
-    }
-  }
-
-  return false;
-}
+export { evaluateShortAnswer };
 
 interface StudentTestPageProps {
   student: Student;
@@ -192,23 +152,8 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
   };
 
   const calculateScore = () => {
-    let score = 0;
-    questions.forEach((q) => {
-      const selected = (selectedAnswers[q.id] || '').trim();
-      const isMcq = Boolean(q.optionA || q.optionB) && (!((test.title || '').toLowerCase().includes('grand test') || (test.title || '').toLowerCase().includes('playing with')));
-
-      if (isMcq) {
-        const correct = normalizeAnswerKey(q.correctAnswer);
-        if (selected && normalizeAnswerKey(selected.toLowerCase()) === correct) {
-          score++;
-        }
-      } else {
-        if (evaluateShortAnswer(selected, q.correctAnswer || '')) {
-          score++;
-        }
-      }
-    });
-    return score;
+    const summary = calculateTestResults(questions, selectedAnswers);
+    return summary.score;
   };
 
   const processSubmission = async () => {
@@ -219,7 +164,8 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
       // Clear draft immediately before network request
       clearDraftAttempt(student.id);
 
-      const finalScore = calculateScore();
+      const summary = calculateTestResults(questions, selectedAnswers);
+      const finalScore = summary.score;
       const attemptData: Omit<Attempt, 'id'> = {
         studentId: student.id,
         testId: test.id,
@@ -255,13 +201,13 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
       }
 
       const analytics = calculateStudentAnalytics(student.name, student.class, studentAttempts);
-      const percentage = Math.round((finalScore / (questions.length || 1)) * 100);
+      const percentage = summary.percentage;
       const statusText =
-        analytics.avgPercentage >= 85
+        percentage >= 85
           ? 'Excellent'
-          : analytics.avgPercentage >= 70
+          : percentage >= 70
           ? 'Good'
-          : analytics.avgPercentage >= 50
+          : percentage >= 50
           ? 'Needs Improvement'
           : 'Critical Improvement Required';
 
@@ -387,15 +333,8 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
 
   // Completed Test Result View - Clean Student Confirmation
   if (completedAttempt) {
-    const percentage = Math.round((completedAttempt.score / (completedAttempt.totalQuestions || 1)) * 100);
-    const statusText =
-      percentage >= 85
-        ? 'PASSED (Excellent)'
-        : percentage >= 70
-        ? 'PASSED (Good)'
-        : percentage >= 50
-        ? 'PASSED (Needs Practice)'
-        : 'NEEDS IMPROVEMENT';
+    const summary = calculateTestResults(questions, completedAttempt.answers || selectedAnswers);
+    const percentage = summary.percentage;
     const isPassed = percentage >= 40;
     const topicName = extractTopicFromTitle(test.title);
 
@@ -417,8 +356,24 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
               <span className="text-[#16449B] font-bold">{topicName}</span>
             </div>
             <div className="flex justify-between items-center py-2 border-b border-[#16449B]/20">
-              <span className="text-[#16449B]">Score</span>
-              <span className="text-[#16449B] font-extrabold">{completedAttempt.score} / {completedAttempt.totalQuestions}</span>
+              <span className="text-[#16449B]">Total Questions</span>
+              <span className="text-[#16449B] font-extrabold">{summary.totalQuestions}</span>
+            </div>
+            <div className="flex justify-between items-center py-2 border-b border-[#16449B]/20">
+              <span className="text-[#16449B]">Correct Answers</span>
+              <span className="text-[#16449B] font-extrabold">{summary.correctCount}</span>
+            </div>
+            <div className="flex justify-between items-center py-2 border-b border-[#16449B]/20">
+              <span className="text-[#16449B]">Wrong Answers</span>
+              <span className="text-[#D32F2F] font-extrabold">{summary.wrongCount}</span>
+            </div>
+            <div className="flex justify-between items-center py-2 border-b border-[#16449B]/20">
+              <span className="text-[#16449B]">Unanswered</span>
+              <span className="text-[#16449B] font-extrabold">{summary.unansweredCount}</span>
+            </div>
+            <div className="flex justify-between items-center py-2 border-b border-[#16449B]/20">
+              <span className="text-[#16449B]">Marks Obtained</span>
+              <span className="text-[#16449B] font-extrabold">{summary.score} / {summary.totalMarks}</span>
             </div>
             <div className="flex justify-between items-center py-2 border-b border-[#16449B]/20">
               <span className="text-[#16449B]">Percentage</span>
@@ -433,7 +388,7 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
           </div>
 
           <div className="bg-white border-2 border-[#16449B] text-[#16449B] text-xs font-bold py-3.5 px-4 rounded-xl text-center space-y-1">
-            <p className="font-extrabold text-sm text-[#16449B]">Result submitted successfully. Parent has been notified.</p>
+            <p className="font-extrabold text-sm text-[#16449B]">Result submitted successfully.</p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
@@ -464,7 +419,7 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
   const currentQ = questions[currentIndex];
   const selectedOpt = currentQ ? selectedAnswers[currentQ.id] : undefined;
   const isSelectedCorrect =
-    selectedOpt && currentQ ? normalizeAnswerKey(selectedOpt) === normalizeAnswerKey(currentQ.correctAnswer) : false;
+    selectedOpt && currentQ ? isQuestionCorrect(selectedOpt, currentQ) : false;
 
   // Visual styling for the per-question timer
   let timerStyle = 'bg-white border-2 border-[#16449B] text-[#16449B]';
