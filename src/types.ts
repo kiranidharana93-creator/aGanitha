@@ -3,6 +3,7 @@ export interface Student {
   uid?: string;
   studentId?: string; // e.g. "STD-1001" or "std_kiran_6"
   password?: string;
+  mustChangePassword?: boolean;
   name: string;
   class: string | null; // e.g., "Class 6", "Class 7", "Class 8", "Class 9", "Class 10"
   section?: string | null; // e.g., "A", "B"

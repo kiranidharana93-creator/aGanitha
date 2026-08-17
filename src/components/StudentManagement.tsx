@@ -150,7 +150,7 @@ export const StudentManagement: React.FC = () => {
     try {
       await updateStudentClassAndSection(editingStudent.id, editClass, editSection);
       if (editPassword.trim()) {
-        await updateStudentPassword(editingStudent.id, editPassword.trim());
+        await updateStudentPassword(editingStudent.id, editPassword.trim(), true);
       }
       setEditingStudent(null);
       await loadStudents();

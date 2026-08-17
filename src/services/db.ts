@@ -82,6 +82,7 @@ export const INITIAL_REGISTERED_STUDENTS: Student[] = [
     uid: 'std_kiran_6',
     studentId: 'STD-1001',
     password: 'password123',
+    mustChangePassword: true,
     name: 'Kiran',
     class: 'Class 6',
     section: 'A',
@@ -95,6 +96,7 @@ export const INITIAL_REGISTERED_STUDENTS: Student[] = [
     uid: 'std_ananya_7',
     studentId: 'STD-1002',
     password: 'password123',
+    mustChangePassword: true,
     name: 'Ananya Sharma',
     class: 'Class 7',
     section: 'A',
@@ -108,6 +110,7 @@ export const INITIAL_REGISTERED_STUDENTS: Student[] = [
     uid: 'std_rahul_8',
     studentId: 'STD-1003',
     password: 'password123',
+    mustChangePassword: true,
     name: 'Rahul Verma',
     class: 'Class 8',
     section: 'A',
@@ -121,6 +124,7 @@ export const INITIAL_REGISTERED_STUDENTS: Student[] = [
     uid: 'std_priya_9',
     studentId: 'STD-1004',
     password: 'password123',
+    mustChangePassword: true,
     name: 'Priya Patel',
     class: 'Class 9',
     section: 'A',
@@ -134,6 +138,7 @@ export const INITIAL_REGISTERED_STUDENTS: Student[] = [
     uid: 'std_aarav_10',
     studentId: 'STD-1005',
     password: 'password123',
+    mustChangePassword: true,
     name: 'Aarav Gupta',
     class: 'Class 10',
     section: 'A',
@@ -204,6 +209,7 @@ export async function loginStudentWithCredentials(
           uid: data.uid || d.id,
           studentId: data.studentId || d.id,
           password: data.password || 'password123',
+          mustChangePassword: data.mustChangePassword !== false,
           name: data.name || 'Student',
           class: data.class || 'Class 6',
           section: data.section || 'A',
@@ -301,6 +307,7 @@ export async function addRegisteredStudent(newStudent: {
     studentId: newStudent.studentId.trim(),
     name: newStudent.name.trim(),
     password: newStudent.password?.trim() || 'password123',
+    mustChangePassword: true, // admin created password, student must change on login
     class: newStudent.class.trim(),
     section: newStudent.section?.trim() || 'A',
     rollNumber: newStudent.rollNumber || '',
@@ -314,11 +321,19 @@ export async function addRegisteredStudent(newStudent: {
   return studentData;
 }
 
-export async function updateStudentPassword(studentDocId: string, newPassword: string): Promise<void> {
+export async function updateStudentPassword(studentDocId: string, newPassword: string, mustChangePassword: boolean = true): Promise<void> {
   const studentRef = doc(db, STUDENTS_COL, studentDocId);
-  await updateDoc(studentRef, { password: newPassword.trim() }).catch(async () => {
-    await setDoc(studentRef, { password: newPassword.trim() }, { merge: true });
+  const updatePayload = {
+    password: newPassword.trim(),
+    mustChangePassword: mustChangePassword,
+  };
+  await updateDoc(studentRef, updatePayload).catch(async () => {
+    await setDoc(studentRef, updatePayload, { merge: true });
   });
+}
+
+export async function completeStudentPasswordChange(studentDocId: string, newPassword: string): Promise<void> {
+  return updateStudentPassword(studentDocId, newPassword, false);
 }
 
 export async function updateStudentProfile(
@@ -376,6 +391,7 @@ export async function getAllRegisteredStudents(): Promise<Student[]> {
         studentId: data.studentId || docId,
         name: data.name || 'Student',
         password: data.password || 'password123',
+        mustChangePassword: data.mustChangePassword !== false,
         class: data.class || null,
         section: data.section || 'A',
         rollNumber: data.rollNumber || '',
@@ -406,6 +422,7 @@ export async function seedDefaultStudents(): Promise<void> {
         studentId: student.studentId,
         name: student.name,
         password: student.password || 'password123',
+        mustChangePassword: student.mustChangePassword !== undefined ? student.mustChangePassword : true,
         class: student.class,
         section: student.section,
         rollNumber: student.rollNumber,

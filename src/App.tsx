@@ -31,7 +31,11 @@ export default function App() {
     if (savedStudent) {
       try {
         const studentObj = JSON.parse(savedStudent);
-        setCurrentUser({ role: 'student', student: studentObj });
+        if (studentObj && studentObj.mustChangePassword) {
+          localStorage.removeItem('cbse_student_session');
+        } else if (studentObj) {
+          setCurrentUser({ role: 'student', student: studentObj });
+        }
       } catch (e) {
         console.error('Failed to parse saved session', e);
       }
