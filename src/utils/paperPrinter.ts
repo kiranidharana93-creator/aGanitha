@@ -39,22 +39,14 @@ export async function printCBSEQuestionPaper(test: Test, existingQuestions?: Que
   let sectionD: Question[] = [];
   let sectionE: Question[] = [];
 
-  const isGrandTest = test.title.toLowerCase().includes('grand test') || sortedQuestions.length === 40;
-
   if (is30Q) {
     sectionA = sortedQuestions.slice(0, 10);
     sectionB = sortedQuestions.slice(10, 18);
     sectionC = sortedQuestions.slice(18, 24);
     sectionD = sortedQuestions.slice(24, 28);
     sectionE = sortedQuestions.slice(28, 30);
-  } else if (isGrandTest) {
-    sectionA = sortedQuestions.slice(0, 8);   // FACTORS AND MULTIPLES
-    sectionB = sortedQuestions.slice(8, 18);  // ODD, EVEN AND PRIME NUMBERS
-    sectionC = sortedQuestions.slice(18, 33); // DIVISIBILITY TESTS
-    sectionD = sortedQuestions.slice(33, 38); // COMMON FACTORS AND MULTIPLES
-    sectionE = sortedQuestions.slice(38, 40); // PRIME FACTORISATION AND HCF
   } else {
-    // Standard division if not 30 or 40 questions
+    // Standard division if not 30 questions
     sectionA = sortedQuestions;
   }
 
@@ -75,9 +67,6 @@ export async function printCBSEQuestionPaper(test: Test, existingQuestions?: Que
     subTitle = 'Chapter 8 – Decimals';
   } else if (isFractions) {
     subTitle = 'Chapter 7 – Fractions';
-  } else if (isGrandTest) {
-    subTitle = 'Chapter – Playing With the Numbers';
-    sampleTestTitle = 'Grand Test';
   } else {
     subTitle = test.title.replace(/sample\s*/gi, '');
   }
@@ -89,6 +78,13 @@ export async function printCBSEQuestionPaper(test: Test, existingQuestions?: Que
     const isMcq = Boolean(q.optionA || q.optionB);
 
     if (isMcq) {
+      const optsHtml = [
+        q.optionA ? `<div class="option-item"><span class="opt-label">a)</span> ${q.optionA}</div>` : '',
+        q.optionB ? `<div class="option-item"><span class="opt-label">b)</span> ${q.optionB}</div>` : '',
+        q.optionC ? `<div class="option-item"><span class="opt-label">c)</span> ${q.optionC}</div>` : '',
+        q.optionD ? `<div class="option-item"><span class="opt-label">d)</span> ${q.optionD}</div>` : '',
+      ].filter(Boolean).join('');
+
       return `
         <div class="question-item">
           <div class="question-header">
@@ -96,10 +92,7 @@ export async function printCBSEQuestionPaper(test: Test, existingQuestions?: Que
             <span class="q-text">${cleanQ}</span>
           </div>
           <div class="options-grid">
-            <div class="option-item"><span class="opt-label">a)</span> ${q.optionA || ''}</div>
-            <div class="option-item"><span class="opt-label">b)</span> ${q.optionB || ''}</div>
-            <div class="option-item"><span class="opt-label">c)</span> ${q.optionC || ''}</div>
-            <div class="option-item"><span class="opt-label">d)</span> ${q.optionD || ''}</div>
+            ${optsHtml}
           </div>
         </div>
       `;
@@ -473,7 +466,7 @@ export async function downloadAdminAnswerKeyDOCX(test: Test, existingQuestions?:
     ? [...existingQuestions].sort((a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0))
     : await getQuestionsByTestId(test.id);
 
-  const cleanTitle = (test.title || 'Grand_Test').replace(/[^a-zA-Z0-9]/g, '_');
+  const cleanTitle = (test.title || 'Mathematics_Test').replace(/[^a-zA-Z0-9]/g, '_');
   const fileName = `${cleanTitle}_Admin_Answer_Key.doc`;
 
   const getOptionText = (q: Question, optKey: string) => {
@@ -571,7 +564,7 @@ export async function downloadAdminAnswerKeyPDF(test: Test, existingQuestions?: 
     ? [...existingQuestions].sort((a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0))
     : await getQuestionsByTestId(test.id);
 
-  const cleanTitle = (test.title || 'Grand_Test').replace(/[^a-zA-Z0-9]/g, '_');
+  const cleanTitle = (test.title || 'Mathematics_Test').replace(/[^a-zA-Z0-9]/g, '_');
 
   const printWindow = window.open('', '_blank');
   if (!printWindow) {

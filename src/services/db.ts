@@ -665,8 +665,13 @@ export async function getAllTests(): Promise<Test[]> {
         .replace(/\s{2,}/g, ' ')
         .trim();
       
-      if (rawTitle.toLowerCase().includes('odd numbers') || cleanTitle.toLowerCase().includes('odd numbers')) {
-        deleteDoc(doc(db, TESTS_COL, docSnap.id)).catch(() => {});
+      const lowerRaw = rawTitle.toLowerCase();
+      const lowerClean = cleanTitle.toLowerCase();
+      if (
+        lowerRaw.includes('odd numbers') ||
+        lowerClean.includes('odd numbers')
+      ) {
+        deleteTest(docSnap.id).catch(() => {});
         continue;
       }
 
@@ -709,9 +714,17 @@ export async function getAllTests(): Promise<Test[]> {
  */
 export async function getPublishedTestsForClass(studentClass: string): Promise<Test[]> {
   const allTests = await getAllTests();
-  return allTests.filter(
-    (t) => t.published && (t.class === studentClass || t.class === 'All' || t.class === 'All Classes')
-  );
+  const classNumStr = String(studentClass).replace(/\D/g, '');
+  return allTests.filter((t) => {
+    if (!t.published) return false;
+    const testClassNum = String(t.class).replace(/\D/g, '');
+    return (
+      t.class === studentClass ||
+      t.class === 'All' ||
+      t.class === 'All Classes' ||
+      (classNumStr !== '' && testClassNum === classNumStr)
+    );
+  });
 }
 
 /**
@@ -786,6 +799,7 @@ export async function getQuestionsByTestId(testId: string): Promise<Question[]> 
         correctAnswer: normalizeAnswerKey(data.correctAnswer) as any,
         hint: data.hint || '',
         orderIndex: typeof data.orderIndex === 'number' ? data.orderIndex : 9999,
+        timeLimitSeconds: typeof data.timeLimitSeconds === 'number' ? data.timeLimitSeconds : undefined,
       };
     });
     return list.sort((a, b) => (a.orderIndex ?? 9999) - (b.orderIndex ?? 9999));
@@ -804,6 +818,7 @@ export async function createQuestion(qData: Omit<Question, 'id'>): Promise<Quest
     question: cleanQuestionText(qData.question),
     correctAnswer: normalizeAnswerKey(qData.correctAnswer) as Question['correctAnswer'],
     orderIndex: typeof qData.orderIndex === 'number' ? qData.orderIndex : 9999,
+    ...(typeof qData.timeLimitSeconds === 'number' ? { timeLimitSeconds: qData.timeLimitSeconds } : {}),
   };
   const docRef = await addDoc(collection(db, QUESTIONS_COL), payload);
   return {
@@ -2190,14 +2205,18 @@ export async function createPlayingWithNumbersTestPaper2(): Promise<Test> {
 }
 
 /**
- * Deletes previous Grand Test Playing With the Numbers test papers to allow fresh seeding
+ * Permanently deletes duplicate Grand Test Playing With Numbers test papers from Firestore
  */
 export async function deleteGrandTestPlayingWithNumbers(): Promise<number> {
   try {
     const snap = await getDocs(collection(db, TESTS_COL));
     const grandDocs = snap.docs.filter((docSnap) => {
       const title = (docSnap.data().title || '').toLowerCase();
-      return title.includes('grand test') || (title.includes('playing with') && title.includes('numbers') && title.includes('grand'));
+      return (
+        title.includes('grand test') ||
+        (title.includes('playing with') && title.includes('grand')) ||
+        (title.includes('playing with numbers') && title.includes('grand'))
+      );
     });
 
     let count = 0;
@@ -2205,7 +2224,10 @@ export async function deleteGrandTestPlayingWithNumbers(): Promise<number> {
       await deleteTest(docSnap.id);
       count++;
     }
-    console.log(`Deleted ${count} previous Grand Test Playing With Numbers test papers.`);
+
+    if (count > 0) {
+      console.log(`Deleted ${count} previous Grand Test Playing With Numbers test papers.`);
+    }
     return count;
   } catch (error) {
     console.error('Error deleting Grand Test Playing With Numbers tests:', error);
@@ -2214,273 +2236,313 @@ export async function deleteGrandTestPlayingWithNumbers(): Promise<number> {
 }
 
 /**
- * Helper to populate official Class 6 GRAND TEST – PLAYING WITH THE NUMBERS (40 Questions)
+ * Helper to populate official Class 6 GRAND TEST – PLAYING WITH NUMBERS (30 Questions)
  */
 export async function createGrandTestPlayingWithNumbers(): Promise<Test> {
   const testObj = await createTest({
-    title: 'CBSE Class 6: Grand Test – Playing With the Numbers',
+    title: 'CBSE Class 6: Grand Test – Playing with Numbers',
     class: 'Class 6',
     duration: 60,
     published: true,
   });
 
-  const rawQuestions: Omit<Question, 'id'>[] = [
-    // SECTION A – FACTORS AND MULTIPLES (Q1–Q8)
+  const grandQuestions: Omit<Question, 'id'>[] = [
+    // 1. Which one of the following numbers is a prime number? [2]
     {
       testId: testObj.id,
-      question: 'Write all the factors of 24.',
-      correctAnswer: '1, 2, 3, 4, 6, 8, 12, 24',
-      hint: 'Factors are numbers that divide 24 exactly.',
+      orderIndex: 1,
+      question: '1. Which one of the following numbers is a prime number? [2]',
+      optionA: '221',
+      optionB: '223',
+      optionC: '247',
+      optionD: '259',
+      correctAnswer: '(b) 223',
+      hint: '223 has no factors other than 1 and itself (221 = 13 × 17, 247 = 13 × 19, 259 = 7 × 37).',
     },
+    // 2. A number is divisible by both 4 and 9. It must certainly be divisible by: [2]
     {
       testId: testObj.id,
-      question: 'Write all the factors of 15.',
-      correctAnswer: '1, 3, 5, 15',
-      hint: 'These numbers divide 15 without leaving any remainder.',
+      orderIndex: 2,
+      question: '2. A number is divisible by both 4 and 9. It must certainly be divisible by: [2]',
+      optionA: '13',
+      optionB: '6',
+      optionC: '8',
+      optionD: '36',
+      correctAnswer: '(d) 36',
+      hint: 'Since 4 and 9 are co-prime, any number divisible by both 4 and 9 is divisible by 4 × 9 = 36.',
     },
+    // 3. The HCF of two numbers is 12 and their LCM is 336. If one of the numbers is 48, the other number is: [2]
     {
       testId: testObj.id,
-      question: 'Write all the factors of 21.',
-      correctAnswer: '1, 3, 7, 21',
-      hint: '21 = 3 × 7.',
+      orderIndex: 3,
+      question: '3. The HCF of two numbers is 12 and their LCM is 336. If one of the numbers is 48, the other number is: [2]',
+      optionA: '84',
+      optionB: '96',
+      optionC: '72',
+      optionD: '108',
+      correctAnswer: '(a) 84',
+      hint: 'Product of two numbers = HCF × LCM => 48 × Other = 12 × 336 => Other = (12 × 336) / 48 = 84.',
     },
+    // 4. The largest number that divides both 245 and 1029, leaving a remainder of 5 in each case, is: [2]
     {
       testId: testObj.id,
-      question: 'Write the first five multiples of 5.',
-      correctAnswer: '5, 10, 15, 20, 25',
-      hint: 'Multiples are obtained by multiplying 5 by 1, 2, 3, 4, and 5.',
+      orderIndex: 4,
+      question: '4. The largest number that divides both 245 and 1029, leaving a remainder of 5 in each case, is: [2]',
+      optionA: '8',
+      optionB: '12',
+      optionC: '16',
+      optionD: '20',
+      correctAnswer: '(c) 16',
+      hint: 'Find HCF(245 - 5, 1029 - 5) = HCF(240, 1024) = 16.',
     },
+    // 5. Which of the following pairs of numbers is co-prime? [2]
     {
       testId: testObj.id,
-      question: 'Write the first five multiples of 8.',
-      correctAnswer: '8, 16, 24, 32, 40',
-      hint: 'Multiples are obtained by multiplying 8 by 1, 2, 3, 4, and 5.',
+      orderIndex: 5,
+      question: '5. Which of the following pairs of numbers is co-prime? [2]',
+      optionA: '12 and 18',
+      optionB: '17 and 68',
+      optionC: '25 and 42',
+      optionD: '15 and 42',
+      correctAnswer: '(c) 25 and 42',
+      hint: 'Factors of 25 are 1, 5, 25. Factors of 42 are 1, 2, 3, 6, 7, 14, 21, 42. Their HCF is 1.',
     },
+    // 6. The smallest number which, when divided by 12, 16 and 24, leaves a remainder of 7 in each case, is: [2]
     {
       testId: testObj.id,
-      question: 'Write the first five multiples of 9.',
-      correctAnswer: '9, 18, 27, 36, 45',
-      hint: 'Multiples are obtained by multiplying 9 by 1, 2, 3, 4, and 5.',
+      orderIndex: 6,
+      question: '6. The smallest number which, when divided by 12, 16 and 24, leaves a remainder of 7 in each case, is: [2]',
+      optionA: '48',
+      optionB: '55',
+      optionC: '41',
+      optionD: '60',
+      correctAnswer: '(b) 55',
+      hint: 'LCM(12, 16, 24) = 48. Required number = 48 + 7 = 55.',
     },
+    // 7. A certain number is exactly divisible by 88. By which of the following numbers is it NOT necessarily divisible? [2]
     {
       testId: testObj.id,
-      question: 'Match the items in Column 1 with Column 2:\nColumn 1: (i) 35, (ii) 15, (iii) 16, (iv) 20, (v) 25\nColumn 2: (a) Multiple of 8, (b) Multiple of 7, (c) Multiple of 70, (d) Factor of 30, (e) Factor of 50, (f) Factor of 20',
-      correctAnswer: '(i) → (b), (ii) → (d), (iii) → (a), (iv) → (f), (v) → (e)',
-      hint: 'Match each number according to whether it is a factor or a multiple.',
+      orderIndex: 7,
+      question: '7. A certain number is exactly divisible by 88. By which of the following numbers is it NOT necessarily divisible? [2]',
+      optionA: '8',
+      optionB: '11',
+      optionC: '22',
+      optionD: '24',
+      correctAnswer: '(d) 24',
+      hint: 'Factors of 88 include 1, 2, 4, 8, 11, 22, 44, 88. 24 is not a factor of 88.',
     },
+    // 8. If HCF(a, b) = 1 for two natural numbers a and b, then a and b are called: [2]
     {
       testId: testObj.id,
-      question: 'Find all the multiples of 9 up to 100.',
-      correctAnswer: '9, 18, 27, 36, 45, 54, 63, 72, 81, 90, 99',
-      hint: 'Multiples of 9 less than or equal to 100.',
+      orderIndex: 8,
+      question: '8. If HCF(a, b) = 1 for two natural numbers a and b, then a and b are called: [2]',
+      optionA: 'twin primes',
+      optionB: 'composite numbers',
+      optionC: 'co-prime numbers',
+      optionD: 'perfect numbers',
+      correctAnswer: '(c) co-prime numbers',
+      hint: 'Two numbers having only 1 as a common factor are called co-prime numbers.',
     },
-
-    // SECTION B – ODD, EVEN AND PRIME NUMBERS (Q9–Q18)
+    // 9. The sum of any two prime numbers, both greater than 2, is always an even number. [1]
     {
       testId: testObj.id,
-      question: 'What is the sum of any two odd numbers?',
-      correctAnswer: 'Even number',
-      hint: 'Odd + Odd = Even.',
+      orderIndex: 9,
+      question: '9. The sum of any two prime numbers, both greater than 2, is always an even number. [1]',
+      optionA: 'True',
+      optionB: 'False',
+      correctAnswer: 'True',
+      hint: 'All prime numbers greater than 2 are odd, and Odd + Odd = Even.',
     },
+    // 10. A number that is divisible by both 6 and 8 is always divisible by 48. [1]
     {
       testId: testObj.id,
-      question: 'What is the sum of any two even numbers?',
-      correctAnswer: 'Even number',
-      hint: 'Even + Even = Even.',
-    },
-    {
-      testId: testObj.id,
-      question: 'State whether the following statement is True or False: The sum of three odd numbers is even.',
+      orderIndex: 10,
+      question: '10. A number that is divisible by both 6 and 8 is always divisible by 48. [1]',
+      optionA: 'True',
+      optionB: 'False',
       correctAnswer: 'False',
-      hint: 'Example: 3 + 5 + 7 = 15, which is odd.',
+      hint: 'LCM(6, 8) = 24. A number divisible by 6 and 8 is divisible by 24, not necessarily 48.',
     },
+    // 11. The HCF of any two consecutive natural numbers is always 1. [1]
     {
       testId: testObj.id,
-      question: 'State whether the following statement is True or False: The product of three odd numbers is odd.',
+      orderIndex: 11,
+      question: '11. The HCF of any two consecutive natural numbers is always 1. [1]',
+      optionA: 'True',
+      optionB: 'False',
       correctAnswer: 'True',
-      hint: 'The product of odd numbers is always odd.',
+      hint: 'Consecutive natural numbers have no common factors other than 1.',
     },
+    // 12. The LCM of two different natural numbers can be smaller than their HCF. [1]
     {
       testId: testObj.id,
-      question: 'State whether the following statement is True or False: 2 is the only even prime number.',
+      orderIndex: 12,
+      question: '12. The LCM of two different natural numbers can be smaller than their HCF. [1]',
+      optionA: 'True',
+      optionB: 'False',
+      correctAnswer: 'False',
+      hint: 'LCM is always greater than or equal to HCF for natural numbers.',
+    },
+    // 13. For a number to be divisible by 11, the difference between the sum of digits at odd places and the sum of digits at even places (counted from the right) must be 0 or a multiple of 11. [1]
+    {
+      testId: testObj.id,
+      orderIndex: 13,
+      question: '13. For a number to be divisible by 11, the difference between the sum of digits at odd places and the sum of digits at even places (counted from the right) must be 0 or a multiple of 11. [1]',
+      optionA: 'True',
+      optionB: 'False',
       correctAnswer: 'True',
-      hint: 'All other even numbers are divisible by 2 and hence composite.',
+      hint: 'This is the standard divisibility rule for 11.',
     },
+    // 14. Two co-prime numbers can both be composite numbers at the same time. [1]
     {
       testId: testObj.id,
-      question: 'The numbers 13 and 31 are prime numbers. Both these numbers have the same digits 1 and 3. Find such pairs of prime numbers up to 100.',
-      correctAnswer: '(13, 31), (17, 71), (37, 73), (79, 97)',
-      hint: 'Both numbers in each pair are prime and contain the same digits.',
+      orderIndex: 14,
+      question: '14. Two co-prime numbers can both be composite numbers at the same time. [1]',
+      optionA: 'True',
+      optionB: 'False',
+      correctAnswer: 'True',
+      hint: 'Example: 4 and 9 are both composite numbers, but HCF(4, 9) = 1, so they are co-prime.',
     },
+    // 15. The smallest 4-digit number exactly divisible by 12, 15 and 20 is ______________. [2]
     {
       testId: testObj.id,
-      question: 'Write down separately the prime numbers and composite numbers less than 20.',
-      correctAnswer: 'Prime numbers: 2, 3, 5, 7, 11, 13, 17, 19 | Composite numbers: 4, 6, 8, 9, 10, 12, 14, 15, 16, 18',
-      hint: 'Prime numbers have only 2 factors; composite numbers have more than 2 factors.',
+      orderIndex: 15,
+      question: '15. The smallest 4-digit number exactly divisible by 12, 15 and 20 is ______________. [2]',
+      correctAnswer: '1020',
+      hint: 'LCM(12, 15, 20) = 60. Smallest 4-digit number is 1000. 1000 + (60 - 40) = 1020.',
     },
+    // 16. If the number 2 4 x 7 (a 4-digit number with hundreds digit x) is exactly divisible by 11, then x = ______________. [2]
     {
       testId: testObj.id,
-      question: 'What is the greatest prime number between 1 and 10?',
-      correctAnswer: '7',
-      hint: 'Prime numbers between 1 and 10 are 2, 3, 5, 7. The greatest is 7.',
-    },
-    {
-      testId: testObj.id,
-      question: 'Express 36 as the sum of two odd primes.',
-      correctAnswer: '17 + 19',
-      hint: 'Both 17 and 19 are odd prime numbers and their sum is 36.',
-    },
-    {
-      testId: testObj.id,
-      question: 'Which of the following numbers are prime? (a) 23, (b) 51, (c) 37, (d) 26',
-      correctAnswer: '23 and 37',
-      hint: '51 and 26 have factors other than 1 and themselves.',
-    },
-
-    // SECTION C – DIVISIBILITY TESTS (Q19–Q27)
-    {
-      testId: testObj.id,
-      question: 'Using divisibility tests, determine which of the following numbers are divisible by 4 and by 8:\n(a) 572, (b) 726352, (c) 5500, (d) 6000',
-      correctAnswer: '572 (4: Yes, 8: No); 726352 (4: Yes, 8: Yes); 5500 (4: Yes, 8: No); 6000 (4: Yes, 8: Yes)',
-      hint: 'Check last 2 digits for 4, and last 3 digits for 8.',
-    },
-    {
-      testId: testObj.id,
-      question: 'Using divisibility tests, determine which of the following numbers are divisible by 6:\n(a) 297144, (b) 1258, (c) 4335, (d) 61233',
-      correctAnswer: '297144',
-      hint: 'A number is divisible by 6 if it is divisible by both 2 and 3.',
-    },
-    {
-      testId: testObj.id,
-      question: 'Using divisibility tests, determine which of the following numbers is divisible by 11:\n(a) 5445, (b) 10824, (c) 7138965, (d) 70169308',
-      correctAnswer: '5445',
-      hint: 'Difference of alternating digit sums is a multiple of 11.',
-    },
-    {
-      testId: testObj.id,
-      question: 'Write the smallest digit in the blank space so that the number formed is divisible by 3: __6724',
-      correctAnswer: '2',
-      hint: '2 + 6 + 7 + 2 + 4 = 21, which is divisible by 3.',
-    },
-    {
-      testId: testObj.id,
-      question: 'Write the greatest digit in the blank space so that the number formed is divisible by 3: 4765__2',
+      orderIndex: 16,
+      question: '16. If the number 2 4 x 7 (a 4-digit number with hundreds digit x) is exactly divisible by 11, then x = ______________. [2]',
       correctAnswer: '9',
-      hint: '4 + 7 + 6 + 5 + 9 + 2 = 33, divisible by 3.',
+      hint: '(7 + 4) - (x + 2) = 11 - (x + 2) = 9 - x. For this to be 0, x = 9.',
     },
+    // 17. The HCF of two numbers is 8 and their product is 384. Their LCM is ______________. [2]
     {
       testId: testObj.id,
-      question: 'Write a digit in the blank space so that the number formed is divisible by 11: 92__389',
+      orderIndex: 17,
+      question: '17. The HCF of two numbers is 8 and their product is 384. Their LCM is ______________. [2]',
+      correctAnswer: '48',
+      hint: 'LCM = Product / HCF = 384 / 8 = 48.',
+    },
+    // 18. The number of common factors of 36 and 60 is ______________. [2]
+    {
+      testId: testObj.id,
+      orderIndex: 18,
+      question: '18. The number of common factors of 36 and 60 is ______________. [2]',
+      correctAnswer: '6',
+      hint: 'Common factors of 36 and 60 are 1, 2, 3, 4, 6, 12 (Total: 6).',
+    },
+    // 19. The prime factorisation of 1440, expressed in exponential form, is ______________. [2]
+    {
+      testId: testObj.id,
+      orderIndex: 19,
+      question: '19. The prime factorisation of 1440, expressed in exponential form, is ______________. [2]',
+      correctAnswer: '2^5 × 3^2 × 5',
+      hint: '1440 = 32 × 9 × 5 = 2^5 × 3^2 × 5.',
+    },
+    // 20. Three bells ring at intervals of 15 minutes, 20 minutes and 30 minutes respectively. If they all ring together at 9:00 a.m., they will next ring together at ______________. [2]
+    {
+      testId: testObj.id,
+      orderIndex: 20,
+      question: '20. Three bells ring at intervals of 15 minutes, 20 minutes and 30 minutes respectively. If they all ring together at 9:00 a.m., they will next ring together at ______________. [2]',
+      correctAnswer: '10:00 a.m.',
+      hint: 'LCM(15, 20, 30) = 60 minutes = 1 hour. 9:00 a.m. + 1 hour = 10:00 a.m.',
+    },
+    // 21. The greatest number of 4 digits that is exactly divisible by 24, 36 and 40 is ______________. [2]
+    {
+      testId: testObj.id,
+      orderIndex: 21,
+      question: '21. The greatest number of 4 digits that is exactly divisible by 24, 36 and 40 is ______________. [2]',
+      correctAnswer: '9720',
+      hint: 'LCM(24, 36, 40) = 360. 9999 / 360 = 27 remainder 279. 9999 - 279 = 9720.',
+    },
+    // 22. The smallest number that must be added to 1780 to make it exactly divisible by 12 is ______________. [2]
+    {
+      testId: testObj.id,
+      orderIndex: 22,
+      question: '22. The smallest number that must be added to 1780 to make it exactly divisible by 12 is ______________. [2]',
       correctAnswer: '8',
-      hint: '(9 + 8 + 8) − (2 + 3 + 9) = 25 − 14 = 11, divisible by 11.',
+      hint: '1780 / 12 = 148 remainder 4. Number to add = 12 - 4 = 8.',
     },
+    // 23. Three ropes of lengths 84 m, 98 m and 126 m are to be cut into pieces of equal length, with no rope left over. Find the greatest possible length of each piece, and the total number of pieces that will be obtained from all three ropes. [3]
     {
       testId: testObj.id,
-      question: 'Write a digit in the blank space so that the number formed is divisible by 11: 8__9484',
-      correctAnswer: '6',
-      hint: '(8 + 9 + 8) − (6 + 4 + 4) = 25 − 14 = 11.',
+      orderIndex: 23,
+      question: '23. Three ropes of lengths 84 m, 98 m and 126 m are to be cut into pieces of equal length, with no rope left over. Find the greatest possible length of each piece, and the total number of pieces that will be obtained from all three ropes. [3]',
+      correctAnswer: '14 m per piece; 22 pieces in total.',
+      hint: 'HCF(84, 98, 126) = 14 m. Total pieces = (84/14) + (98/14) + (126/14) = 6 + 7 + 9 = 22 pieces.',
+      timeLimitSeconds: 120,
     },
+    // 24. Find the smallest number which, when divided by 28, 32 and 42, leaves remainders 8, 12 and 22 respectively. [3]
     {
       testId: testObj.id,
-      question: 'Which of the following statements are true?\n(a) If a number is divisible by 3, it must be divisible by 9.\n(b) If a number is divisible by 9, it must be divisible by 3.\n(c) A number is divisible by 18, if it is divisible by both 3 and 6.',
-      correctAnswer: '(b) and (c)',
-      hint: '(a) False, (b) True, (c) True.',
+      orderIndex: 24,
+      question: '24. Find the smallest number which, when divided by 28, 32 and 42, leaves remainders 8, 12 and 22 respectively. [3]',
+      correctAnswer: '652',
+      hint: '28 - 8 = 20, 32 - 12 = 20, 42 - 22 = 20. LCM(28, 32, 42) = 672. Required number = 672 - 20 = 652.',
+      timeLimitSeconds: 120,
     },
+    // 25. Two tankers contain 850 litres and 680 litres of diesel respectively. Find the maximum capacity of a container which can measure the diesel of both tankers an exact number of times, and state how many times it will measure the diesel in each tanker. [3]
     {
       testId: testObj.id,
-      question: 'Which of the following statements are true?\n(d) If a number is divisible by 9 and 10 both, then it must be divisible by 90.\n(e) If two numbers are co-primes, at least one of them must be prime.\n(f) All numbers which are divisible by 4 must also be divisible by 8.',
-      correctAnswer: '(d) only',
-      hint: '(d) True, (e) False (example: 8 and 15 are co-prime, but neither is prime), (f) False (example: 12 is divisible by 4 but not 8).',
+      orderIndex: 25,
+      question: '25. Two tankers contain 850 litres and 680 litres of diesel respectively. Find the maximum capacity of a container which can measure the diesel of both tankers an exact number of times, and state how many times it will measure the diesel in each tanker. [3]',
+      correctAnswer: '170 L; 5 times in the first tanker, 4 times in the second.',
+      hint: 'HCF(850, 680) = 170 litres. First tanker: 850 / 170 = 5 times. Second tanker: 680 / 170 = 4 times.',
+      timeLimitSeconds: 120,
     },
-
-    // SECTION D – COMMON FACTORS, CO-PRIMES AND PRIME FACTORISATION (Q28–Q34)
+    // 26. Find the least number which, when divided by 15, 25 and 35, leaves a remainder of 3 in each case. [3]
     {
       testId: testObj.id,
-      question: 'Find the common factors of 20 and 28.',
-      correctAnswer: '1, 2, 4',
-      hint: 'Factors of 20: 1, 2, 4, 5, 10, 20. Factors of 28: 1, 2, 4, 7, 14, 28. Common: 1, 2, 4.',
+      orderIndex: 26,
+      question: '26. Find the least number which, when divided by 15, 25 and 35, leaves a remainder of 3 in each case. [3]',
+      correctAnswer: '528',
+      hint: 'LCM(15, 25, 35) = 525. Required number = 525 + 3 = 528.',
+      timeLimitSeconds: 120,
     },
+    // 27. The HCF of two numbers is 23 and their LCM is 1449. If one of the numbers is 161, find the other number. Show your working using the relationship between HCF and LCM. [3]
     {
       testId: testObj.id,
-      question: 'Find the common factors of 15 and 25.',
-      correctAnswer: '1, 5',
-      hint: 'Factors of 15: 1, 3, 5, 15. Factors of 25: 1, 5, 25. Common: 1, 5.',
+      orderIndex: 27,
+      question: '27. The HCF of two numbers is 23 and their LCM is 1449. If one of the numbers is 161, find the other number. Show your working using the relationship between HCF and LCM. [3]',
+      correctAnswer: '207',
+      hint: 'Other number = (HCF × LCM) / 161 = (23 × 1449) / 161 = 207.',
+      timeLimitSeconds: 120,
     },
+    // 28. Three groups of students, having 48, 60 and 72 members respectively, are to be seated in rows for an exam such that each row contains students from only one group and every row has the same number of students. Find the minimum total number of rows required. [3]
     {
       testId: testObj.id,
-      question: 'Find the common factors of 35 and 50.',
-      correctAnswer: '1, 5',
-      hint: 'Factors of 35: 1, 5, 7, 35. Factors of 50: 1, 2, 5, 10, 25, 50. Common: 1, 5.',
+      orderIndex: 28,
+      question: '28. Three groups of students, having 48, 60 and 72 members respectively, are to be seated in rows for an exam such that each row contains students from only one group and every row has the same number of students. Find the minimum total number of rows required. [3]',
+      correctAnswer: '15 rows.',
+      hint: 'HCF(48, 60, 72) = 12 students per row. Number of rows = (48/12) + (60/12) + (72/12) = 4 + 5 + 6 = 15 rows.',
+      timeLimitSeconds: 120,
     },
+    // 29. Traffic lights at three road crossings change automatically after every 48 seconds, 72 seconds and 108 seconds respectively. If all three change simultaneously at 8:20:00 a.m., find the time at which they will next change simultaneously together. [2]
     {
       testId: testObj.id,
-      question: 'Find the first three common multiples of 6 and 8.',
-      correctAnswer: '24, 48, 72',
-      hint: 'LCM(6, 8) = 24. Multiples: 24, 48, 72.',
+      orderIndex: 29,
+      question: '29. Traffic lights at three road crossings change automatically after every 48 seconds, 72 seconds and 108 seconds respectively. If all three change simultaneously at 8:20:00 a.m., find the time at which they will next change simultaneously together. [2]',
+      correctAnswer: '8:27:12 a.m.',
+      hint: 'LCM(48, 72, 108) = 432 seconds = 7 min 12 sec. 8:20:00 a.m. + 7 min 12 sec = 8:27:12 a.m.',
+      timeLimitSeconds: 120,
     },
+    // 30. Find the greatest number that will divide 445, 572 and 699, leaving remainders 4, 5 and 6 respectively. [2]
     {
       testId: testObj.id,
-      question: 'Write all the numbers less than 100 which are common multiples of 3 and 4.',
-      correctAnswer: '12, 24, 36, 48, 60, 72, 84, 96',
-      hint: 'Common multiples of 3 and 4 are multiples of 12 less than 100.',
-    },
-    {
-      testId: testObj.id,
-      question: 'Which of the following numbers are co-prime? (a) 18 and 35, (b) 15 and 37, (c) 30 and 415, (d) 17 and 68',
-      correctAnswer: '(a) 18 and 35, (b) 15 and 37',
-      hint: 'Their HCF is 1.',
-    },
-    {
-      testId: testObj.id,
-      question: 'Write the greatest 4-digit number and express it in terms of its prime factors.',
-      correctAnswer: '9999 = 3 × 3 × 11 × 101',
-      hint: 'Greatest 4-digit number is 9999. 9999 = 3 × 3 × 11 × 101.',
-    },
-
-    // SECTION E – PRIME FACTORS AND HCF (Q35–Q40)
-    {
-      testId: testObj.id,
-      question: 'Find all the prime factors of 1729 and arrange them in ascending order. Now state the relation, if any, between two consecutive prime factors.',
-      correctAnswer: '7, 13, 19 (difference between consecutive prime factors is 6)',
-      hint: '1729 = 7 × 13 × 19. Consecutive differences are 6.',
-    },
-    {
-      testId: testObj.id,
-      question: 'In which of the following expressions has prime factorisation been done?\n(a) 24 = 2 × 3 × 4, (b) 56 = 7 × 2 × 2 × 2, (c) 70 = 2 × 5 × 7, (d) 54 = 2 × 3 × 9',
-      correctAnswer: '(b) and (c)',
-      hint: 'Prime factorisation must contain only prime numbers.',
-    },
-    {
-      testId: testObj.id,
-      question: 'Determine if 25110 is divisible by 45.',
-      correctAnswer: 'Yes',
-      hint: '25110 ends in 0 (divisible by 5) and sum of digits is 9 (divisible by 9). So it is divisible by 45.',
-    },
-    {
-      testId: testObj.id,
-      question: 'Find the HCF of 18 and 48.',
-      correctAnswer: '6',
-      hint: 'HCF of 18 and 48 is 6.',
-    },
-    {
-      testId: testObj.id,
-      question: 'Find the HCF of 30 and 42.',
-      correctAnswer: '6',
-      hint: 'HCF of 30 and 42 is 6.',
-    },
-    {
-      testId: testObj.id,
-      question: 'Find the HCF of 18, 54 and 81.',
-      correctAnswer: '9',
-      hint: '9 is the greatest number dividing 18, 54, and 81 exactly.',
+      orderIndex: 30,
+      question: '30. Find the greatest number that will divide 445, 572 and 699, leaving remainders 4, 5 and 6 respectively. [2]',
+      correctAnswer: '63',
+      hint: 'Find HCF(445 - 4, 572 - 5, 699 - 6) = HCF(441, 567, 693) = 63.',
+      timeLimitSeconds: 120,
     },
   ];
 
-  for (let idx = 0; idx < rawQuestions.length; idx++) {
-    await createQuestion({
-      ...rawQuestions[idx],
-      orderIndex: idx,
-    });
+  for (const q of grandQuestions) {
+    await createQuestion(q);
   }
 
   return testObj;
@@ -4810,7 +4872,7 @@ export async function cleanupAndDeduplicateTests(): Promise<number> {
       }
 
       // Query question count for accuracy
-      const qSnap = await getDocs(collection(db, TESTS_COL, id, QUESTIONS_COL));
+      const qSnap = await getDocs(query(collection(db, QUESTIONS_COL), where('testId', '==', id)));
       const qCount = qSnap.size;
 
       // Extract Topic Key and Sample Test Number
@@ -4918,7 +4980,7 @@ export async function seedSampleDataIfEmpty(): Promise<void> {
     } else {
       // Verify questions for existing Sample Test 1
       for (const testDoc of sample1Docs) {
-        const qSnap = await getDocs(collection(db, TESTS_COL, testDoc.id, QUESTIONS_COL));
+        const qSnap = await getDocs(query(collection(db, QUESTIONS_COL), where('testId', '==', testDoc.id)));
         if (qSnap.size < 30) {
           console.log(`Sample Test 1 has only ${qSnap.size} questions (< 30). Upgrading to full 38-question test paper...`);
           await deleteTest(testDoc.id);
@@ -4927,18 +4989,46 @@ export async function seedSampleDataIfEmpty(): Promise<void> {
       }
     }
 
-    // Ensure Playing With Numbers tests are seeded
-    const pwnDocs = snap.docs.filter((d) => {
+    // Ensure Class 6 Grand Test – Playing with Numbers is seeded with all 30 questions
+    const grandDocs = snap.docs.filter((d) => {
       const title = (d.data().title || '').toLowerCase();
-      return title.includes('playing with numbers');
+      const cls = (d.data().class || '').toLowerCase();
+      return (
+        title.includes('grand test') ||
+        (title.includes('playing with') && title.includes('grand'))
+      ) && (cls.includes('6') || title.includes('class 6'));
     });
 
-    const hasGrandTest = pwnDocs.some((d) => (d.data().title || '').toLowerCase().includes('grand test'));
+    let needsGrandReseed = grandDocs.length === 0;
+    if (!needsGrandReseed) {
+      for (const testDoc of grandDocs) {
+        const qSnap = await getDocs(query(collection(db, QUESTIONS_COL), where('testId', '==', testDoc.id)));
+        if (qSnap.size < 30) {
+          console.log(`Class 6 Grand Test ${testDoc.id} has only ${qSnap.size} questions (< 30). Re-seeding...`);
+          needsGrandReseed = true;
+          break;
+        }
+        // Check if long questions have 120s timer configured
+        const has120s = qSnap.docs.some((qd) => (qd.data().timeLimitSeconds || 0) === 120);
+        if (!has120s) {
+          console.log(`Class 6 Grand Test ${testDoc.id} questions need 120s timer update. Re-seeding...`);
+          needsGrandReseed = true;
+          break;
+        }
+      }
+    }
 
-    if (!hasGrandTest) {
-      console.log('Seeding Grand Test – Playing With the Numbers (40 Questions)...');
+    if (needsGrandReseed) {
+      console.log('Seeding Class 6 Grand Test – Playing with Numbers (30 questions)...');
+      await deleteGrandTestPlayingWithNumbers();
       await createGrandTestPlayingWithNumbers();
     }
+
+    // Ensure Playing With Numbers sample tests are seeded
+    const pwnDocs = snap.docs.filter((d) => {
+      const title = (d.data().title || '').toLowerCase();
+      return title.includes('playing with numbers') && !title.includes('grand');
+    });
 
     if (pwnDocs.length < 2) {
       console.log('Seeding Playing With Numbers Sample Tests...');
@@ -4956,7 +5046,7 @@ export async function seedSampleDataIfEmpty(): Promise<void> {
     let needsIntegersReseed = integersDocs.length < 2;
     if (!needsIntegersReseed) {
       for (const testDoc of integersDocs) {
-        const qSnap = await getDocs(collection(db, TESTS_COL, testDoc.id, QUESTIONS_COL));
+        const qSnap = await getDocs(query(collection(db, QUESTIONS_COL), where('testId', '==', testDoc.id)));
         if (qSnap.size < 20) {
           console.log(`Class 6 Integers test ${testDoc.id} has only ${qSnap.size} questions (< 20). Re-seeding...`);
           needsIntegersReseed = true;
@@ -4982,7 +5072,7 @@ export async function seedSampleDataIfEmpty(): Promise<void> {
     let needsFractionsReseed = fractionsDocs.length === 0;
     if (!needsFractionsReseed) {
       for (const testDoc of fractionsDocs) {
-        const qSnap = await getDocs(collection(db, TESTS_COL, testDoc.id, QUESTIONS_COL));
+        const qSnap = await getDocs(query(collection(db, QUESTIONS_COL), where('testId', '==', testDoc.id)));
         if (qSnap.size < 30) {
           console.log(`Class 6 Fractions test ${testDoc.id} has only ${qSnap.size} questions (< 30). Re-seeding...`);
           needsFractionsReseed = true;
@@ -5007,7 +5097,7 @@ export async function seedSampleDataIfEmpty(): Promise<void> {
     let needsDecimalsReseed = decimalsDocs.length === 0;
     if (!needsDecimalsReseed) {
       for (const testDoc of decimalsDocs) {
-        const qSnap = await getDocs(collection(db, TESTS_COL, testDoc.id, QUESTIONS_COL));
+        const qSnap = await getDocs(query(collection(db, QUESTIONS_COL), where('testId', '==', testDoc.id)));
         if (qSnap.size < 30) {
           console.log(`Class 6 Decimals test ${testDoc.id} has only ${qSnap.size} questions (< 30). Re-seeding...`);
           needsDecimalsReseed = true;
@@ -5032,7 +5122,7 @@ export async function seedSampleDataIfEmpty(): Promise<void> {
     let needsAlgebraReseed = algebraDocs.length === 0;
     if (!needsAlgebraReseed) {
       for (const testDoc of algebraDocs) {
-        const qSnap = await getDocs(collection(db, TESTS_COL, testDoc.id, QUESTIONS_COL));
+        const qSnap = await getDocs(query(collection(db, QUESTIONS_COL), where('testId', '==', testDoc.id)));
         if (qSnap.size < 30) {
           console.log(`Class 6 Algebra test ${testDoc.id} has only ${qSnap.size} questions (< 30). Re-seeding...`);
           needsAlgebraReseed = true;
@@ -5057,7 +5147,7 @@ export async function seedSampleDataIfEmpty(): Promise<void> {
     let needsRatioReseed = ratioDocs.length === 0;
     if (!needsRatioReseed) {
       for (const testDoc of ratioDocs) {
-        const qSnap = await getDocs(collection(db, TESTS_COL, testDoc.id, QUESTIONS_COL));
+        const qSnap = await getDocs(query(collection(db, QUESTIONS_COL), where('testId', '==', testDoc.id)));
         if (qSnap.size < 30) {
           console.log(`Class 6 Ratio test ${testDoc.id} has only ${qSnap.size} questions (< 30). Re-seeding...`);
           needsRatioReseed = true;
@@ -5070,38 +5160,6 @@ export async function seedSampleDataIfEmpty(): Promise<void> {
       console.log('Seeding Class 6 Ratio and Proportion Sample Test 1 (30 questions)...');
       await deleteAllRatioTests();
       await createRatioTestPaper1();
-    }
-
-    // Ensure Grand Test – Playing With the Numbers is seeded with 40 Non-MCQ questions
-    const grandDocs = snap.docs.filter((d) => {
-      const title = (d.data().title || '').toLowerCase();
-      return title.includes('grand test') || (title.includes('playing with') && title.includes('numbers') && title.includes('grand'));
-    });
-
-    let needsGrandReseed = grandDocs.length === 0;
-    if (!needsGrandReseed) {
-      for (const testDoc of grandDocs) {
-        const qSnap = await getDocs(collection(db, TESTS_COL, testDoc.id, QUESTIONS_COL));
-        if (qSnap.size < 40) {
-          console.log(`Grand Test ${testDoc.id} has ${qSnap.size} questions (< 40). Re-seeding...`);
-          needsGrandReseed = true;
-          break;
-        }
-        if (qSnap.docs.length > 0) {
-          const firstQ = qSnap.docs[0].data();
-          if (firstQ.optionA && firstQ.optionA.trim() !== '') {
-            console.log('Grand Test has old MCQ format. Re-seeding as short-answer format...');
-            needsGrandReseed = true;
-            break;
-          }
-        }
-      }
-    }
-
-    if (needsGrandReseed) {
-      console.log('Seeding Grand Test – Playing With the Numbers (40 Non-MCQ Questions)...');
-      await deleteGrandTestPlayingWithNumbers();
-      await createGrandTestPlayingWithNumbers();
     }
 
     // Clean up any remaining duplicate test papers

@@ -85,7 +85,8 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
         const sortedList = [...qList].sort((a, b) => (a.orderIndex ?? 9999) - (b.orderIndex ?? 9999));
         if (isMounted) {
           setQuestions(sortedList);
-          setQuestionTimeLeft(60);
+          const firstDuration = sortedList[0]?.timeLimitSeconds || 60;
+          setQuestionTimeLeft(firstDuration);
           setIsLoading(false);
         }
       } catch (err) {
@@ -102,12 +103,22 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
     };
   }, [test.id]);
 
-  // Reset 60s Timer whenever question index changes
+  // Reset Timer whenever question index changes
   useEffect(() => {
-    if (questions.length > 0) {
-      setQuestionTimeLeft(60);
+    if (questions.length > 0 && questions[currentIndex]) {
+      const qDuration = questions[currentIndex]?.timeLimitSeconds || 60;
+      setQuestionTimeLeft(qDuration);
     }
-  }, [currentIndex, questions.length]);
+  }, [currentIndex, questions]);
+
+  const formatQuestionTimer = (seconds: number) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    if (m > 0) {
+      return `${m}:${s < 10 ? '0' : ''}${s}`;
+    }
+    return `${seconds}s`;
+  };
 
   // Per-Question Timer Countdown Effect
   useEffect(() => {
@@ -574,11 +585,11 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
                     Question {currentIndex + 1} of {questions.length}
                   </span>
 
-                  {/* Per-Question Timer (60s countdown) */}
+                  {/* Per-Question Timer countdown */}
                   <div className={`flex items-center gap-2 px-3.5 py-1.5 rounded-[8px] border-2 transition-colors ${timerStyle}`}>
                     <Clock className="w-4 h-4 shrink-0" />
                     <span className="text-xs font-mono font-bold">
-                      Time left: <strong className="text-sm">{questionTimeLeft}s</strong>
+                      Time left: <strong className="text-sm">{formatQuestionTimer(questionTimeLeft)}</strong>
                     </span>
                   </div>
                 </div>
@@ -587,14 +598,14 @@ export const StudentTestPage: React.FC<StudentTestPageProps> = ({
                 <h3 className="text-lg font-extrabold text-[#16449B] leading-relaxed">{currentQ.question}</h3>
 
                 {/* Options or Short Answer Field */}
-                {(!((test.title || '').toLowerCase().includes('grand test') || (test.title || '').toLowerCase().includes('playing with'))) && Boolean(currentQ.optionA && currentQ.optionA.trim() !== '') ? (
+                {Boolean(currentQ.optionA && currentQ.optionA.trim() !== '') ? (
                   <div className="space-y-3">
                     {[
                       { key: 'optionA', label: 'Option A', text: currentQ.optionA },
                       { key: 'optionB', label: 'Option B', text: currentQ.optionB },
                       { key: 'optionC', label: 'Option C', text: currentQ.optionC },
                       { key: 'optionD', label: 'Option D', text: currentQ.optionD },
-                    ].map((opt) => {
+                    ].filter((opt) => Boolean(opt.text && opt.text.trim() !== '')).map((opt) => {
                       const isSelected = selectedAnswers[currentQ.id] === opt.key;
 
                       return (

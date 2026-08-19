@@ -76,10 +76,22 @@ export function evaluateShortAnswer(userAns: string | undefined | null, correctA
 export function normalizeOptionKey(ans: string | undefined | null): 'optionA' | 'optionB' | 'optionC' | 'optionD' | null {
   if (!ans) return null;
   const clean = String(ans).trim().toLowerCase();
-  if (clean === 'a' || clean === 'optiona' || clean === 'option a' || clean === 'opt a' || clean === '(a)' || clean === 'a.' || clean === 'a)') return 'optionA';
-  if (clean === 'b' || clean === 'optionb' || clean === 'option b' || clean === 'opt b' || clean === '(b)' || clean === 'b.' || clean === 'b)') return 'optionB';
-  if (clean === 'c' || clean === 'optionc' || clean === 'option c' || clean === 'opt c' || clean === '(c)' || clean === 'c.' || clean === 'c)') return 'optionC';
-  if (clean === 'd' || clean === 'optiond' || clean === 'option d' || clean === 'opt d' || clean === '(d)' || clean === 'd.' || clean === 'd)') return 'optionD';
+  if (
+    clean === 'a' || clean === 'optiona' || clean === 'option a' || clean === 'opt a' || clean === '(a)' || clean === 'a.' || clean === 'a)' ||
+    clean.startsWith('(a)') || clean.startsWith('a)') || clean.startsWith('a.') || clean.startsWith('option a')
+  ) return 'optionA';
+  if (
+    clean === 'b' || clean === 'optionb' || clean === 'option b' || clean === 'opt b' || clean === '(b)' || clean === 'b.' || clean === 'b)' ||
+    clean.startsWith('(b)') || clean.startsWith('b)') || clean.startsWith('b.') || clean.startsWith('option b')
+  ) return 'optionB';
+  if (
+    clean === 'c' || clean === 'optionc' || clean === 'option c' || clean === 'opt c' || clean === '(c)' || clean === 'c.' || clean === 'c)' ||
+    clean.startsWith('(c)') || clean.startsWith('c)') || clean.startsWith('c.') || clean.startsWith('option c')
+  ) return 'optionC';
+  if (
+    clean === 'd' || clean === 'optiond' || clean === 'option d' || clean === 'opt d' || clean === '(d)' || clean === 'd.' || clean === 'd)' ||
+    clean.startsWith('(d)') || clean.startsWith('d)') || clean.startsWith('d.') || clean.startsWith('option d')
+  ) return 'optionD';
   return null;
 }
 

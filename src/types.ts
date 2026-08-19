@@ -48,6 +48,7 @@ export interface Question {
   correctAnswer: string;
   hint?: string;
   orderIndex?: number;
+  timeLimitSeconds?: number;
 }
 
 export interface Attempt {
